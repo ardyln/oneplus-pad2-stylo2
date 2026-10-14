@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stylo 2</string>
+    <string name="channel_status">Pen connection</string>
+
+    <string name="status_title">Pen</string>
+    <string name="status_not_running">Service not running</string>
+    <string name="status_bluetooth_off">Bluetooth is off</string>
+    <string name="status_waiting">Waiting for the pen</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_battery">Connected · battery %1$d%%</string>
+    <string name="status_battery_charger">Connected · battery %1$d%%, on the charger</string>
+    <string name="status_not_paired">No paired OnePlus Stylo 2 found</string>
+    <string name="status_unsupported">The paired pen is not a Stylo 2</string>
+
+    <string name="feedback_switch">Vibrate while writing</string>
+    <string name="feedback_category">Writing feedback</string>
+    <string name="texture_title">Texture</string>
+    <string name="texture_pencil">Pencil</string>
+    <string name="texture_eraser">Eraser</string>
+    <string name="texture_ballpen">Ballpoint pen</string>
+    <string name="texture_pen">Pen</string>
+    <string name="level_title">Strength</string>
+    <string name="level_summary">0 is barely noticeable, 4 is the strongest</string>
+
+    <string name="button_category">Thumb button</string>
+    <string name="button_action_title">When pressed</string>
+    <string name="action_none">Do nothing</string>
+    <string name="action_open_app">Open an app</string>
+    <string name="button_app_title">App to open</string>
+    <string name="button_app_none">None chosen</string>
+    <string name="button_buzz_title">Vibrate on press</string>
+    <string name="button_buzz_summary">A short vibration in the pen confirms the press</string>
+    <string name="test_buzz_title">Test vibration</string>
+    <string name="test_buzz_summary">Makes the pen vibrate once</string>
+
+    <string-array name="texture_entries">
+        <item>@string/texture_pencil</item>
+        <item>@string/texture_eraser</item>
+        <item>@string/texture_ballpen</item>
+        <item>@string/texture_pen</item>
+    </string-array>
+    <string-array name="texture_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="button_action_entries">
+        <item>@string/action_none</item>
+        <item>@string/action_open_app</item>
+    </string-array>
+    <string-array name="button_action_values" translatable="false">
+        <item>none</item>
+        <item>open_app</item>
+    </string-array>
+</resources>

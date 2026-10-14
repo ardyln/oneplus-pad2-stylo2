@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        android:key="status"
+        android:title="@string/status_title"
+        android:selectable="false"
+        app:iconSpaceReserved="false" />
+
+    <SwitchPreferenceCompat
+        android:key="feedback_enable"
+        android:title="@string/feedback_switch"
+        android:defaultValue="true"
+        android:layout="@layout/preference_main_switch" />
+
+    <PreferenceCategory
+        android:title="@string/feedback_category"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="feedback_texture"
+            android:title="@string/texture_title"
+            android:entries="@array/texture_entries"
+            android:entryValues="@array/texture_values"
+            android:defaultValue="0"
+            app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="feedback_level"
+            android:title="@string/level_title"
+            android:summary="@string/level_summary"
+            android:defaultValue="2"
+            android:max="4"
+            app:min="0"
+            app:showSeekBarValue="true"
+            app:updatesContinuously="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/button_category"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="button_action"
+            android:title="@string/button_action_title"
+            android:entries="@array/button_action_entries"
+            android:entryValues="@array/button_action_values"
+            android:defaultValue="none"
+            app:useSimpleSummaryProvider="true"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="button_app"
+            android:title="@string/button_app_title"
+            android:persistent="false"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="button_buzz"
+            android:title="@string/button_buzz_title"
+            android:summary="@string/button_buzz_summary"
+            android:defaultValue="false"
+            android:widgetLayout="@layout/preference_material_switch"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="test_buzz"
+            android:title="@string/test_buzz_title"
+            android:summary="@string/test_buzz_summary"
+            android:persistent="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

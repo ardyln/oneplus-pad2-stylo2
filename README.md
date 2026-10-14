@@ -7,7 +7,7 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
   the texture (pencil, eraser, ballpoint pen, pen) and the strength.
 - **Thumb button**: open an app of your choice, optionally with a short vibration as confirmation.
 
-It also shows the pen's battery level in its notification.
+It also shows the pen's battery level and whether it's on the magnetic charger.
 
 ## How it works
 
@@ -26,5 +26,11 @@ exempts it from battery optimization. Removing the module undoes all of this.
 
 ## Build
 
-`KS_PASS=<keystore password> tools/build.sh` (needs the Android SDK build tools, platform 34 and a JDK).
-The signing key is created on the first build at `~/tools/stylo2-release.jks` and is not part of the repo.
+`KS_PASS=<keystore password> tools/build.sh` builds the app with the Gradle wrapper (Kotlin, AndroidX
+Preference, Material Components) and packs the module zip into `build/`. It needs JDK 21 and an Android
+SDK with platform 34 and build-tools 36 (`ANDROID_HOME`, default `/usr/lib/android-sdk`). The signing key
+is created on the first build at `~/tools/stylo2-release.jks` and is not part of the repo.
+
+The settings screen follows the structure of LineageOS's device settings (a preference screen in
+`res/xml`, a main switch, categories), using the public AndroidX/Material libraries in place of
+SettingsLib, which is only available inside the Android source tree.
