@@ -80,9 +80,9 @@ Replies come as notifications on `18093046` and start with the same first 3–4 
 | `2c 39 01 01` | | tablet tells the pen: off the magnet | | stock |
 | `2c 53 01` | | query serial number | `2c 53 01 <n> <n ASCII bytes>` | **never send** |
 | `2c 90 01 01 <s>` | 1 / 0 | pencil enabled / disabled | | tested (accepted; no effect on the texture) |
-| `2c 91 01 <s>` | 1 / 0 | presentation mode ("laser function") on / off | | stock, untested |
+| `2c 91 01 <s>` | 1 / 0 | presentation mode ("laser function") on / off | | **tested** |
 | `2c 92 01 02 ff 02` | | one short vibration | | **tested** |
-| `2c 93 01 <m>` | 0 / 1 | presentation ("laser") mode | | stock, untested |
+| `2c 93 01 <m>` | 0 / 1 | presentation mode: 0 = pointer only while touching, 1 = pointer always | | **tested** |
 | `2c 94 02 <type> <level>` | type 0–3, level 0–5 | writing feedback | | **tested** |
 
 **Writing feedback** (`2c 94`):
@@ -93,11 +93,24 @@ Replies come as notifications on `18093046` and start with the same first 3–4 
 - **The pen forgets it on every Bluetooth disconnect**; resend after each connection. It's kept while the
   pen sleeps, sits on the magnet, or the screen is off (tested).
 
-**Presentation mode** (`2c 91`, `2c 93`): the stock settings describe it as "Swipe along the flat
-surface near the tip of the stylus to turn pages" and "Press and hold on the flat surface near the tip
-of the stylus to activate the virtual laser pointer". Those events most likely arrive through the pen's
-HID mouse and keyboard reports. The meaning of the two mode values is unknown. Stock only sends these
-after the feedback setting on connect, according to its settings `ipe_laser_mode` and a "demo mode" flag.
+**Presentation mode** (`2c 91`, `2c 93`, tested): turns on a second touch surface near the tip and the
+pen's motion sensor. Everything then arrives as **standard HID input** on the pen's "Mouse" and
+"Keyboard" input devices; nothing extra is sent on the vendor characteristics.
+
+| Gesture on the flat surface near the tip | HID input |
+|---|---|
+| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released |
+| swipe in one direction / the other | `REL_WHEEL` +1 / −1 (with `REL_WHEEL_HI_RES` ±120) |
+| moving the pen | `REL_X` / `REL_Y` (air mouse): mode 0 only while the surface is touched, mode 1 always |
+| (unclear) | an occasional short `KEY_F20` press, seen in mode 0 only |
+
+The pen's debug console also prints a code per gesture: `film FF` and `film 05` (the two swipe
+directions), `film 06` (hold starts) and `film 08` (hold ends), next to `film 24` for the thumb button.
+On OxygenOS the system turns this into page turns and an on-screen laser dot (`ISystemAidlInterface
+.setLaserMode`, system feature `oplus.software.laser.support`); stock's "Presentation mode" switch sends
+`2c 91 01 01` and resets the mode to 0, and per its settings the pen stays in presentation mode until
+it's attached to the tablet again. On PixelOS, Android treats the input as a mouse: the wheel scrolls
+or zooms, and the motion moves a mouse cursor.
 
 ## Messages from the pen on `18093046`
 

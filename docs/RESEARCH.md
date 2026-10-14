@@ -120,7 +120,20 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
 - Verified with Saber: while the virtual button was held, hovering switched Saber to the eraser and
   every stroke erased.
 
-## 6. Saber
+## 6. Presentation mode
+
+- Stock: the "Presentation mode" switch calls `setLaserFunctionAndResetMode`, which sends
+  `2c 91 01 01`/`00` and `2c 93 01 00`. The mode is later switched by the OxygenOS system through
+  `ISystemAidlInterface.setLaserMode`, gated by the system feature `oplus.software.laser.support`.
+- Tested: with `2c 91 01 01`, the flat surface near the tip becomes a touch area. A finger on it holds
+  `KEY_F19` (a tap gives a 60–90 ms press), swipes send mouse wheel steps (Google Photos zoomed), and the
+  pen moves the mouse cursor with its motion sensor. In mode 0 the cursor only moves while the surface
+  is touched (1,464 of 1,464 movement events during an F19 hold); in mode 1 it moves all the time
+  (4,279 of 5,729 outside a hold). A short `KEY_F20` appeared now and then in mode 0, cause unknown.
+- Nothing extra is sent on the vendor characteristics; the console prints `film FF` / `film 05`
+  (swipes), `film 06` / `film 08` (hold start and end).
+
+## 7. Saber
 
 - Package `com.adilhanney.saber` (GPL-3.0). Saber doesn't use any OnePlus API.
 - Tools are `ToolId` (`packages/sbn/lib/tool_id.dart`): 0 highlighter, 1 fountain pen, 2 ballpoint pen,
@@ -135,7 +148,7 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
 - Saber's [contributing rules](https://github.com/saber-notes/saber/blob/main/.github/CONTRIBUTING.md)
   don't accept AI-generated code, so this project integrates from the outside instead of patching Saber.
 
-## 7. Which app is in front
+## 8. Which app is in front
 
 - In desktop windowing mode several apps stay resumed, so `UsageEvents.ACTIVITY_RESUMED` misses focus
   changes between visible windows.

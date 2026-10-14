@@ -42,6 +42,10 @@ public final class ProbeActivity extends Activity {
             "disable", new byte[] {0x2c, (byte) 0x90, 0x01, 0x01, 0x00}, // pencil disabled
             "texture", new byte[] {0x2c, (byte) 0x94, 0x02, 0x00, 0x03}, // pencil texture, default level
             "texture-off", new byte[] {0x2c, (byte) 0x94, 0x02, 0x00, 0x00}, // writing feedback off (level byte 0)
+            "present-on", new byte[] {0x2c, (byte) 0x91, 0x01, 0x01},  // presentation mode on
+            "present-off", new byte[] {0x2c, (byte) 0x91, 0x01, 0x00}, // presentation mode off
+            "presentmode:0", new byte[] {0x2c, (byte) 0x93, 0x01, 0x00}, // presentation ("laser") mode 0
+            "presentmode:1", new byte[] {0x2c, (byte) 0x93, 0x01, 0x01}, // presentation ("laser") mode 1
             "oneshot", new byte[] {0x2c, (byte) 0x92, 0x01, 0x02, (byte) 0xff, 0x02}); // single vibration
 
     /** Named command, or "texture:T:L" with the stock ranges: type 0-3, slider level 0-4 (sent as level + 1). */
