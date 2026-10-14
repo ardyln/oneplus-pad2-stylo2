@@ -172,6 +172,10 @@ class PenService : Service() {
         override fun onConnectionStateChange(g: BluetoothGatt, st: Int, state: Int) {
             handler.post {
                 Log.i(TAG, "connection state=$state status=$st")
+                EventLog.add(
+                    EventLog.Source.PEN, "state=$state status=$st",
+                    if (state == BluetoothProfile.STATE_CONNECTED) "Pen connected" else "Pen disconnected",
+                )
                 if (state == BluetoothProfile.STATE_CONNECTED) {
                     setStatus(getString(R.string.status_connecting))
                     g.discoverServices()
@@ -205,7 +209,10 @@ class PenService : Service() {
             val u = c.uuid
             val v = c.value
             handler.post {
-                if (st == BluetoothGatt.GATT_SUCCESS && v != null && v.isNotEmpty()) onValue(u, v)
+                if (st == BluetoothGatt.GATT_SUCCESS && v != null && v.isNotEmpty()) {
+                    EventLog.add(EventLog.Source.PEN, "read ${PenEvents.shortName(u)} ${v.toHex()}", PenEvents.incoming(u, v))
+                    onValue(u, v)
+                }
                 done()
             }
         }
@@ -215,6 +222,7 @@ class PenService : Service() {
             val v = c.value ?: return
             if (v.isEmpty()) return
             Log.d(TAG, "notify $u ${v.toHex()}")
+            EventLog.add(EventLog.Source.PEN, "${PenEvents.shortName(u)} ${v.toHex()}", PenEvents.incoming(u, v))
             handler.post { if (u == PenProtocol.BUTTON) onButton() else onValue(u, v) }
         }
     }
@@ -271,7 +279,10 @@ class PenService : Service() {
 
     // --- commands ---
 
-    /** Sends the writing feedback setting if it changed; in Saber, the texture follows its tool. */
+    /**
+     * Sends the writing feedback setting if it changed. In Saber the texture follows its tool, even
+     * when the main switch is off (like OxygenOS, where notes apps have their own feedback).
+     */
     private fun sendFeedbackSetting() {
         var on = settings.feedbackOn
         var texture = settings.texture
@@ -279,7 +290,8 @@ class PenService : Service() {
         val tool = saberTool?.let { Saber.Tool.byId(it) }
         if (settings.saberTexture && activeApp == Saber.PACKAGE && tool != null) {
             val t = tool.texture(settings.prefs)
-            if (t == Saber.TEXTURE_OFF) on = false else texture = t
+            on = t != Saber.TEXTURE_OFF
+            if (on) texture = t
             tool.level(settings.prefs).let { if (it != Saber.LEVEL_MAIN) level = it }
         }
         val cmd = PenProtocol.texture(on, texture, level)
@@ -291,11 +303,30 @@ class PenService : Service() {
 
     private fun onSaberTool(tool: Int?) {
         saberTool = tool
+        val t = tool?.let { Saber.Tool.byId(it) }
+        if (t != null) {
+            val texture = t.texture(settings.prefs)
+            val level = t.level(settings.prefs).takeIf { it != Saber.LEVEL_MAIN } ?: settings.level
+            EventLog.add(
+                EventLog.Source.SABER, "lastTool=$tool",
+                "Active tool: ${getString(t.label)} → " +
+                    PenEvents.textureSetting(texture != Saber.TEXTURE_OFF, texture, level) +
+                    if (activeApp == Saber.PACKAGE) "" else " (applies when Saber is focused)",
+            )
+        }
         sendFeedbackSetting()
     }
 
     private fun onForegroundChanged() {
         Log.i(TAG, "active app: $activeApp")
+        EventLog.add(
+            EventLog.Source.FOCUS, activeApp ?: "?",
+            "Focused app" + when {
+                activeApp == Saber.PACKAGE -> ": Saber. Its tool settings apply"
+                activeApp in settings.stylusButtonApps -> ": double tap acts as the stylus button"
+                else -> ": shortcuts and the main texture apply"
+            } + if (FocusService.running) "" else " (usage stats fallback)",
+        )
         if (bridge.pressed && activeApp !in settings.stylusButtonApps) bridge.setPressed(false)
         sendFeedbackSetting()
     }
@@ -309,6 +340,7 @@ class PenService : Service() {
                 done()
                 return@queue
             }
+            EventLog.add(EventLog.Source.PEN, "→ ${value.toHex()}", PenEvents.outgoing(value))
             c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             c.value = value
             if (!g.writeCharacteristic(c)) done()
@@ -326,6 +358,11 @@ class PenService : Service() {
             // In notes apps the double tap holds or releases a virtual stylus button (Saber: eraser).
             bridge.setPressed(!bridge.pressed)
             Log.i(TAG, "stylus button ${if (bridge.pressed) "held" else "released"} in $activeApp")
+            EventLog.add(
+                EventLog.Source.BUTTON, "BTN_STYLUS=${if (bridge.pressed) 1 else 0}",
+                if (bridge.pressed) "Virtual stylus button held: Android adds it to the pen's input; Saber erases"
+                else "Virtual stylus button released: Saber goes back to the previous tool",
+            )
             if (settings.buttonBuzz) write(PenProtocol.buzz())
             return
         }
@@ -348,6 +385,12 @@ class PenService : Service() {
         tapCount = 0
         if (taps == 0) return@Runnable
         Log.i(TAG, "gesture: $taps double tap(s)")
+        val shortcut = settings.shortcuts.load().getOrNull(taps - 1)
+        EventLog.add(
+            EventLog.Source.APP, "gesture taps=$taps",
+            "$taps double tap(s) → " + (shortcut?.action?.name?.lowercase()?.replace('_', ' ') ?: "no shortcut") +
+                if (settings.broadcastAll) ", broadcast sent" else "",
+        )
         if (settings.broadcastAll) sendBroadcast(ShortcutRunner.gestureIntent(ShortcutRunner.ACTION_GESTURE, taps))
         settings.shortcuts.load().getOrNull(taps - 1)?.let { runner.run(it, taps, battery) }
     }

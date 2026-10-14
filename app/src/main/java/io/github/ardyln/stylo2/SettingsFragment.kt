@@ -46,6 +46,10 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         shortcutsPreference = findPreference(Settings.KEY_SHORTCUTS_SCREEN)!!
         stylusAppsPreference = findPreference(Settings.KEY_STYLUS_BUTTON_APPS)!!
         bridgePreference = findPreference(Settings.KEY_BRIDGE_STATUS)!!
+        findPreference<Preference>("debug_log")!!.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), DebugActivity::class.java))
+            true
+        }
         findPreference<Preference>("saber_tools")!!.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), SaberToolsActivity::class.java))
             true

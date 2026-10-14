@@ -98,6 +98,10 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
             send(REGISTER)
             ready = out != null
             Log.i(PenService.TAG, "virtual stylus button ready")
+            EventLog.add(
+                EventLog.Source.BUTTON, "uinput register",
+                "Root helper connected: virtual \"Stylo 2 buttons\" device created (external stylus)",
+            )
         } catch (e: IOException) {
             Log.w(PenService.TAG, "stylus button pipe: $e")
         }
@@ -111,6 +115,7 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
         } catch (e: IOException) {
             // The helper went away; wait for it to come back.
             Log.w(PenService.TAG, "stylus button pipe closed: $e")
+            EventLog.add(EventLog.Source.BUTTON, "pipe closed", "Root helper went away; waiting for it")
             out = null
             ready = false
             pressed = false

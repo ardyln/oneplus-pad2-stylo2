@@ -125,4 +125,17 @@
             android:selectable="false"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/debug_category"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="debug_log"
+            android:title="@string/debug_title"
+            android:summary="@string/debug_summary"
+            android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 </PreferenceScreen>

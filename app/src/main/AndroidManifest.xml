@@ -40,6 +40,11 @@
             android:exported="false"
             android:parentActivityName=".SettingsActivity" />
 
+        <activity
+            android:name=".DebugActivity"
+            android:exported="false"
+            android:parentActivityName=".SettingsActivity" />
+
         <service android:name=".PenService" android:exported="false" />
 
         <service
