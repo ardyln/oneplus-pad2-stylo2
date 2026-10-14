@@ -157,6 +157,7 @@ public final class PenService extends Service {
                     // autoConnect keeps trying in the background; just reset our state.
                     ready = false;
                     battery = -1;
+                    charging = false;
                     com = null;
                     ops.clear();
                     busy = false;
@@ -190,6 +191,7 @@ public final class PenService extends Service {
             UUID u = c.getUuid();
             byte[] v = c.getValue();
             if (v == null || v.length == 0) return;
+            Log.d(TAG, "notify " + u + " " + hex(v));
             if (PenProtocol.BUTTON.equals(u)) {
                 handler.post(PenService.this::onButton);
             } else {
@@ -225,7 +227,6 @@ public final class PenService extends Service {
         subscribe(g, statusService.getCharacteristic(PenProtocol.BATTERY));
         subscribe(g, statusService.getCharacteristic(PenProtocol.CHARGING));
         read(g, comService.getCharacteristic(PenProtocol.BATTERY_READ));
-        read(g, comService.getCharacteristic(PenProtocol.CHARGING_READ));
         sendFeedbackSetting();
         setStatus(connectedText());
     }
@@ -248,8 +249,8 @@ public final class PenService extends Service {
     private void onValue(UUID u, byte[] v) {
         if (PenProtocol.BATTERY.equals(u) || PenProtocol.BATTERY_READ.equals(u)) {
             battery = v[0] & 0xff;
-        } else if (PenProtocol.CHARGING.equals(u) || PenProtocol.CHARGING_READ.equals(u)) {
-            charging = (v[0] & 0x01) != 0;
+        } else if (PenProtocol.CHARGING.equals(u)) {
+            charging = (v[0] & 0x01) == 0;
         } else {
             return;
         }

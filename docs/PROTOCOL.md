@@ -9,10 +9,9 @@ found, are in `docs/STYLO2.md` of the [keyboard module repo](https://github.com/
 |---|---|---|
 | `18093046-2a69-11ec-8d3d-0242ac130003` | `18092dbc-…` | commands (write), replies (notify) |
 | `1809314a-2a69-11ec-8d3d-0242ac130003` | `18092dbc-…` | battery percent (read) |
-| `18093212-2a69-11ec-8d3d-0242ac130003` | `18092dbc-…` | charging state (read): `20` no, `21` yes |
 | `180938ac-2a69-11ec-8d3d-0242ac130003` | `18093398-…` | thumb button (notify): `01` per touch |
 | `180937bc-2a69-11ec-8d3d-0242ac130003` | `18093398-…` | battery percent (notify, on change) |
-| `1809396a-2a69-11ec-8d3d-0242ac130003` | `18093398-…` | charging state (notify, on change) |
+| `1809396a-2a69-11ec-8d3d-0242ac130003` | `18093398-…` | on the magnetic charger (notify, on change): `20` yes, `21` no |
 
 The pen only sends thumb-button notifications while other notifications on the connection are enabled
 too. This module enables the command channel, button, battery and charging notifications.

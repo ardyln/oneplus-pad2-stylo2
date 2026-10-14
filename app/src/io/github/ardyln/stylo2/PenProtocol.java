@@ -13,16 +13,15 @@ final class PenProtocol {
     // Command channel: commands are written as 2c <cmd> <len> <payload...>
     static final UUID COM_SERVICE = UUID.fromString("18092dbc-2a69-11ec-8d3d-0242ac130003");
     static final UUID COM_WRITE = UUID.fromString("18093046-2a69-11ec-8d3d-0242ac130003");
-    // Readable copies of the battery and charging state (notifications only come on change)
+    // Readable battery percent (the BATTERY notification only comes on change)
     static final UUID BATTERY_READ = UUID.fromString("1809314a-2a69-11ec-8d3d-0242ac130003");
-    static final UUID CHARGING_READ = UUID.fromString("18093212-2a69-11ec-8d3d-0242ac130003");
 
     // Status service. The pen only reports the thumb button while other notifications are
     // subscribed too, so subscribe to the same set as the stock app: COM_WRITE, BUTTON, BATTERY, CHARGING.
     static final UUID STATUS_SERVICE = UUID.fromString("18093398-2a69-11ec-8d3d-0242ac130003");
     static final UUID BUTTON = UUID.fromString("180938ac-2a69-11ec-8d3d-0242ac130003");   // "01" per touch
     static final UUID BATTERY = UUID.fromString("180937bc-2a69-11ec-8d3d-0242ac130003");  // percent
-    static final UUID CHARGING = UUID.fromString("1809396a-2a69-11ec-8d3d-0242ac130003"); // 20 off, 21 on
+    static final UUID CHARGING = UUID.fromString("1809396a-2a69-11ec-8d3d-0242ac130003"); // 20 on the charger, 21 off
 
     static final int TEXTURE_PENCIL = 0;
     static final int TEXTURE_ERASER = 1;

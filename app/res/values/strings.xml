@@ -7,7 +7,7 @@
     <string name="status_connecting">connecting…</string>
     <string name="status_connected">connected</string>
     <string name="status_battery">connected · battery %1$d%%</string>
-    <string name="status_battery_charging">connected · battery %1$d%%, charging</string>
+    <string name="status_battery_charging">connected · battery %1$d%%, on the charger</string>
     <string name="status_not_paired">no paired OnePlus Stylo 2 found</string>
     <string name="status_unsupported">connected device is not a Stylo 2</string>
 
