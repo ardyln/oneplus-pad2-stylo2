@@ -17,7 +17,8 @@ It also shows the pen's battery level and whether it's on the magnetic charger.
 
 The app keeps a Bluetooth LE connection to the paired pen. Each time the pen connects, it sends the
 writing feedback setting and subscribes to the button. See [docs/PROTOCOL.md](docs/PROTOCOL.md) for
-the protocol and [docs/RESEARCH.md](docs/RESEARCH.md) for how it was worked out.
+the protocol, [docs/RESEARCH.md](docs/RESEARCH.md) for how it was worked out, and
+[docs/STYLO2.md](docs/STYLO2.md) for the original research log.
 No OnePlus code or apps are used.
 
 ## Install
@@ -53,6 +54,18 @@ is created on the first build at `~/tools/stylo2-release.jks` and is not part of
 The settings screen follows the structure of LineageOS's device settings (a preference screen in
 `res/xml`, a main switch, categories), using the public AndroidX/Material libraries in place of
 SettingsLib, which is only available inside the Android source tree.
+
+## Repository
+
+| Path | Contents |
+|---|---|
+| `app/` | the Android app (Kotlin) |
+| `module/` | KernelSU/Magisk module scripts, including the root helper `stylus-bridge.sh` |
+| `docs/` | `PROTOCOL.md` (the pen's BLE protocol), `RESEARCH.md` (findings), `STYLO2.md` (research log) |
+| `tools/build.sh` | builds the app and the module zip |
+| `tools/penprobe/` | debug app used for the research: subscribes to the pen's notifications and can send a small allowlist of stock commands |
+| `tools/gatt_cache_dump.py` | decodes an Android `gatt_cache_*` file into services and characteristics |
+| `tools/research/` | test scripts and the tablet's input device list |
 
 ## Credits
 
