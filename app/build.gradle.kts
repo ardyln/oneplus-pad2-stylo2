@@ -13,8 +13,8 @@ android {
         minSdk = 31
         // 28: legacy Bluetooth permissions, no runtime BLUETOOTH_CONNECT prompt
         targetSdk = 28
-        versionCode = 2
-        versionName = "0.2"
+        versionCode = 5
+        versionName = "0.5"
     }
 
     signingConfigs {
@@ -31,7 +31,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -54,5 +54,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.android.material:material:1.12.0")
 }

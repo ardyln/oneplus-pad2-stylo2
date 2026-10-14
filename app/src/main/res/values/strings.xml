@@ -25,13 +25,46 @@
     <string name="level_summary">0 is barely noticeable, 4 is the strongest</string>
 
     <string name="button_category">Thumb button</string>
-    <string name="button_action_title">When pressed</string>
-    <string name="action_none">Do nothing</string>
+    <string name="shortcuts_title">Shortcuts</string>
+    <string name="shortcuts_none">None yet. Assign actions to double taps.</string>
+    <plurals name="shortcuts_summary">
+        <item quantity="one">%d shortcut</item>
+        <item quantity="other">%d shortcuts</item>
+    </plurals>
+    <string name="shortcuts_help">The pen detects double taps on the thumb button. The first shortcut runs on a double tap, the second on two double taps in a row, and so on. Drag to reorder, swipe to remove.</string>
+    <string name="shortcuts_empty">No shortcuts yet</string>
+    <string name="shortcut_add">Add shortcut</string>
+    <string name="shortcut_drag">Drag to reorder</string>
+    <string name="shortcut_deleted">Removed: %1$s</string>
+    <string name="undo">Undo</string>
+    <string name="shortcut_taps_1">Double tap</string>
+    <string name="shortcut_taps_n">Double tap ×%1$d</string>
+    <string name="shortcut_delete">Delete</string>
     <string name="action_open_app">Open an app</string>
-    <string name="button_app_title">App to open</string>
-    <string name="button_app_none">None chosen</string>
-    <string name="button_buzz_title">Vibrate on press</string>
-    <string name="button_buzz_summary">A short vibration in the pen confirms the press</string>
+    <string name="action_open_app_named">Open %1$s</string>
+    <string name="action_media_play_pause">Media: play / pause</string>
+    <string name="action_media_next">Media: next track</string>
+    <string name="action_media_previous">Media: previous track</string>
+    <string name="action_broadcast">Send a broadcast intent</string>
+    <string name="action_broadcast_named">Broadcast %1$s</string>
+    <string name="action_webhook">Home Assistant webhook</string>
+    <string name="action_webhook_named">Webhook %1$s</string>
+    <string name="action_buzz">Vibrate the pen</string>
+    <string name="choose_app">Choose app</string>
+    <string name="broadcast_action_title">Intent action</string>
+    <string name="broadcast_action_hint">e.g. net.dinglisch.android.tasker.STYLO</string>
+    <string name="broadcast_action_help">Extras: taps (int) and gesture (string). In Tasker: Event → System → Intent Received.</string>
+    <string name="webhook_title">Webhook URL</string>
+    <string name="webhook_hint">http://homeassistant.local:8123/api/webhook/…</string>
+    <string name="webhook_help">In Home Assistant, create an automation with a Webhook trigger and paste its URL. The body is JSON with gesture, taps and battery.</string>
+    <string name="invalid_value">Not valid</string>
+
+    <string name="button_buzz_title">Vibrate on each double tap</string>
+    <string name="button_buzz_summary">A short vibration in the pen confirms that the double tap was detected</string>
+    <string name="tap_window_title">Time to chain double taps</string>
+    <string name="tap_window_summary">How long to wait for another double tap, in milliseconds. Shortcuts with fewer double taps run after this delay when longer ones exist.</string>
+    <string name="broadcast_all_title">Broadcast every gesture</string>
+    <string name="broadcast_all_summary">Sends io.github.ardyln.stylo2.action.DOUBLE_TAP with the extras taps and gesture, for Tasker and other automation apps</string>
     <string name="test_buzz_title">Test vibration</string>
     <string name="test_buzz_summary">Makes the pen vibrate once</string>
 
@@ -46,13 +79,5 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-    </string-array>
-    <string-array name="button_action_entries">
-        <item>@string/action_none</item>
-        <item>@string/action_open_app</item>
-    </string-array>
-    <string-array name="button_action_values" translatable="false">
-        <item>none</item>
-        <item>open_app</item>
     </string-array>
 </resources>

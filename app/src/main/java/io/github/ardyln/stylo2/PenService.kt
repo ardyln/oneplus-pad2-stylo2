@@ -39,6 +39,8 @@ class PenService : Service() {
     private var ready = false
     private var battery = -1
     private var onCharger = false
+    private var tapCount = 0
+    private val runner by lazy { ShortcutRunner(this) { write(PenProtocol.buzz()) } }
 
     private val opTimeout = Runnable {
         Log.w(TAG, "GATT operation timed out")
@@ -253,23 +255,33 @@ class PenService : Service() {
         }
     }
 
+    /**
+     * The pen reports each double tap on the thumb button (single taps, holds and slides are
+     * filtered out by its firmware). Consecutive double taps within the tap window form one
+     * gesture; it runs once no shortcut can use more taps, or when the window passes.
+     */
     private fun onButton() {
-        Log.i(TAG, "thumb button")
+        tapCount++
+        Log.i(TAG, "double tap #$tapCount")
+        tapListener?.invoke(tapCount)
         if (settings.buttonBuzz) write(PenProtocol.buzz())
-        if (settings.buttonAction == Settings.ACTION_OPEN_APP) {
-            val pkg = settings.buttonApp
-            val launch = pkg?.let { packageManager.getLaunchIntentForPackage(it) }
-            if (launch == null) {
-                Log.w(TAG, "no app to open: $pkg")
-                return
-            }
-            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            try {
-                startActivity(launch)
-            } catch (e: RuntimeException) {
-                Log.e(TAG, "could not open $pkg", e)
-            }
+        handler.removeCallbacks(fireGesture)
+        // The broadcast reports any count, so then it always waits for the window to close.
+        val last = settings.shortcuts.load().size
+        if (!settings.broadcastAll && tapCount >= last) {
+            fireGesture.run()
+        } else {
+            handler.postDelayed(fireGesture, settings.tapWindowMs)
         }
+    }
+
+    private val fireGesture = Runnable {
+        val taps = tapCount
+        tapCount = 0
+        if (taps == 0) return@Runnable
+        Log.i(TAG, "gesture: $taps double tap(s)")
+        if (settings.broadcastAll) sendBroadcast(ShortcutRunner.gestureIntent(ShortcutRunner.ACTION_GESTURE, taps))
+        settings.shortcuts.load().getOrNull(taps - 1)?.let { runner.run(it, taps, battery) }
     }
 
     // --- one GATT operation at a time ---
@@ -318,6 +330,9 @@ class PenService : Service() {
         private const val CHANNEL = "status"
         private const val NOTIFICATION_ID = 1
         private const val OP_TIMEOUT_MS = 5000L
+
+        /** Called on the main thread with the running count after each double tap (for the UI). */
+        @Volatile var tapListener: ((Int) -> Unit)? = null
 
         /** Last known state for the settings screen; null while the service isn't running. */
         @Volatile var status: String? = null

@@ -43,25 +43,36 @@
         android:title="@string/button_category"
         app:iconSpaceReserved="false">
 
-        <ListPreference
-            android:key="button_action"
-            android:title="@string/button_action_title"
-            android:entries="@array/button_action_entries"
-            android:entryValues="@array/button_action_values"
-            android:defaultValue="none"
-            app:useSimpleSummaryProvider="true"
-            app:iconSpaceReserved="false" />
-
         <Preference
-            android:key="button_app"
-            android:title="@string/button_app_title"
+            android:key="shortcuts_screen"
+            android:title="@string/shortcuts_title"
             android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron"
             app:iconSpaceReserved="false" />
 
         <SwitchPreferenceCompat
             android:key="button_buzz"
             android:title="@string/button_buzz_title"
             android:summary="@string/button_buzz_summary"
+            android:defaultValue="false"
+            android:widgetLayout="@layout/preference_material_switch"
+            app:iconSpaceReserved="false" />
+
+        <SeekBarPreference
+            android:key="button_tap_window"
+            android:title="@string/tap_window_title"
+            android:summary="@string/tap_window_summary"
+            android:defaultValue="1000"
+            android:max="2000"
+            app:min="400"
+            app:seekBarIncrement="100"
+            app:showSeekBarValue="true"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="button_broadcast_all"
+            android:title="@string/broadcast_all_title"
+            android:summary="@string/broadcast_all_summary"
             android:defaultValue="false"
             android:widgetLayout="@layout/preference_material_switch"
             app:iconSpaceReserved="false" />
