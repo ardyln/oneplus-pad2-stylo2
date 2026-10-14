@@ -16,7 +16,8 @@ It also shows the pen's battery level and whether it's on the magnetic charger.
 ## How it works
 
 The app keeps a Bluetooth LE connection to the paired pen. Each time the pen connects, it sends the
-writing feedback setting and subscribes to the button. See [docs/PROTOCOL.md](docs/PROTOCOL.md).
+writing feedback setting and subscribes to the button. See [docs/PROTOCOL.md](docs/PROTOCOL.md) for
+the protocol and [docs/RESEARCH.md](docs/RESEARCH.md) for how it was worked out.
 No OnePlus code or apps are used.
 
 ## Install

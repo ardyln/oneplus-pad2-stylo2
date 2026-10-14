@@ -1,0 +1,6 @@
+{"id":1,"command":"register","name":"Stylo 2 buttons","vid":1234,"pid":5678,"bus":"bluetooth","configuration":[{"type":"UI_SET_EVBIT","data":[1]},{"type":"UI_SET_KEYBIT","data":[331,332]}]}
+{"id":1,"command":"delay","duration":8000}
+{"id":1,"command":"inject","events":[1,331,1,0,0,0]}
+{"id":1,"command":"delay","duration":25000}
+{"id":1,"command":"inject","events":[1,331,0,0,0,0]}
+{"id":1,"command":"delay","duration":1000}
