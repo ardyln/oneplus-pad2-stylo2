@@ -1,5 +1,6 @@
 package io.github.ardyln.stylo2
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -20,6 +21,7 @@ import android.content.SharedPreferences
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import android.util.Log
 import java.util.UUID
 
@@ -28,7 +30,10 @@ import java.util.UUID
  * sends the writing feedback setting (the pen forgets it when disconnected) and subscribes
  * to the thumb button.
  */
-@Suppress("DEPRECATION") // the pre-33 GATT API, matching targetSdk 28
+// targetSdk 28: the legacy BLUETOOTH/BLUETOOTH_ADMIN permissions apply, not BLUETOOTH_CONNECT,
+// and the pre-33 GATT API is the one that matches it.
+@SuppressLint("MissingPermission")
+@Suppress("DEPRECATION")
 class PenService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val ops = ArrayDeque<() -> Unit>()
@@ -41,6 +46,27 @@ class PenService : Service() {
     private var onCharger = false
     private var tapCount = 0
     private val runner by lazy { ShortcutRunner(this) { write(PenProtocol.buzz()) } }
+    private lateinit var bridge: StylusBridge
+    private lateinit var foreground: ForegroundApp
+    private var saberTool: Int? = null
+    private var lastFeedback: ByteArray? = null
+
+    private fun bridgeReady() = this::bridge.isInitialized && bridge.ready
+
+    /** The app the pen is working in: the focused window, or the last resumed app as a fallback. */
+    private val activeApp get() = if (FocusService.running) FocusService.focused else foreground.current
+
+    private val foregroundPoll = object : Runnable {
+        override fun run() {
+            // Fallback when the accessibility service is off (misses focus changes between windows)
+            if (!FocusService.running && getSystemService(PowerManager::class.java).isInteractive &&
+                foreground.update()
+            ) {
+                onForegroundChanged()
+            }
+            handler.postDelayed(this, FOREGROUND_POLL_MS)
+        }
+    }
 
     private val opTimeout = Runnable {
         Log.w(TAG, "GATT operation timed out")
@@ -48,7 +74,7 @@ class PenService : Service() {
     }
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key in Settings.FEEDBACK_KEYS) sendFeedbackSetting()
+        if (key in Settings.FEEDBACK_KEYS || key?.startsWith("saber_") == true) sendFeedbackSetting()
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -70,6 +96,7 @@ class PenService : Service() {
     override fun onCreate() {
         super.onCreate()
         settings = Settings(this)
+        instance = this
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL, getString(R.string.channel_status), NotificationManager.IMPORTANCE_MIN)
         )
@@ -78,6 +105,11 @@ class PenService : Service() {
             addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         })
         settings.prefs.registerOnSharedPreferenceChangeListener(prefsListener)
+        foreground = ForegroundApp(this)
+        bridge = StylusBridge(this) { tool -> handler.post { onSaberTool(tool) } }
+        bridge.start()
+        FocusService.listener = { handler.post { onForegroundChanged() } }
+        handler.post(foregroundPoll)
         connect()
     }
 
@@ -89,8 +121,12 @@ class PenService : Service() {
     override fun onDestroy() {
         settings.prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         unregisterReceiver(receiver)
+        handler.removeCallbacks(foregroundPoll)
+        FocusService.listener = null
+        bridge.stop()
         disconnect()
         status = null
+        instance = null
         super.onDestroy()
     }
 
@@ -117,6 +153,7 @@ class PenService : Service() {
 
     private fun resetConnectionState() {
         ready = false
+        lastFeedback = null
         com = null
         battery = -1
         onCharger = false
@@ -234,10 +271,33 @@ class PenService : Service() {
 
     // --- commands ---
 
+    /** Sends the writing feedback setting if it changed; in Saber, the texture follows its tool. */
     private fun sendFeedbackSetting() {
-        val cmd = PenProtocol.texture(settings.feedbackOn, settings.texture, settings.level)
+        var on = settings.feedbackOn
+        var texture = settings.texture
+        var level = settings.level
+        val tool = saberTool?.let { Saber.Tool.byId(it) }
+        if (settings.saberTexture && activeApp == Saber.PACKAGE && tool != null) {
+            val t = tool.texture(settings.prefs)
+            if (t == Saber.TEXTURE_OFF) on = false else texture = t
+            tool.level(settings.prefs).let { if (it != Saber.LEVEL_MAIN) level = it }
+        }
+        val cmd = PenProtocol.texture(on, texture, level)
+        if (cmd.contentEquals(lastFeedback) || !ready) return
+        lastFeedback = cmd
         Log.i(TAG, "writing feedback: ${cmd.toHex()}")
         write(cmd)
+    }
+
+    private fun onSaberTool(tool: Int?) {
+        saberTool = tool
+        sendFeedbackSetting()
+    }
+
+    private fun onForegroundChanged() {
+        Log.i(TAG, "active app: $activeApp")
+        if (bridge.pressed && activeApp !in settings.stylusButtonApps) bridge.setPressed(false)
+        sendFeedbackSetting()
     }
 
     private fun write(value: ByteArray) {
@@ -261,6 +321,14 @@ class PenService : Service() {
      * gesture; it runs once no shortcut can use more taps, or when the window passes.
      */
     private fun onButton() {
+        if (!FocusService.running) foreground.update()
+        if (bridge.ready && activeApp in settings.stylusButtonApps) {
+            // In notes apps the double tap holds or releases a virtual stylus button (Saber: eraser).
+            bridge.setPressed(!bridge.pressed)
+            Log.i(TAG, "stylus button ${if (bridge.pressed) "held" else "released"} in $activeApp")
+            if (settings.buttonBuzz) write(PenProtocol.buzz())
+            return
+        }
         tapCount++
         Log.i(TAG, "double tap #$tapCount")
         tapListener?.invoke(tapCount)
@@ -330,9 +398,14 @@ class PenService : Service() {
         private const val CHANNEL = "status"
         private const val NOTIFICATION_ID = 1
         private const val OP_TIMEOUT_MS = 5000L
+        private const val FOREGROUND_POLL_MS = 1000L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null
+
+        /** Whether the root helper's virtual stylus button is available (for the settings screen). */
+        val stylusBridgeReady get() = instance?.bridgeReady() == true
+        private var instance: PenService? = null
 
         /** Last known state for the settings screen; null while the service isn't running. */
         @Volatile var status: String? = null

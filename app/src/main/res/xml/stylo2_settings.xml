@@ -84,4 +84,45 @@
             android:persistent="false"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/notes_category"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="stylus_button_apps"
+            android:title="@string/stylus_button_apps_title"
+            android:persistent="false"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="saber_texture"
+            android:title="@string/saber_texture_title"
+            android:summary="@string/saber_texture_summary"
+            android:defaultValue="true"
+            android:widgetLayout="@layout/preference_material_switch"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="saber_tools"
+            android:title="@string/saber_tools_title"
+            android:summary="@string/saber_tools_summary"
+            android:dependency="saber_texture"
+            android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="bridge_status"
+            android:title="@string/bridge_title"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+
+        <io.github.ardyln.stylo2.LongTextPreference
+            android:key="saber_about"
+            android:title="@string/saber_about_title"
+            android:summary="@string/saber_about_summary"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
 </PreferenceScreen>

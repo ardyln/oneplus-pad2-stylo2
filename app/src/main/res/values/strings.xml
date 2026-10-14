@@ -68,6 +68,36 @@
     <string name="test_buzz_title">Test vibration</string>
     <string name="test_buzz_summary">Makes the pen vibrate once</string>
 
+    <string name="notes_category">Notes apps</string>
+    <string name="focus_service_label">Stylo 2: active app</string>
+    <string name="focus_service_description">Tells the Stylo 2 app which app window is focused, so double taps and textures can follow notes apps like Saber. Only the package name of the focused window is read.</string>
+    <string name="bridge_focus_off">Running, but the accessibility service "Stylo 2: active app" is off</string>
+    <string name="stylus_button_apps_title">Double tap as stylus button</string>
+    <string name="stylus_button_apps_summary">%1$s: a double tap holds or releases the stylus button instead of running shortcuts. Saber uses the stylus button as its eraser.</string>
+    <string name="stylus_button_apps_none">No apps chosen</string>
+    <string name="stylus_button_apps_dialog">Apps</string>
+    <string name="saber_texture_title">Texture follows Saber\'s tool</string>
+    <string name="saber_texture_summary">Each Saber tool gets its own texture and strength</string>
+    <string name="saber_tools_title">Saber tools</string>
+    <string name="saber_tools_summary">Choose the texture and strength for each tool</string>
+    <string name="saber_tool_pen">Pen</string>
+    <string name="saber_tool_highlighter">Highlighter</string>
+    <string name="saber_tool_fountain_pen">Fountain pen</string>
+    <string name="saber_tool_ballpoint_pen">Ballpoint pen</string>
+    <string name="saber_tool_pencil">Pencil</string>
+    <string name="saber_tool_shape_pen">Shape pen</string>
+    <string name="saber_tool_eraser">Eraser</string>
+    <string name="saber_tool_select">Select</string>
+    <string name="saber_tool_text">Text</string>
+    <string name="saber_tool_laser_pointer">Laser pointer</string>
+    <string name="texture_off">No vibration</string>
+    <string name="saber_tool_summary">%1$s · strength %2$d</string>
+    <string name="saber_about_title">About the Saber integration</string>
+    <string name="saber_about_summary">Saber itself is not modified. This app uses an accessibility service to detect when Saber\'s window is focused. With root, it reads Saber\'s settings file to see the active tool, and adds a virtual stylus button that Android merges with the pen\'s input. Saber\'s developers aren\'t involved and aren\'t responsible for this, so please don\'t report problems with it to Saber.</string>
+    <string name="bridge_title">Root helper</string>
+    <string name="bridge_ready">Running</string>
+    <string name="bridge_not_ready">Not running. It comes with the KernelSU/Magisk module.</string>
+
     <string-array name="texture_entries">
         <item>@string/texture_pencil</item>
         <item>@string/texture_eraser</item>

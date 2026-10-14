@@ -14,6 +14,10 @@ class Settings(context: Context) {
     val buttonBuzz get() = prefs.getBoolean(KEY_BUTTON_BUZZ, false)
     val tapWindowMs get() = prefs.getInt(KEY_TAP_WINDOW, 1000).toLong()
     val broadcastAll get() = prefs.getBoolean(KEY_BROADCAST_ALL, false)
+    val stylusButtonApps: Set<String> get() = prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: setOf(Saber.PACKAGE)
+    val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
+
+    fun setStylusButtonApps(apps: Set<String>) = prefs.edit().putStringSet(KEY_STYLUS_BUTTON_APPS, apps).apply()
     val shortcuts = ShortcutStore(prefs)
 
     init {
@@ -37,10 +41,13 @@ class Settings(context: Context) {
         const val KEY_BROADCAST_ALL = "button_broadcast_all"
         const val KEY_SHORTCUTS_SCREEN = "shortcuts_screen"
         const val KEY_TEST_BUZZ = "test_buzz"
+        const val KEY_STYLUS_BUTTON_APPS = "stylus_button_apps"
+        const val KEY_SABER_TEXTURE = "saber_texture"
+        const val KEY_BRIDGE_STATUS = "bridge_status"
 
         private const val OLD_KEY_BUTTON_ACTION = "button_action"
         private const val OLD_KEY_BUTTON_APP = "button_app"
 
-        val FEEDBACK_KEYS = setOf(KEY_FEEDBACK, KEY_TEXTURE, KEY_LEVEL)
+        val FEEDBACK_KEYS = setOf(KEY_FEEDBACK, KEY_TEXTURE, KEY_LEVEL, KEY_SABER_TEXTURE)
     }
 }

@@ -22,6 +22,8 @@ object PenProtocol {
     val MAGNET: UUID = UUID.fromString("1809396a-2a69-11ec-8d3d-0242ac130003") // 20 on the charger, 21 off
 
     const val TEXTURE_PENCIL = 0
+    const val TEXTURE_ERASER = 1
+    const val TEXTURE_BALLPEN = 2
     const val TEXTURE_PEN = 3
     const val LEVEL_MAX = 4
 

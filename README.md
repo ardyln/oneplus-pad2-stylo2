@@ -5,7 +5,11 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 
 - **Writing feedback** ("textured vibration"): the pen vibrates while you write, in every app. Choose
   the texture (pencil, eraser, ballpoint pen, pen) and the strength.
-- **Thumb button**: open an app of your choice, optionally with a short vibration as confirmation.
+- **Thumb-button shortcuts**: the pen reports double taps; chain them (double tap, double tap ×2, …)
+  and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
+  or a Home Assistant webhook.
+- **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
+  eraser, and the texture follows the active tool, with a texture and strength per tool.
 
 It also shows the pen's battery level and whether it's on the magnetic charger.
 
@@ -19,10 +23,24 @@ No OnePlus code or apps are used.
 
 1. Pair the pen with the tablet as usual.
 2. Install the module zip with KernelSU or Magisk and reboot.
-3. Open the **Stylo 2** app to choose the texture, strength and button action.
+3. Open the **Stylo 2** app to choose the texture, strength, shortcuts and notes-app options.
 
-The module installs the app, allows it to open apps from the background (for the button action) and
-exempts it from battery optimization. Removing the module undoes all of this.
+At boot the module:
+- installs the app and grants it background activity starts (to open apps from a shortcut), usage
+  access, and an exemption from battery optimization;
+- enables the app's accessibility service "Stylo 2: active app", which only reads the package name of
+  the focused window (to know when Saber is in use, also in desktop windowing mode);
+- starts a root helper (`stylus-bridge.sh`) that creates a virtual stylus button with Android's
+  `uinput` tool, and reads Saber's settings file to see its active tool.
+
+Removing the module undoes all of this.
+
+## Saber
+
+Saber itself is not modified. The integration works from the outside: Android merges the virtual
+stylus button into the pen's input (Saber uses the stylus button as its eraser), and the active tool
+is read from Saber's settings. Saber's developers aren't involved, so please don't report problems
+with this integration to Saber.
 
 ## Build
 
@@ -34,3 +52,10 @@ is created on the first build at `~/tools/stylo2-release.jks` and is not part of
 The settings screen follows the structure of LineageOS's device settings (a preference screen in
 `res/xml`, a main switch, categories), using the public AndroidX/Material libraries in place of
 SettingsLib, which is only available inside the Android source tree.
+
+## Credits
+
+- Tool and texture icons from [Font Awesome Free](https://fontawesome.com) 6 by Fonticons, Inc.,
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): the same icons
+  [Saber](https://github.com/saber-notes/saber) uses for its tools.
+- Other icons from [Material Symbols](https://fonts.google.com/icons) by Google, Apache-2.0.

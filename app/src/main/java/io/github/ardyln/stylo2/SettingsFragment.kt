@@ -10,6 +10,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
     private lateinit var settings: Settings
@@ -17,11 +18,20 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
     private lateinit var texturePreference: ListPreference
     private lateinit var levelPreference: SeekBarPreference
     private lateinit var shortcutsPreference: Preference
+    private lateinit var stylusAppsPreference: Preference
+    private lateinit var bridgePreference: Preference
 
     private val handler = Handler(Looper.getMainLooper())
     private val refresh = object : Runnable {
         override fun run() {
             statusPreference.summary = PenService.status ?: getString(R.string.status_not_running)
+            bridgePreference.summary = getString(
+                when {
+                    !PenService.stylusBridgeReady -> R.string.bridge_not_ready
+                    !FocusService.running -> R.string.bridge_focus_off
+                    else -> R.string.bridge_ready
+                }
+            )
             handler.postDelayed(this, 1000)
         }
     }
@@ -34,6 +44,17 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         texturePreference = findPreference(Settings.KEY_TEXTURE)!!
         levelPreference = findPreference(Settings.KEY_LEVEL)!!
         shortcutsPreference = findPreference(Settings.KEY_SHORTCUTS_SCREEN)!!
+        stylusAppsPreference = findPreference(Settings.KEY_STYLUS_BUTTON_APPS)!!
+        bridgePreference = findPreference(Settings.KEY_BRIDGE_STATUS)!!
+        findPreference<Preference>("saber_tools")!!.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), SaberToolsActivity::class.java))
+            true
+        }
+        stylusAppsPreference.setOnPreferenceClickListener {
+            pickStylusButtonApps()
+            true
+        }
+        updateStylusAppsSummary()
 
         findPreference<SwitchPreferenceCompat>(Settings.KEY_FEEDBACK)!!.onPreferenceChangeListener = this
         updateFeedbackEnabled(settings.feedbackOn)
@@ -72,6 +93,38 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
         if (preference.key == Settings.KEY_FEEDBACK) updateFeedbackEnabled(newValue as Boolean)
         return true
+    }
+
+    private fun launcherApps(): List<Pair<String, String>> {
+        val pm = requireContext().packageManager
+        return pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
+            .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
+            .distinctBy { it.first }
+            .sortedBy { it.second.lowercase() }
+    }
+
+    private fun updateStylusAppsSummary() {
+        val chosen = settings.stylusButtonApps
+        val labels = launcherApps().filter { it.first in chosen }.map { it.second }
+        stylusAppsPreference.summary = if (labels.isEmpty()) getString(R.string.stylus_button_apps_none)
+            else getString(R.string.stylus_button_apps_summary, labels.joinToString(", "))
+    }
+
+    private fun pickStylusButtonApps() {
+        val apps = launcherApps()
+        val chosen = settings.stylusButtonApps.toMutableSet()
+        val checked = apps.map { it.first in chosen }.toBooleanArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.stylus_button_apps_dialog)
+            .setMultiChoiceItems(apps.map { it.second }.toTypedArray(), checked) { _, which, isChecked ->
+                if (isChecked) chosen += apps[which].first else chosen -= apps[which].first
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                settings.setStylusButtonApps(chosen)
+                updateStylusAppsSummary()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun updateFeedbackEnabled(on: Boolean) {

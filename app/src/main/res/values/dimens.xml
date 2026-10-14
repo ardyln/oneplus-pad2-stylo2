@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Width of the tool column in the single-row Saber tool layout, so all rows line up -->
+    <dimen name="tool_header_width">250dp</dimen>
+    <!-- Indent of the pen types inside the pen card -->
+    <dimen name="pen_group_indent">12dp</dimen>
+</resources>

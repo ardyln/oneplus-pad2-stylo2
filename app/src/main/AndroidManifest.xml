@@ -10,12 +10,17 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Home Assistant webhooks -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Foreground app for the notes-app features (granted by service.sh) -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.Stylo2"
         android:allowBackup="false"
+        android:supportsRtl="true"
         android:usesCleartextTraffic="true">
 
         <activity android:name=".SettingsActivity" android:exported="true">
@@ -30,7 +35,25 @@
             android:exported="false"
             android:parentActivityName=".SettingsActivity" />
 
+        <activity
+            android:name=".SaberToolsActivity"
+            android:exported="false"
+            android:parentActivityName=".SettingsActivity" />
+
         <service android:name=".PenService" android:exported="false" />
+
+        <service
+            android:name=".FocusService"
+            android:exported="true"
+            android:label="@string/focus_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/focus_service" />
+        </service>
 
         <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>

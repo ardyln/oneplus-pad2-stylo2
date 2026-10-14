@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texture and strength controls for one Saber tool -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/tool_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/tool_icon_background"
+            android:importantForAccessibility="no"
+            android:padding="8dp"
+            app:tint="?attr/colorOnSecondaryContainer" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@android:id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+            <TextView
+                android:id="@android:id/summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?android:attr/textColorSecondary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/textures"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/texture_off"
+            style="@style/Stylo2.TextureButton"
+            android:contentDescription="@string/texture_off"
+            app:icon="@drawable/ic_texture_off" />
+
+        <Button
+            android:id="@+id/texture_pencil"
+            style="@style/Stylo2.TextureButton"
+            android:contentDescription="@string/texture_pencil"
+            app:icon="@drawable/ic_texture_pencil" />
+
+        <Button
+            android:id="@+id/texture_eraser"
+            style="@style/Stylo2.TextureButton"
+            android:contentDescription="@string/texture_eraser"
+            app:icon="@drawable/ic_texture_eraser" />
+
+        <Button
+            android:id="@+id/texture_ballpen"
+            style="@style/Stylo2.TextureButton"
+            android:contentDescription="@string/texture_ballpen"
+            app:icon="@drawable/ic_texture_ballpen" />
+
+        <Button
+            android:id="@+id/texture_pen"
+            style="@style/Stylo2.TextureButton"
+            android:contentDescription="@string/texture_pen"
+            app:icon="@drawable/ic_texture_pen" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/strength_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/level_title"
+            android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/strength"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:contentDescription="@string/level_title"
+            android:stepSize="1"
+            android:valueFrom="0"
+            android:valueTo="4"
+            app:tickVisible="true" />
+    </LinearLayout>
+</LinearLayout>

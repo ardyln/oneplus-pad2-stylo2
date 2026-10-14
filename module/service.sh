@@ -23,8 +23,27 @@ fi
 
 # Opening an app from the thumb button is a background activity start; this allows it.
 appops set "$PKG" SYSTEM_ALERT_WINDOW allow
-# Keeps the pen connection alive in Doze. Both are undone by uninstall.sh.
+# Lets the app see which app is in front (notes-app features).
+appops set "$PKG" GET_USAGE_STATS allow
+# Keeps the pen connection alive in Doze. Undone by uninstall.sh (the app-ops go with the app).
 cmd deviceidle whitelist +"$PKG" >/dev/null 2>&1
 # The service is not exported; the app's boot receiver starts it.
 am broadcast -n "$PKG/.BootReceiver" >/dev/null 2>&1
 log "service started"
+
+# Focused-window tracking for the notes-app features (an accessibility service that only reads
+# the focused window's package). Appended to any services already enabled; removed by uninstall.sh.
+SVC="$PKG/$PKG.FocusService"
+cur=$(settings get secure enabled_accessibility_services)
+case ":$cur:" in
+    *":$SVC:"*) ;;
+    *)
+        if [ -z "$cur" ] || [ "$cur" = "null" ]; then new=$SVC; else new="$cur:$SVC"; fi
+        settings put secure enabled_accessibility_services "$new"
+        settings put secure accessibility_enabled 1
+        log "accessibility service enabled"
+        ;;
+esac
+
+# Virtual stylus button and Saber's tool, for the notes-app features.
+sh "$MODDIR/stylus-bridge.sh" </dev/null >/dev/null 2>&1 &
