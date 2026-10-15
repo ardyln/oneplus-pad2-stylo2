@@ -22,8 +22,9 @@ New:
 - **Right click** (opens menus, like a long press) and **middle click** as presentation gesture
   actions. A held mouse button isn't a long press for most apps, so there's no long-press action.
 - **Touch timeline** on the presentation page: each touch's duration against the zones (too short,
-  tap, hold), when a single tap runs after letting go, and the last 15 seconds of taps, holds,
-  double taps and swipes. The longest tap and the single-tap delay are handles on it.
+  tap, hold), the short end against the pen's assumed 15 ms scans (an estimate from the measured
+  durations), when a single tap runs after letting go, and the last 15 seconds of taps, holds,
+  double taps and swipes. The longest tap and the single-tap delay are draggable knobs on it.
 - The live card shows the key the pen sent (F19, F20, wheel), how long it was held, what it counted
   as, the action, and whether it ran.
 - Single taps on the touch area run **instantly** by default: tests showed the pen reports double

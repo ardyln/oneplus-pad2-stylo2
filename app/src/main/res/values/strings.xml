@@ -206,10 +206,15 @@
     <string name="last_input_swipe_down">Swipe away from the tip → %1$s</string>
     <string name="last_input_not_run">Not run: presentation mode is paused in this app.</string>
     <string name="timeline_header">Touch timeline</string>
-    <string name="timeline_help">Drag the handles to change the longest tap and the delay; your recent touches move between the zones as you do. Top: how long each touch lasted (the newest is the big dot); touches shorter than about 30 ms never reach the tablet. Middle: when a single tap runs after you let go. Bottom: the last seconds, with taps and holds as bars, a dot where each tap ran, double taps as 2× and swipes as arrows.</string>
+    <string name="timeline_help">Drag the handles to change the longest tap and the delay; your recent touches move between the zones as you do. 1: how long each touch lasted (the newest is the big dot). 2: the short end zoomed in. All measured durations are multiples of about 15 ms, so the pen seems to check the touch area every 15 ms and need 2–3 checks before it reports a touch. That\'s an estimate: taps the pen drops never reach the tablet, so they can\'t be shown here; they only show up as gaps in the last seconds. 3: when a single tap runs after you let go. 4: the last seconds, with taps and holds as bars, a dot where each tap ran, double taps as 2× and swipes as arrows.</string>
     <string name="timeline_durations">How long you touched</string>
     <string name="timeline_recent">Last %1$d seconds</string>
     <string name="timeline_now">now</string>
+    <string name="timeline_scans">Short touches against the pen\'s scans (estimate)</string>
+    <string name="timeline_scan_band">from here the pen reports it (after about 2–3 scans)</string>
+    <string name="timeline_scan_count">%1$d ms ≈ %2$d scans</string>
+    <string name="timeline_scan_longer">%1$d longer →</string>
+    <string name="timeline_drag">drag</string>
     <string name="timeline_delay">After you let go: when a single tap runs</string>
     <string name="timeline_delay_zone">delay</string>
     <string name="timeline_runs_here">single tap runs</string>

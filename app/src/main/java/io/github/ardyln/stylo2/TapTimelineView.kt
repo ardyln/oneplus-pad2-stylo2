@@ -20,8 +20,10 @@ import kotlin.math.sqrt
  * The presentation page's touch timeline, with the tap timing settings as handles:
  * 1. how long each touch lasted, against the zones too short (dropped by the pen), tap and hold; the
  *    boundary between tap and hold is the "longest tap" handle;
- * 2. after letting go, how long a single tap waits before it runs (the "delay single taps" handle);
- * 3. the last [WINDOW_MS] of touches, double taps and swipes, with a dot where each tap's action ran.
+ * 2. the short end zoomed in against the pen's assumed scan grid (an estimate from the measured
+ *    durations, which come in steps of about [SCAN_MS]; touches the pen drops never arrive);
+ * 3. after letting go, how long a single tap waits before it runs (the "delay single taps" handle);
+ * 4. the last [WINDOW_MS] of touches, double taps and swipes, with a dot where each tap's action ran.
  * Reads [PenService.snapshotInputs] and redraws itself while it's on screen.
  */
 class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
@@ -83,9 +85,21 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         }
     }
 
+    /** When the view appeared: the handles wiggle briefly then, to show they can be dragged. */
+    private var shownAt = 0L
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        shownAt = SystemClock.uptimeMillis()
         post(redraw)
+    }
+
+    /** A short, fading side-to-side wiggle for the handles after the view appears. */
+    private fun nudge(): Float {
+        val t = SystemClock.uptimeMillis() - shownAt
+        if (t > NUDGE_MS || drag != Drag.NONE) return 0f
+        val fade = 1f - t.toFloat() / NUDGE_MS
+        return (kotlin.math.sin(t / 1000.0 * 2 * Math.PI * 2.5).toFloat()) * 5 * dp * fade
     }
 
     override fun onDetachedFromWindow() {
@@ -94,7 +108,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val h = (292 * dp).toInt() + paddingTop + paddingBottom
+        val h = (424 * dp).toInt() + paddingTop + paddingBottom
         setMeasuredDimension(getDefaultSize(suggestedMinimumWidth, widthMeasureSpec), resolveSize(h, heightMeasureSpec))
     }
 
@@ -105,6 +119,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         right = width - paddingRight - 8 * dp
         var y = paddingTop + 14 * sp
         y = drawDurations(canvas, inputs, y)
+        y = drawScans(canvas, inputs, y + 24 * dp)
         y = drawWait(canvas, y + 24 * dp)
         drawTimeline(canvas, inputs, now, y + 24 * dp)
     }
@@ -121,7 +136,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
     private fun drawDurations(c: Canvas, inputs: List<TimedInput>, top: Float): Float {
         title.color = cText
         c.drawText(context.getString(R.string.timeline_durations), left, top, title)
-        val barTop = top + 12 * dp
+        val barTop = top + 30 * dp  // room for the "drag" hint above
         val barBottom = barTop + 36 * dp
         durationBar.set(left, barTop, right, barBottom)
         val tapMax = tapMaxMs
@@ -165,14 +180,96 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         return labelY
     }
 
-    // ---- 2. After letting go: the single-tap delay
+    // ---- 2. The short end against the pen's assumed scans
+
+    private fun scanX(ms: Float) = left + (ms / SCAN_AXIS_MS).coerceIn(0f, 1f) * (right - left)
+
+    private fun drawScans(c: Canvas, inputs: List<TimedInput>, top: Float): Float {
+        title.color = cText
+        c.drawText(context.getString(R.string.timeline_scans), left, top, title)
+        val barTop = top + 12 * dp
+        val barBottom = barTop + 30 * dp
+        rect.set(left, barTop, right, barBottom)
+        fill.color = cTrack
+        c.drawRoundRect(rect, 6 * dp, 6 * dp, fill)
+        // Below the band: never arrives
+        rect.set(left, barTop, scanX(MIN_MS.toFloat()), barBottom)
+        fill.color = cTooShort
+        c.drawRoundRect(rect, 6 * dp, 6 * dp, fill)
+        // The threshold band: somewhere between two and three scans, so a gradient, not a line
+        val x1 = scanX(2 * SCAN_MS)
+        val x2 = scanX(3 * SCAN_MS)
+        fill.shader = android.graphics.LinearGradient(x1, 0f, x2, 0f, cTooShort, cTap, android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(x1, barTop, x2, barBottom, fill)
+        fill.shader = null
+        rect.set(x2, barTop, right, barBottom)
+        fill.color = cTap
+        c.drawRoundRect(rect, 6 * dp, 6 * dp, fill)
+        text.color = cOnTap
+        val band = context.getString(R.string.timeline_scan_band)
+        c.drawText(band, (x2 + 8 * dp).coerceAtMost(right - text.measureText(band) - 4 * dp), barBottom - 9 * dp, text)
+        // One tick per assumed scan
+        stroke.color = cText
+        stroke.alpha = 150
+        stroke.strokeWidth = 1 * dp
+        var t = SCAN_MS
+        while (t < SCAN_AXIS_MS) {
+            val x = scanX(t)
+            c.drawLine(x, barBottom - 6 * dp, x, barBottom, stroke)
+            t += SCAN_MS
+        }
+        stroke.alpha = 255
+        // Registered short touches, snapped to the grid; the newest says how many scans it was
+        val touches = inputs.filter { it.kind == InputKind.TOUCH }.takeLast(DOTS)
+        val short = touches.filter { it.upAt - it.downAt <= SCAN_AXIS_MS }
+        short.forEachIndexed { i, e ->
+            val held = e.upAt - e.downAt
+            val scans = Math.round(held / SCAN_MS).coerceAtLeast(1)
+            val x = scanX(scans * SCAN_MS)
+            val newest = e === touches.last()
+            val r = if (newest) 6 * dp else 4 * dp
+            val alpha = if (newest) 255 else 90 + 140 * (i + 1) / short.size
+            fill.color = cOutline
+            fill.alpha = alpha
+            c.drawCircle(x, barTop + 10 * dp, r + 2 * dp, fill)
+            fill.color = cMark
+            fill.alpha = alpha
+            c.drawCircle(x, barTop + 10 * dp, r, fill)
+            fill.alpha = 255
+            if (newest) {
+                val label = context.getString(R.string.timeline_scan_count, held, scans)
+                val tw = text.measureText(label)
+                val bx = (x - tw / 2 - 8 * dp).coerceIn(left - 8 * dp, right + 8 * dp - tw - 16 * dp)
+                rect.set(bx, barTop - 26 * dp, bx + tw + 16 * dp, barTop - 4 * dp)
+                fill.color = cBubble
+                c.drawRoundRect(rect, 11 * dp, 11 * dp, fill)
+                text.color = cOnBubble
+                c.drawText(label, bx + 8 * dp, barTop - 10 * dp, text)
+            }
+        }
+        val longer = touches.size - short.size
+        text.color = cText
+        val labelY = barBottom + 16 * sp
+        if (longer > 0) {
+            val more = context.getString(R.string.timeline_scan_longer, longer)
+            c.drawText(more, right - text.measureText(more), labelY, text)
+        }
+        for (ms in listOf(0, 30, 60, 90)) {
+            val x = scanX(ms.toFloat())
+            val label = "$ms ms"
+            c.drawText(label, (x - text.measureText(label) / 2).coerceIn(left, right - text.measureText(label)), labelY, text)
+        }
+        return labelY
+    }
+
+    // ---- 3. After letting go: the single-tap delay
 
     private fun waitX(ms: Long) = left + ms.coerceIn(0, WAIT_MAX_MS).toFloat() / WAIT_MAX_MS * (right - left)
 
     private fun drawWait(c: Canvas, top: Float): Float {
         title.color = cText
         c.drawText(context.getString(R.string.timeline_delay), left, top, title)
-        val barTop = top + 12 * dp
+        val barTop = top + 30 * dp  // room for the "drag" hint above
         val barBottom = barTop + 30 * dp
         waitBar.set(left, barTop, right, barBottom)
         rect.set(left, barTop, right, barBottom)
@@ -186,7 +283,9 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         c.drawCircle(runX, (barTop + barBottom) / 2, 5 * dp, fill)
         text.color = cText
         val runLabel = context.getString(R.string.timeline_runs_here)
-        val lx = if (runX + 10 * dp + text.measureText(runLabel) < right) runX + 10 * dp else runX - 10 * dp - text.measureText(runLabel)
+        // Beside the knob (radius about 15 dp), on whichever side has room
+        val gap = 22 * dp
+        val lx = if (runX + gap + text.measureText(runLabel) < right) runX + gap else runX - gap - text.measureText(runLabel)
         c.drawText(runLabel, lx, (barTop + barBottom) / 2 + 4 * sp, text)
         handle(c, runX, barTop, barBottom, drag == Drag.WAIT,
             if (wait == 0L) context.getString(R.string.tap_instant) else seconds(wait))
@@ -199,7 +298,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         return labelY
     }
 
-    // ---- 3. The last seconds, newest on the right
+    // ---- 4. The last seconds, newest on the right
 
     private fun drawTimeline(c: Canvas, inputs: List<TimedInput>, now: Long, top: Float) {
         title.color = cText
@@ -285,12 +384,41 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         }
     }
 
-    /** A draggable boundary: a pill with grip lines, and the value in a bubble while dragging. */
-    private fun handle(c: Canvas, x: Float, top: Float, bottom: Float, active: Boolean, value: String) {
-        val w = if (active) 8 * dp else 6 * dp
-        rect.set(x - w / 2, top - 6 * dp, x + w / 2, bottom + 6 * dp)
+    /**
+     * A draggable boundary: a line through the bar with a round knob carrying ◀ ▶, "drag" under it,
+     * and the value in a bubble while dragging.
+     */
+    private fun handle(c: Canvas, x0: Float, top: Float, bottom: Float, active: Boolean, value: String) {
+        val x = x0 + nudge()
+        val mid = (top + bottom) / 2
+        stroke.color = cHandle
+        stroke.strokeWidth = 3 * dp
+        c.drawLine(x, top - 4 * dp, x, bottom + 4 * dp, stroke)
+        val r = if (active) 15 * dp else 13 * dp
+        fill.color = cOutline
+        c.drawCircle(x, mid, r + 2 * dp, fill)
         fill.color = cHandle
-        c.drawRoundRect(rect, w / 2, w / 2, fill)
+        c.drawCircle(x, mid, r, fill)
+        // ◀ ▶ inside the knob
+        fill.color = cOutline
+        val a = 4.5f * dp
+        path.reset()
+        path.moveTo(x - 2 * dp, mid - a)
+        path.lineTo(x - 2 * dp - a, mid)
+        path.lineTo(x - 2 * dp, mid + a)
+        path.close()
+        path.moveTo(x + 2 * dp, mid - a)
+        path.lineTo(x + 2 * dp + a, mid)
+        path.lineTo(x + 2 * dp, mid + a)
+        path.close()
+        c.drawPath(path, fill)
+        if (!active) {
+            text.color = cText
+            val hint = context.getString(R.string.timeline_drag)
+            val tw = text.measureText(hint)
+            // Above the bar, so it doesn't collide with the scale below
+            c.drawText(hint, (x - tw / 2).coerceIn(left, right - tw), top - 8 * dp, text)
+        }
         if (active) {
             val tw = text.measureText(value)
             val bx = (x - tw / 2 - 8 * dp).coerceIn(left - 8 * dp, right + 8 * dp - tw - 16 * dp)
@@ -310,7 +438,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
     override fun onTouchEvent(e: MotionEvent): Boolean {
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                val slop = 24 * dp
+                val slop = 28 * dp
                 drag = when {
                     e.y in durationBar.top - slop..durationBar.bottom + slop &&
                         abs(e.x - durationX(tapMaxMs)) < slop -> Drag.TAP_MAX
@@ -369,6 +497,9 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
     companion object {
         /** Touches shorter than about this never reach the tablet (measured: 30–45 ms minimum). */
         const val MIN_MS = 30L
+        /** The step all measured durations fall on: the pen seems to scan the touch area this often. */
+        private const val SCAN_MS = 15f
+        private const val SCAN_AXIS_MS = 120f
         private const val MAX_MS = 2500L
         private const val TAP_MAX_MIN = 150L
         private const val TAP_MAX_MAX = 800L
@@ -376,5 +507,6 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
         const val WINDOW_MS = 15_000L
         private const val DOTS = 12
         private const val FRAME_MS = 33L
+        private const val NUDGE_MS = 1600L
     }
 }

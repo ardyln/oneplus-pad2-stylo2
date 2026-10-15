@@ -41,6 +41,12 @@ log for troubleshooting.
 | **Presentation mode** | **Other apps** |
 | ![Presentation mode: what each gesture does](docs/screenshots/presentation.png) | ![Other apps: primary stylus button and their own texture](docs/screenshots/other-apps.png) |
 
+**Touch timeline** (presentation mode): how long each touch lasted against the tap and hold zones,
+the short end against the pen's scans, when a single tap runs, and the last 15 seconds. The knobs
+set the tap timing.
+
+![Touch timeline with tap and hold zones, scan grid and recent touches](docs/screenshots/timeline.png)
+
 ## How it works
 
 The app keeps a Bluetooth LE connection to the paired pen. Each time the pen connects, it sends the
