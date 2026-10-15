@@ -185,6 +185,23 @@ Goal: let the user remap the swipes (e.g. to next/previous page) instead of Andr
 - After a reboot, nothing can run until the first unlock (credential-encrypted storage:
   `sys.user.0.ce_available`), so the module's `service.sh` waits for it.
 
+## 10. Other devices
+
+Could the Bluetooth-only features (shortcuts, presentation mode, battery) work on another rooted
+Android device? Tested with a rooted Xiaomi phone (Android 17, KernelSU), with the tablet's Bluetooth
+turned off so the pen was free:
+
+- **Pairing from Bluetooth settings:** the pen never showed up, and the phone's scan never saw its
+  name or address.
+- **Connecting directly by address** (penprobe with `--ez random true`: the pen's address is a random
+  static one): the connection attempt timed out after 30 s (`status=147`, `GATT_CONNECTION_TIMEOUT`),
+  so nothing the phone could connect to was received from that address.
+
+So the pen only talks to the tablet it was paired with through the magnetic charger (where the
+tablet learns its address from the kernel's `pencil_addr` event). The app itself has nothing specific
+to the Pad 2 apart from the install check, but without a way to pair the pen elsewhere, the module
+stays Pad 2 only.
+
 ## Tools
 
 `tools/research/` has the scripts used for the tests above (they need adb and root). The pen's address is

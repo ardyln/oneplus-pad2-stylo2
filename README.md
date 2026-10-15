@@ -1,7 +1,11 @@
 # OnePlus Stylo 2 for the OnePlus Pad 2 on AOSP ROMs
 
 A KernelSU module (Magisk untested) with a small app that brings the OxygenOS features of the OnePlus Stylo 2, and a few more,
-on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
+on AOSP-based ROMs (tested on PixelOS 17 for `caihong`). It's for the Pad 2 only: the pen pairs
+through the tablet's magnetic charger and can't be found or connected to by other devices (see
+[RESEARCH.md](docs/RESEARCH.md#10-other-devices)).
+
+Features:
 
 - **Writing feedback** ("textured vibration"): the pen vibrates while you write, in every app. Choose
   the texture (pencil, eraser, ballpoint pen, pen) and the strength.

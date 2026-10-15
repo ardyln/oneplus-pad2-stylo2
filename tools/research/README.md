@@ -5,6 +5,7 @@ Used for the experiments in [docs/RESEARCH.md](../../docs/RESEARCH.md). They nee
 | File | What it does |
 |---|---|
 | `send.sh cmd[,cmd...]` | Restarts penprobe (`tools/penprobe`) and sends its allowlisted stock commands (`texture:T:L`, `texture-off`, `oneshot`, …). Reads the pen's address from `$PEN_MAC_FILE` (default `~/tools/stylo2-re/pen.mac`), which is never committed |
+| penprobe `--ez random true` | Connects to a pen with a random static address that the device doesn't know yet (`getRemoteLeDevice`, Android 13+); used for the other-devices test in RESEARCH.md section 10 |
 | `btn.sh` | Prints thumb-button notifications and pen console lines since the last call, then clears the log |
 | `stylus-btn-test.json` | Input for Android's `uinput` tool: registers a stylus-button-only device, presses the button for 25 s, releases it |
 | `stylus-btn-run.sh` | Runs that test on the tablet, vibrates the tablet at the start and end of the pressed phase, and prints Saber's `lastTool` changes |

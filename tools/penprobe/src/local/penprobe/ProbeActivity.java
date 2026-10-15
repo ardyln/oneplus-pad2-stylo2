@@ -196,7 +196,11 @@ public final class ProbeActivity extends Activity {
             out("start with --es mac XX:XX:XX:XX:XX:XX");
             return;
         }
-        BluetoothDevice dev = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mac);
+        // --ez random true: the address is a random static one (needed to reach an unknown pen directly)
+        boolean random = getIntent().getBooleanExtra("random", false);
+        BluetoothDevice dev = random && android.os.Build.VERSION.SDK_INT >= 33
+                ? BluetoothAdapter.getDefaultAdapter().getRemoteLeDevice(mac, BluetoothDevice.ADDRESS_TYPE_RANDOM)
+                : BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mac);
         out("connecting to " + mac + " bond=" + dev.getBondState());
         gatt = dev.connectGatt(this, false, cb, BluetoothDevice.TRANSPORT_LE);
     }
