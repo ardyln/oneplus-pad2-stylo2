@@ -133,6 +133,7 @@ class PresentationActivity : AppCompatActivity() {
     /** Live feedback: how long the last touch on the touch area was, and what it counted as. */
     private val lastTouch = object : Runnable {
         override fun run() {
+            findViewById<TapTimelineView>(R.id.timeline).tapMaxMs = settings.tapMaxMs
             val input = PenService.lastInput
             findViewById<TextView>(R.id.last_touch).text = when {
                 !settings.presentation -> getString(R.string.last_touch_off)

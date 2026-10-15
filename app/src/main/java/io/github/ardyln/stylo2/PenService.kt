@@ -541,6 +541,7 @@ class PenService : Service() {
                 "Swipe ${if (value == "UP") "toward the tip" else "away from the tip"} → ${a.action.name.lowercase().replace('_', ' ')}",
             )
             lastInput = LastInput("REL_WHEEL $value", -1, gesture, presentationActive())
+            record(TimedInput(if (value == "UP") InputKind.SWIPE_UP else InputKind.SWIPE_DOWN, now, now))
             if (presentationActive()) {
                 runner.run(a, 1, battery, gesture.key)
                 if (settings.vibrateScroll) feedbackBuzz(now)
@@ -551,12 +552,15 @@ class PenService : Service() {
             if (down) {
                 Log.i(TAG, "touch area pressed (presentation active=${presentationActive()})")
                 surfaceDownAt = now
+                touchDownSince = now
                 return
             }
             // A release without a press (e.g. the press came before the helper connected) says nothing
             if (surfaceDownAt == 0L) return
             val held = now - surfaceDownAt
+            record(TimedInput(InputKind.TOUCH, surfaceDownAt, now))
             surfaceDownAt = 0L
+            touchDownSince = 0L
             val tap = held <= settings.tapMaxMs
             EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
             Log.i(TAG, "touch area released after ${held} ms (${if (tap) "tap" else "hold"})")
@@ -574,6 +578,7 @@ class PenService : Service() {
         } else if (key == "KEY_F20" && down) {
             Log.i(TAG, "KEY_F20 (double tap on the touch area)")
             lastInput = LastInput("KEY_F20", -1, PresentationGesture.DOUBLE_TAP, presentationActive())
+            record(TimedInput(InputKind.DOUBLE_TAP, now, now))
             handler.removeCallbacks(singleTap)
             EventLog.add(EventLog.Source.PEN, key, "Double tap on the touch area (the Bluetooth double tap handles it)")
         }
@@ -657,6 +662,19 @@ class PenService : Service() {
         /** The last presentation input, for the presentation page's live card. */
         @Volatile var lastInput: LastInput? = null
 
+        /** Recent touch-area inputs for the presentation page's timeline, oldest first. */
+        private val recentInputs = ArrayDeque<TimedInput>()
+
+        /** When the touch area was pressed, while it's held; 0 otherwise. */
+        @Volatile var touchDownSince = 0L
+
+        fun record(i: TimedInput) = synchronized(recentInputs) {
+            recentInputs.addLast(i)
+            while (recentInputs.size > 60) recentInputs.removeFirst()
+        }
+
+        fun snapshotInputs(): List<TimedInput> = synchronized(recentInputs) { recentInputs.toList() }
+
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null
 
@@ -678,3 +696,7 @@ class PenService : Service() {
  * the pointer) and whether its action ran.
  */
 data class LastInput(val key: String, val heldMs: Long, val gesture: PresentationGesture?, val ran: Boolean)
+
+/** A touch-area input for the timeline: a touch (pressed and released), a double tap or a swipe. */
+enum class InputKind { TOUCH, DOUBLE_TAP, SWIPE_UP, SWIPE_DOWN }
+data class TimedInput(val kind: InputKind, val downAt: Long, val upAt: Long)

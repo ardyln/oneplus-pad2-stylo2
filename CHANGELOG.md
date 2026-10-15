@@ -15,6 +15,8 @@
   separate long-press action.)
 - The live card on the presentation page shows the key the pen sent (F19, F20, wheel), how long it
   was held, what it counted as, the action, and whether it ran.
+- Touch timeline on the presentation page: each touch's duration against the zones (too short, tap,
+  hold), and the last 15 seconds of taps, holds, double taps and swipes.
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
 - "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both
