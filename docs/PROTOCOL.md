@@ -48,7 +48,7 @@ Handles are from the cache on the test device; they can differ with other firmwa
 | | | `18093212` | read | unknown; read `20`/`21`, not the charger state (tested) |
 | 0x0044–0x0050 | `18093398-2a69-11ec-8d3d-0242ac130003` **Status** | **`180937bc`** | notify | battery percent, on change (stock: "battery change") |
 | | | **`180938ac`** | notify | thumb button: `01` per **double tap** (stock: "double click") |
-| | | **`1809396a`** | notify | charging state: `20` charging (on the magnet), `21` not (tested; stock: `onChargingState(value == 0x20)`) |
+| | | **`1809396a`** | notify | charging state: `20` charging (on the magnet), `21` not (tested; stock: `onChargingState(value == 0x20)`). Sent on changes only, not when subscribing (tested) |
 | | | `180932da` | notify | log code, 2 bytes (stock: "log notify", logged as `r=%02d%03d`) |
 | 0x0051–0x0059 | `6e400001-b5a3-f393-e0a9-e50e24dcca9e` Nordic UART | `6e400002` | write-no-rsp, write | debug console input. **Don't write** |
 | | | `6e400003` | notify | debug console output (text, below) |

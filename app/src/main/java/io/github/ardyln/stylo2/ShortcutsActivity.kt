@@ -61,6 +61,7 @@ class ShortcutsActivity : AppCompatActivity() {
         }
         val density = resources.displayMetrics.density
         bindOptions()
+        bindCharger()
         findViewById<androidx.core.widget.NestedScrollView>(R.id.scroll).padForBottomBars(extra = (88 * density).toInt()) { bottom ->
             // Keep the add button above the bars too
             (add.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = bottom + (16 * density).toInt()
@@ -105,6 +106,30 @@ class ShortcutsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    /** The actions for attaching the pen to the charger and taking it off. */
+    private fun bindCharger() {
+        val settings = Settings(this)
+        val box = findViewById<android.widget.LinearLayout>(R.id.charger_triggers)
+        box.removeAllViews()
+        for (t in ChargerTrigger.entries) {
+            val row = layoutInflater.inflate(R.layout.item_gesture, box, false)
+            row.findViewById<android.widget.ImageView>(android.R.id.icon).setImageResource(t.icon)
+            row.findViewById<TextView>(android.R.id.title).setText(t.label)
+            row.findViewById<TextView>(android.R.id.summary).text = editor.actionLabel(t.action(settings))
+            row.findViewById<View>(R.id.chevron).visibility = View.VISIBLE
+            val bg = android.util.TypedValue()
+            theme.resolveAttribute(android.R.attr.selectableItemBackground, bg, true)
+            row.setBackgroundResource(bg.resourceId)
+            row.setOnClickListener {
+                editor.chooseAction(getString(t.label), t.action(settings)) { chosen ->
+                    t.setAction(settings, chosen)
+                    bindCharger()
+                }
+            }
+            box.addView(row)
+        }
     }
 
     /** Chain time (in seconds here, stored in ms) and the broadcast for every gesture. */

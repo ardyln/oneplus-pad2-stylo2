@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.22
+- Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
+  Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
+
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.
 - Other apps: the default texture is pencil at strength 4 (the strength used to follow the main one).

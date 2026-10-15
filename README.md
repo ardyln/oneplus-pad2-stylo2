@@ -8,7 +8,7 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 - **Thumb-button shortcuts**: the pen reports double taps; chain them (double tap, double tap ×2, …)
   and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
   or a Home Assistant webhook, next/previous page, applying a preset, and switching the app's own
-  settings.
+  settings. Attaching the pen to the charger and taking it off can run actions too.
 - **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture. Long-press a
   tile to open its page.
 - **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser, and the

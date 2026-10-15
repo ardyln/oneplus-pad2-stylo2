@@ -23,17 +23,18 @@ class ShortcutRunner(
     private val scroll: (Int) -> Unit = {},
 ) {
 
-    fun run(s: Shortcut, taps: Int, battery: Int) {
+    /** [gesture] names the trigger in webhooks and broadcasts ("double_tap", "pen_attached", …). */
+    fun run(s: Shortcut, taps: Int, battery: Int, gesture: String = gestureName(taps)) {
         // Webhook URLs contain a secret id, so they're never logged.
         val arg = if (s.action == Shortcut.Action.WEBHOOK) "" else s.arg ?: ""
-        Log.i(PenService.TAG, "shortcut: ${taps}x ${s.action} $arg")
+        Log.i(PenService.TAG, "shortcut: $gesture ${s.action} $arg")
         when (s.action) {
             Shortcut.Action.OPEN_APP -> openApp(s.arg)
             Shortcut.Action.MEDIA_PLAY_PAUSE -> mediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
             Shortcut.Action.MEDIA_NEXT -> mediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
             Shortcut.Action.MEDIA_PREVIOUS -> mediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-            Shortcut.Action.BROADCAST -> s.arg?.let { context.sendBroadcast(gestureIntent(it, taps)) }
-            Shortcut.Action.WEBHOOK -> s.arg?.let { webhook(it, taps, battery) }
+            Shortcut.Action.BROADCAST -> s.arg?.let { context.sendBroadcast(gestureIntent(it, taps, gesture)) }
+            Shortcut.Action.WEBHOOK -> s.arg?.let { webhook(it, taps, battery, gesture) }
             Shortcut.Action.BUZZ -> buzz()
             // The pen service picks these setting changes up and updates the pen.
             Shortcut.Action.TOGGLE_PRESENTATION -> settings.setPresentation(!settings.presentation)
@@ -76,9 +77,9 @@ class ShortcutRunner(
         am.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, code, 0))
     }
 
-    private fun webhook(url: String, taps: Int, battery: Int) {
+    private fun webhook(url: String, taps: Int, battery: Int, gesture: String) {
         val body = JSONObject()
-            .put("gesture", gestureName(taps))
+            .put("gesture", gesture)
             .put("taps", taps)
             .apply { if (battery >= 0) put("battery", battery) }
             .toString()
@@ -107,11 +108,15 @@ class ShortcutRunner(
         const val EXTRA_TAPS = "taps"
         const val EXTRA_GESTURE = "gesture"
 
+        /** Broadcast for the charger, sent with "Broadcast every gesture": extras attached and gesture. */
+        const val ACTION_CHARGER = "io.github.ardyln.stylo2.action.CHARGER"
+        const val EXTRA_ATTACHED = "attached"
+
         fun gestureName(taps: Int) = if (taps == 1) "double_tap" else "double_tap_$taps"
 
-        fun gestureIntent(action: String, taps: Int): Intent = Intent(action)
+        fun gestureIntent(action: String, taps: Int, gesture: String = gestureName(taps)): Intent = Intent(action)
             .putExtra(EXTRA_TAPS, taps)
-            .putExtra(EXTRA_GESTURE, gestureName(taps))
+            .putExtra(EXTRA_GESTURE, gesture)
             .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
     }
 }

@@ -45,6 +45,9 @@ class PenService : Service() {
     private var ready = false
     private var battery = -1
     private var onCharger = false
+    /** The charger state as last reported in this connection; null until the pen reports it. */
+    private var chargerState: Boolean? = null
+    private var readyAt = 0L
     private var tapCount = 0
     private var surfaceDownAt = 0L
     private var lastFeedbackBuzz = 0L
@@ -194,6 +197,7 @@ class PenService : Service() {
         com = null
         battery = -1
         onCharger = false
+        chargerState = null
         ops.clear()
         busy = false
         handler.removeCallbacks(opTimeout)
@@ -276,6 +280,7 @@ class PenService : Service() {
             return
         }
         ready = true
+        readyAt = SystemClock.uptimeMillis()
         subscribe(g, com)
         subscribe(g, button)
         subscribe(g, statusService.getCharacteristic(PenProtocol.BATTERY))
@@ -319,11 +324,41 @@ class PenService : Service() {
         queue { if (!g.readCharacteristic(c)) done() }
     }
 
+    /**
+     * Runs the charger actions on a change. The first report of a connection only counts as a
+     * change when it comes well after connecting; right after connecting it's the current state.
+     */
+    private fun onChargerReport(attached: Boolean) {
+        val previous = chargerState
+        chargerState = attached
+        val sinceReady = SystemClock.uptimeMillis() - readyAt
+        Log.i(TAG, "charger: ${if (attached) "attached" else "detached"} (was $previous, ${sinceReady} ms after connecting)")
+        if (previous == attached) return
+        if (previous == null && sinceReady < CHARGER_INITIAL_MS) return
+        val trigger = ChargerTrigger.of(attached)
+        val a = trigger.action(settings)
+        EventLog.add(
+            EventLog.Source.APP, trigger.gesture,
+            "Pen ${if (attached) "attached to" else "removed from"} the charger → " +
+                a.action.name.lowercase().replace('_', ' ') + if (settings.broadcastAll) ", broadcast sent" else "",
+        )
+        if (settings.broadcastAll) {
+            sendBroadcast(
+                Intent(ShortcutRunner.ACTION_CHARGER)
+                    .putExtra(ShortcutRunner.EXTRA_ATTACHED, attached)
+                    .putExtra(ShortcutRunner.EXTRA_GESTURE, trigger.gesture)
+                    .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES),
+            )
+        }
+        runner.run(a, 1, battery, trigger.gesture)
+    }
+
     private fun onValue(u: UUID, v: ByteArray) {
         when (u) {
             PenProtocol.BATTERY, PenProtocol.BATTERY_READ -> battery = v[0].toInt() and 0xff
             PenProtocol.MAGNET -> {
                 onCharger = (v[0].toInt() and 0x01) == 0
+                onChargerReport(onCharger)
                 if (settings.presentation) {
                     if (onCharger && !settings.presentationStays) {
                         // Like OxygenOS: presentation mode lasts until the pen is attached again.
@@ -610,6 +645,7 @@ class PenService : Service() {
         private const val CHANNEL = "status"
         private const val NOTIFICATION_ID = 1
         private const val OP_TIMEOUT_MS = 5000L
+        private const val CHARGER_INITIAL_MS = 5000L
         private const val FOREGROUND_POLL_MS = 1000L
 
         private const val FEEDBACK_GAP_MS = 150L

@@ -71,6 +71,23 @@
 
                 <TextView
                     style="@style/Stylo2.SectionHeader"
+                    android:text="@string/charger_header" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/charger_help"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <LinearLayout
+                    android:id="@+id/charger_triggers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    style="@style/Stylo2.SectionHeader"
                     android:text="@string/shortcuts_options" />
 
                 <TextView

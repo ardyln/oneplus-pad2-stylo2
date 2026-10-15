@@ -6,7 +6,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 /** "Reset to defaults" for a page, or for everything: which settings belong where. */
 enum class ResetScope(val title: Int, val message: Int, val matches: (String) -> Boolean) {
     SHORTCUTS(R.string.reset_shortcuts_title, R.string.reset_shortcuts_message, { key ->
-        key == ShortcutStore.KEY || key == Settings.KEY_TAP_WINDOW || key == Settings.KEY_BROADCAST_ALL
+        key == ShortcutStore.KEY || key == Settings.KEY_TAP_WINDOW || key == Settings.KEY_BROADCAST_ALL ||
+            key.startsWith("charger_")
     }),
     SABER(R.string.reset_saber_title, R.string.reset_saber_message, { key ->
         key == Settings.KEY_SABER_TEXTURE || key == Settings.KEY_SABER_ERASER || (key.startsWith("saber_") && (key.endsWith("_texture") || key.endsWith("_level")))

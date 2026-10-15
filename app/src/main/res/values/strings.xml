@@ -80,6 +80,10 @@
     <string name="shortcuts_title">Shortcuts</string>
     <string name="shortcuts_none">None yet. Assign actions to double taps.</string>
     <string name="shortcuts_options">Options</string>
+    <string name="charger_header">Pen on the charger</string>
+    <string name="charger_help">Run an action when you attach the pen to the tablet\'s magnetic charger or take it off, for example a Home Assistant webhook. Webhooks get \"gesture\": \"pen_attached\" or \"pen_detached\", broadcasts the extra gesture. Only real changes count: connecting to a pen that\'s already attached doesn\'t.</string>
+    <string name="charger_attached">Attached to the charger</string>
+    <string name="charger_detached">Removed from the charger</string>
     <string name="tap_window_value">Time to chain double taps: %1$.1f s</string>
     <string name="seconds_value">%1$.1f s</string>
     <string name="shortcuts_help">Double tap the thumb area of the pen to run a shortcut. Double tap twice in a row for the second one, three times for the third, and so on. Drag the handle to reorder, swipe sideways to remove.</string>
@@ -140,7 +144,7 @@
     <string name="tap_window_title">Time to chain double taps</string>
     <string name="tap_window_summary">How long the app waits for the next double tap in a row. Shorter feels snappier, longer makes chains easier. Only matters when you have two or more shortcuts.</string>
     <string name="broadcast_all_title">Broadcast every gesture</string>
-    <string name="broadcast_all_summary">Sends io.github.ardyln.stylo2.action.DOUBLE_TAP with the extras taps and gesture, for Tasker and other automation apps</string>
+    <string name="broadcast_all_summary">Sends io.github.ardyln.stylo2.action.DOUBLE_TAP with the extras taps and gesture for every double tap, and io.github.ardyln.stylo2.action.CHARGER with attached and gesture when the pen goes on or off the charger, for Tasker and other automation apps</string>
     <string name="test_buzz_title">Test vibration</string>
     <string name="test_buzz_summary">Makes the pen vibrate once</string>
 
