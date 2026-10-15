@@ -552,7 +552,10 @@ class PenService : Service() {
                 surfaceDownAt = now
                 return
             }
+            // A release without a press (e.g. the press came before the helper connected) says nothing
+            if (surfaceDownAt == 0L) return
             val held = now - surfaceDownAt
+            surfaceDownAt = 0L
             val tap = held <= settings.tapMaxMs
             EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
             Log.i(TAG, "touch area released after ${held} ms (${if (tap) "tap" else "hold"})")

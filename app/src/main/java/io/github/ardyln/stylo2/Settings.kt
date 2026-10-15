@@ -39,8 +39,11 @@ class Settings(context: Context) {
     val presentationStays get() = prefs.getBoolean(KEY_PRESENTATION_STAYS, false)
     /** Touches of the touch area up to this long are taps; longer ones are holds (pointer). */
     val tapMaxMs get() = prefs.getInt(KEY_TAP_MAX, 450).toLong()
-    /** How long a single tap waits for a second one; 0 runs it at once. */
-    val tapWaitMs get() = prefs.getInt(KEY_TAP_WAIT, 300).toLong()
+    /**
+     * How long a single tap waits before it runs; 0 runs it at once. The pen reports double taps on
+     * its own (KEY_F20, no F19 presses), so this is only a safeguard.
+     */
+    val tapWaitMs get() = prefs.getInt(KEY_TAP_WAIT, 0).toLong()
     val vibrateTap get() = prefs.getBoolean(KEY_VIBRATE_TAP, true)
 
     fun setPresentation(on: Boolean) = prefs.edit().putBoolean(KEY_PRESENTATION, on).apply()

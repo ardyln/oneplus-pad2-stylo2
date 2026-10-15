@@ -92,7 +92,10 @@ public final class PenPointer {
         ioctl.setAccessible(true);
         ioctl.invoke(null, fd, EVIOCGRAB);
         log("grabbed " + dev);
-        Thread reader = new Thread(() -> forward(in), "pen-mouse");
+        // No lambdas: the helper is compiled against android.jar, which lacks LambdaMetafactory
+        Thread reader = new Thread(new Runnable() {
+            @Override public void run() { forward(in); }
+        }, "pen-mouse");
         reader.setDaemon(true);
         reader.start();
         while (reader.isAlive() && wantGrab()) Thread.sleep(300);
@@ -136,14 +139,16 @@ public final class PenPointer {
     private synchronized void send(String json) {
         try {
             if (uinput == null) {
+                // Redirect.DISCARD (Java 9) doesn't exist on Android; /dev/null does the same
                 Process p = new ProcessBuilder("uinput", "-").redirectErrorStream(true)
-                        .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+                        .redirectOutput(new File("/dev/null")).start();
                 uinput = p.getOutputStream();
                 uinput.write((REGISTER + "\n").getBytes(StandardCharsets.UTF_8));
             }
             uinput.write((json + "\n").getBytes(StandardCharsets.UTF_8));
             uinput.flush();
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException | LinkageError e) {
+            // Never let a forwarding error end the reader thread (and with it the pointer)
             log("uinput: " + e);
             uinput = null;
         }
@@ -151,23 +156,27 @@ public final class PenPointer {
 
     /** Writes the scroll steps to the app; opening the pipe blocks until the app reads it. */
     private void startKeyWriter() {
-        Thread t = new Thread(() -> {
-            while (true) {
-                try (OutputStream out = new FileOutputStream(keysFifo)) {
-                    while (true) {
-                        out.write((keyLines.take() + "\n").getBytes(StandardCharsets.UTF_8));
-                        out.flush();
-                    }
-                } catch (Exception e) {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }
+        Thread t = new Thread(new Runnable() {
+            @Override public void run() { writeKeys(); }
         }, "pen-keys-writer");
         t.setDaemon(true);
         t.start();
+    }
+
+    private void writeKeys() {
+        while (true) {
+            try (OutputStream out = new FileOutputStream(keysFifo)) {
+                while (true) {
+                    out.write((keyLines.take() + "\n").getBytes(StandardCharsets.UTF_8));
+                    out.flush();
+                }
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
     }
 
     private static void log(String s) {

@@ -141,10 +141,10 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
 - Nothing extra is sent on the vendor characteristics; the console prints `film FF` / `film 05`
   (swipes), `film 06` / `film 08` (hold start and end).
 - **Tap timing,** measured with the app's log: taps on the touch area lasted 30–420 ms, deliberate holds
-  600 ms and more. In the one logged double-tap test, each double tap on the touch area gave `KEY_F20`
-  and the `180938ac` notification in the same millisecond, and no `KEY_F19` presses. The app still
-  waits briefly after a single tap (default 300 ms, adjustable down to instant) in case a double tap
-  sometimes does start with F19 presses; that hasn't been checked with more taps yet.
+  600 ms and more. Double taps on the touch area (20 logged, in both pointer modes) each gave `KEY_F20`
+  and the `180938ac` notification within 0–5 ms of each other, in either order, and **never any
+  `KEY_F19`**: the pen recognises them itself. So single taps run at once by default; a delay can
+  still be set as a safeguard.
 
 ## 7. Taking over the pen's mouse
 

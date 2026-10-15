@@ -1,6 +1,10 @@
 # Changelog
 
 ## 0.22
+- **Fix:** the presentation pointer helper crashed on the first pen movement (it used a Java API that
+  Android doesn't have) and restarted every few seconds, so the air mouse didn't work since 0.15. The
+  helper is now compiled against Android's API, so this kind of error fails the build.
+- A release of the touch area without a press is ignored (it was measured from boot).
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
 - "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both
@@ -9,6 +13,9 @@
   skip a count (e.g. an action only on four double taps).
 - App lists (shortcut "Open an app", "Add app" on the Other apps page) have a search field and show
   app icons.
+- Presentation mode: single taps on the touch area run instantly by default. Tests showed the pen
+  reports double taps on its own (never as two taps), so "Delay single taps" (formerly "Wait for a
+  second tap") is only a safeguard now, and its explanations say so.
 
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.

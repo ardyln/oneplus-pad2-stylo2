@@ -25,7 +25,9 @@ cp "$ROOT/app/build/outputs/apk/release/app-release.apk" "$OUT/Stylo2.apk"
 ANDROID_JAR=$(ls -d "$ANDROID_HOME"/platforms/android-3*/android.jar | sort -V | tail -n1)
 BT=$(ls -d "$ANDROID_HOME"/build-tools/3* | sort -V | tail -n1)
 mkdir -p "$OUT/helper/classes" "$OUT/helper/dex"
-"$JAVA_HOME/bin/javac" --release 11 -Xlint:-options -nowarn -classpath "$ANDROID_JAR" \
+# Compiled against android.jar as the boot classpath (not the JDK), so Java APIs that Android
+# lacks fail here instead of at run time.
+"$JAVA_HOME/bin/javac" -source 8 -target 8 -bootclasspath "$ANDROID_JAR" -Xlint:-options -nowarn \
     -d "$OUT/helper/classes" $(find "$ROOT/helper/src" -name '*.java')
 "$BT/d8" --release --min-api 31 --lib "$ANDROID_JAR" --output "$OUT/helper/dex" \
     $(find "$OUT/helper/classes" -name '*.class')
