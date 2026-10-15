@@ -48,6 +48,9 @@ class PenService : Service() {
     private var tapCount = 0
     private var surfaceDownAt = 0L
     private var lastFeedbackBuzz = 0L
+    /** What the pen was last told about presentation mode; null after a reconnect. */
+    private var sentPresentation: Boolean? = null
+    private var sentPresentationMode = -1
     private val runner by lazy { ShortcutRunner(this, settings) { write(PenProtocol.buzz()) } }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
@@ -161,6 +164,7 @@ class PenService : Service() {
 
     private fun resetConnectionState() {
         ready = false
+        sentPresentation = null
         lastFeedback = null
         com = null
         battery = -1
@@ -253,15 +257,27 @@ class PenService : Service() {
         subscribe(g, statusService.getCharacteristic(PenProtocol.MAGNET))
         read(g, comService.getCharacteristic(PenProtocol.BATTERY_READ))
         sendFeedbackSetting()
-        sendPresentation()
+        sendPresentation(force = true)
         setStatus(connectedText())
     }
 
     /** Presentation mode state, sent on every connection like the stock app does. */
-    private fun sendPresentation() {
-        write(PenProtocol.presentation(settings.presentation))
-        if (settings.presentation) write(PenProtocol.presentationMode(settings.presentationMode))
+    private fun sendPresentation(force: Boolean = false) {
+        val on = presentationActive()
+        val mode = settings.presentationMode
+        if (!force && on == sentPresentation && (!on || mode == sentPresentationMode)) return
+        if (!ready) return
+        sentPresentation = on
+        sentPresentationMode = mode
+        write(PenProtocol.presentation(on))
+        if (on) write(PenProtocol.presentationMode(mode))
     }
+
+    /**
+     * Presentation mode as the pen should have it: the setting, paused while a stylus-button app
+     * such as Saber is focused so that the double tap there toggles the eraser.
+     */
+    private fun presentationActive() = settings.presentation && activeApp !in settings.stylusButtonApps
 
     private fun subscribe(g: BluetoothGatt, c: BluetoothGattCharacteristic?) {
         val ccc = c?.getDescriptor(PenProtocol.CCC) ?: return
@@ -289,7 +305,7 @@ class PenService : Service() {
                         settings.setPresentation(false)
                     } else if (!onCharger) {
                         // Kept on: make sure the pen is in presentation mode again once it's picked up.
-                        sendPresentation()
+                        sendPresentation(force = true)
                     }
                 }
             }
@@ -356,6 +372,15 @@ class PenService : Service() {
         )
         if (bridge.pressed && activeApp !in settings.stylusButtonApps) bridge.setPressed(false)
         sendFeedbackSetting()
+        val wasActive = sentPresentation
+        sendPresentation()
+        if (settings.presentation && wasActive != sentPresentation) {
+            EventLog.add(
+                EventLog.Source.APP, "presentation=${sentPresentation}",
+                if (sentPresentation == true) "Presentation mode resumed"
+                else "Presentation mode paused in this app: the double tap acts as the stylus button",
+            )
+        }
     }
 
     private fun write(value: ByteArray) {
@@ -381,8 +406,8 @@ class PenService : Service() {
      */
     private fun onButton() {
         if (!FocusService.running) foreground.update()
-        // Presentation mode comes first: even in Saber, the double tap then clicks or runs shortcuts.
-        if (!settings.presentation && bridge.ready && activeApp in settings.stylusButtonApps) {
+        // In stylus-button apps (Saber) presentation mode pauses, so the double tap toggles the eraser.
+        if (!presentationActive() && bridge.ready && activeApp in settings.stylusButtonApps) {
             // In notes apps the double tap holds or releases a virtual stylus button (Saber: eraser).
             bridge.setPressed(!bridge.pressed)
             Log.i(TAG, "stylus button ${if (bridge.pressed) "held" else "released"} in $activeApp")
@@ -439,7 +464,7 @@ class PenService : Service() {
         val down = value == "DOWN"
         if (key == "REL_WHEEL") {
             EventLog.add(EventLog.Source.PEN, "REL_WHEEL $value", "Swipe on the touch area: scroll ${value.lowercase()}")
-            if (settings.presentation && settings.vibrateScroll) feedbackBuzz(now)
+            if (presentationActive() && settings.vibrateScroll) feedbackBuzz(now)
             return
         }
         if (key == "KEY_F19") {
@@ -454,8 +479,8 @@ class PenService : Service() {
                 if (tap) "Tap on the surface near the tip" + if (settings.clickSurfaceTap) " → click at the pointer" else ""
                 else "Surface near the tip held (air mouse)",
             )
-            if (tap && settings.presentation && settings.clickSurfaceTap) bridge.click()
-            if (tap && settings.presentation && settings.vibrateTap) feedbackBuzz(now)
+            if (tap && presentationActive() && settings.clickSurfaceTap) bridge.click()
+            if (tap && presentationActive() && settings.vibrateTap) feedbackBuzz(now)
         } else if (down) {
             EventLog.add(EventLog.Source.PEN, key, "Presentation key (meaning unknown)")
         }
@@ -468,7 +493,7 @@ class PenService : Service() {
         write(PenProtocol.buzz())
     }
 
-    private fun clicksOnDoubleTap() = settings.presentation && settings.clickDoubleTap && bridge.ready
+    private fun clicksOnDoubleTap() = presentationActive() && settings.clickDoubleTap && bridge.ready
 
     // --- one GATT operation at a time ---
 
