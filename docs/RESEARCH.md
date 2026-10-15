@@ -133,7 +133,7 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
   `2c 91 01 01`/`00` and `2c 93 01 00`. The mode is later switched by the OxygenOS system through
   `ISystemAidlInterface.setLaserMode`, gated by the system feature `oplus.software.laser.support`.
 - Tested: with `2c 91 01 01`, the flat surface near the tip becomes a touch area. A finger on it holds
-  `KEY_F19` (a tap gives a 60–90 ms press), swipes send mouse wheel steps (Google Photos zoomed), and the
+  `KEY_F19` (a tap gave a 60–90 ms press in the first test; later 30–420 ms), swipes send mouse wheel steps (Google Photos zoomed), and the
   pen moves the mouse cursor with its motion sensor. In mode 0 the cursor only moves while the surface
   is touched (1,464 of 1,464 movement events during an F19 hold); in mode 1 it moves all the time
   (4,279 of 5,729 outside a hold). A short `KEY_F20` press comes with a double tap on the touch area, together with the usual
@@ -141,8 +141,10 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
 - Nothing extra is sent on the vendor characteristics; the console prints `film FF` / `film 05`
   (swipes), `film 06` / `film 08` (hold start and end).
 - **Tap timing,** measured with the app's log: taps on the touch area lasted 30–420 ms, deliberate holds
-  600 ms and more. A double tap on the touch area is two short F19 presses followed by `KEY_F20` and
-  the `180938ac` notification, so a single tap has to wait briefly (default 300 ms) before it can run.
+  600 ms and more. In the one logged double-tap test, each double tap on the touch area gave `KEY_F20`
+  and the `180938ac` notification in the same millisecond, and no `KEY_F19` presses. The app still
+  waits briefly after a single tap (default 300 ms, adjustable down to instant) in case a double tap
+  sometimes does start with F19 presses; that hasn't been checked with more taps yet.
 
 ## 7. Taking over the pen's mouse
 

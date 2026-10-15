@@ -96,14 +96,15 @@ Replies come as notifications on `18093046` and start with the same first 3–4 
 
 **Presentation mode** (`2c 91`, `2c 93`, tested): turns on a second touch surface near the tip and the
 pen's motion sensor. Everything then arrives as **standard HID input** on the pen's "Mouse" and
-"Keyboard" input devices; nothing extra is sent on the vendor characteristics.
+"Keyboard" input devices (`KEY_F19`/`KEY_F20` on the Keyboard, the rest on the Mouse); nothing extra is
+sent on the vendor characteristics.
 
 | Gesture on the flat surface near the tip | HID input |
 |---|---|
-| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released (taps measured 30–420 ms, deliberate holds 600 ms and more) |
+| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released; it stays down for as long as the finger stays (taps measured 30–420 ms, deliberate holds 600 ms and more) |
 | swipe in one direction / the other | `REL_WHEEL` +1 / −1 (with `REL_WHEEL_HI_RES` ±120) |
 | moving the pen | `REL_X` / `REL_Y` (air mouse): mode 0 only while the surface is touched, mode 1 always |
-| double tap on the touch area | a short `KEY_F20` press, together with the usual double tap on `180938ac` (tested) |
+| double tap on the touch area | a short `KEY_F20` press, in the same millisecond as the usual double tap on `180938ac`; in the one logged test (two double taps, pointer mode 0) no `KEY_F19` came with it |
 
 The pen's debug console also prints a code per gesture: `film FF` and `film 05` (the two swipe
 directions), `film 06` (hold starts) and `film 08` (hold ends), next to `film 24` for the thumb button.
