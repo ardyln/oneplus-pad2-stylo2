@@ -136,6 +136,18 @@
 
             <TextView
                 style="@style/Stylo2.SectionHeader"
+                android:text="@string/tap_timing_header" />
+
+            <include
+                android:id="@+id/tap_max"
+                layout="@layout/item_slider_row" />
+
+            <include
+                android:id="@+id/tap_wait"
+                layout="@layout/item_slider_row" />
+
+            <TextView
+                style="@style/Stylo2.SectionHeader"
                 android:text="@string/presentation_vibration" />
 
             <include

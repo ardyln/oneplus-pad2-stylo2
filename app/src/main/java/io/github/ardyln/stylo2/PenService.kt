@@ -493,21 +493,26 @@ class PenService : Service() {
         }
         if (key == "KEY_F19") {
             if (down) {
+                Log.i(TAG, "touch area pressed (presentation active=${presentationActive()})")
                 surfaceDownAt = now
                 return
             }
             val held = now - surfaceDownAt
-            val tap = held < SURFACE_TAP_MS
+            val tap = held <= settings.tapMaxMs
             EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
+            Log.i(TAG, "touch area released after ${held} ms (${if (tap) "tap" else "hold"})")
             if (!tap || !presentationActive()) return
             if (handler.hasCallbacks(singleTap)) {
                 // Second tap of a double tap: the double tap (F20 and the Bluetooth notification) handles it
                 handler.removeCallbacks(singleTap)
                 return
             }
-            // A double tap on the touch area is two taps; wait to see whether a second one follows.
-            handler.postDelayed(singleTap, SINGLE_TAP_WAIT_MS)
+            // A double tap on the touch area is two taps; wait to see whether a second one follows,
+            // unless the user chose instant taps.
+            val wait = settings.tapWaitMs
+            if (wait <= 0) singleTap.run() else handler.postDelayed(singleTap, wait)
         } else if (key == "KEY_F20" && down) {
+            Log.i(TAG, "KEY_F20 (double tap on the touch area)")
             handler.removeCallbacks(singleTap)
             EventLog.add(EventLog.Source.PEN, key, "Double tap on the touch area (the Bluetooth double tap handles it)")
         }
@@ -584,8 +589,7 @@ class PenService : Service() {
         private const val NOTIFICATION_ID = 1
         private const val OP_TIMEOUT_MS = 5000L
         private const val FOREGROUND_POLL_MS = 1000L
-        private const val SURFACE_TAP_MS = 250L
-        private const val SINGLE_TAP_WAIT_MS = 300L
+
         private const val FEEDBACK_GAP_MS = 150L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */

@@ -172,6 +172,14 @@
     <string name="pointer_always_desc">The pointer follows every movement of the pen, like a laser pointer. Handy for presenting, but it also moves while you hold the pen otherwise.</string>
     <string name="presentation_click">Click</string>
     <string name="presentation_vibration">Vibration</string>
+    <string name="tap_timing_header">Tap timing</string>
+    <string name="tap_max_title">Longest tap</string>
+    <string name="tap_max_summary">A touch on the touch area up to this long is a tap. Longer touches move the pointer instead.</string>
+    <string name="tap_wait_title">Wait for a second tap</string>
+    <string name="tap_wait_summary">How long a single tap waits in case a second one follows (a double tap). Instant runs it right away, but then the first touch of every double tap also counts as a single tap.</string>
+    <string name="tap_instant">Instant</string>
+    <string name="seconds_value_2">%1$.2f s</string>
+    <string name="slider_title_value">%1$s: %2$s</string>
     <string name="vibrate_scroll_title">Vibrate when scrolling</string>
     <string name="vibrate_scroll_summary">A short vibration for each swipe along the touch area</string>
     <string name="vibrate_tap_title">Vibrate on a tap</string>

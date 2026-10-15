@@ -57,6 +57,10 @@ class PresentationActivity : AppCompatActivity() {
         }
 
 
+        bindMsSlider(findViewById(R.id.tap_max), Settings.KEY_TAP_MAX, settings.tapMaxMs, 150, 800,
+            R.string.tap_max_title, R.string.tap_max_summary, instantAtZero = false)
+        bindMsSlider(findViewById(R.id.tap_wait), Settings.KEY_TAP_WAIT, settings.tapWaitMs, 0, 600,
+            R.string.tap_wait_title, R.string.tap_wait_summary, instantAtZero = true)
         staysOn = findViewById(R.id.stays_on)
         bindSwitchRow(staysOn, Settings.KEY_PRESENTATION_STAYS, R.string.presentation_stays_title,
             R.string.presentation_stays_summary) { settings.presentationStays }
@@ -93,6 +97,28 @@ class PresentationActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    /** A slider in seconds for a setting stored in milliseconds; steps of 50 ms. */
+    private fun bindMsSlider(
+        row: View, key: String, current: Long, minMs: Int, maxMs: Int,
+        title: Int, summary: Int, instantAtZero: Boolean,
+    ) {
+        val titleView = row.findViewById<TextView>(android.R.id.title)
+        row.findViewById<TextView>(android.R.id.summary).setText(summary)
+        val slider = row.findViewById<com.google.android.material.slider.Slider>(R.id.slider)
+        fun label(ms: Int) = if (instantAtZero && ms == 0) getString(R.string.tap_instant)
+            else getString(R.string.seconds_value_2, ms / 1000f)
+        slider.valueFrom = minMs.toFloat()
+        slider.valueTo = maxMs.toFloat()
+        slider.stepSize = 50f
+        slider.value = current.coerceIn(minMs.toLong(), maxMs.toLong()).toFloat()
+        slider.setLabelFormatter { label(it.toInt()) }
+        titleView.text = getString(R.string.slider_title_value, getString(title), label(slider.value.toInt()))
+        slider.addOnChangeListener { _, v, fromUser ->
+            titleView.text = getString(R.string.slider_title_value, getString(title), label(v.toInt()))
+            if (fromUser) settings.prefs.edit().putInt(key, v.toInt()).apply()
+        }
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
