@@ -11,6 +11,10 @@
     <!-- Home Assistant webhooks -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Foreground app for the notes-app features (granted by service.sh) -->
+    <!-- To turn the focus-tracking accessibility service back on after an update (granted by service.sh) -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
         xmlns:tools="http://schemas.android.com/tools"
         tools:ignore="ProtectedPermissions" />

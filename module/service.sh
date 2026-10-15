@@ -25,6 +25,8 @@ fi
 appops set "$PKG" SYSTEM_ALERT_WINDOW allow
 # Lets the app see which app is in front (notes-app features).
 appops set "$PKG" GET_USAGE_STATS allow
+# Lets the app turn its accessibility service back on: Android turns it off on every update.
+pm grant "$PKG" android.permission.WRITE_SECURE_SETTINGS
 # Keeps the pen connection alive in Doze. Undone by uninstall.sh (the app-ops go with the app).
 cmd deviceidle whitelist +"$PKG" >/dev/null 2>&1
 # The service is not exported; the app's boot receiver starts it.

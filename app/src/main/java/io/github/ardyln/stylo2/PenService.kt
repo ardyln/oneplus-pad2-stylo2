@@ -104,6 +104,7 @@ class PenService : Service() {
         super.onCreate()
         settings = Settings(this)
         instance = this
+        FocusService.ensureEnabled(this)
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL, getString(R.string.channel_status), NotificationManager.IMPORTANCE_MIN)
         )
