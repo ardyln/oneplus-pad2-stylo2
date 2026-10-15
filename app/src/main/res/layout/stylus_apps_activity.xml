@@ -49,6 +49,18 @@
 
             <TextView
                 style="@style/Stylo2.SectionHeader"
+                android:text="@string/stylus_apps_feel_header" />
+
+            <include
+                android:id="@+id/feel_switch"
+                layout="@layout/item_switch_row" />
+
+            <include
+                android:id="@+id/feel_card"
+                layout="@layout/item_saber_tool" />
+
+            <TextView
+                style="@style/Stylo2.SectionHeader"
                 android:text="@string/stylus_apps_header" />
 
             <LinearLayout

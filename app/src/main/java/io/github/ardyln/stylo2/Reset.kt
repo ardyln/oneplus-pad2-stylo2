@@ -12,7 +12,7 @@ enum class ResetScope(val title: Int, val message: Int, val matches: (String) ->
         key == Settings.KEY_SABER_TEXTURE || (key.startsWith("saber_") && (key.endsWith("_texture") || key.endsWith("_level")))
     }),
     STYLUS_APPS(R.string.reset_stylus_apps_title, R.string.reset_stylus_apps_message, { key ->
-        key == Settings.KEY_STYLUS_BUTTON_APPS
+        key == Settings.KEY_STYLUS_BUTTON_APPS || key.startsWith("stylus_apps_")
     }),
     PRESENTATION(R.string.reset_presentation_title, R.string.reset_presentation_message, { key ->
         key.startsWith("presentation")

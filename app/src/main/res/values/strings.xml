@@ -47,7 +47,7 @@
     <string name="reset_saber_title">Reset Saber settings?</string>
     <string name="reset_saber_message">Turns texture-follows-tool back on and resets the texture and strength of every tool.</string>
     <string name="reset_stylus_apps_title">Reset stylus button apps?</string>
-    <string name="reset_stylus_apps_message">The list goes back to Saber only.</string>
+    <string name="reset_stylus_apps_message">The list goes back to Saber only, and the writing feel for these apps turns off.</string>
     <string name="reset_presentation_title">Reset presentation mode?</string>
     <string name="reset_presentation_message">Turns presentation mode off and resets the pointer, the gesture actions, \"stay on when attached\" and the vibrations.</string>
     <string name="reset_all_title">Reset all settings</string>
@@ -153,6 +153,10 @@
     <string name="stylus_button_apps_title">Stylus button apps</string>
     <string name="stylus_apps_intro">In these apps a double tap works like the button on other styluses: the first double tap presses it, the next one releases it. Any app that supports a stylus button can use it. Saber, for example, erases while it\'s pressed. Shortcuts and presentation mode pause in these apps.</string>
     <string name="stylus_apps_header">Apps</string>
+    <string name="stylus_apps_feel_header">Writing feel in these apps</string>
+    <string name="stylus_apps_feel_title">Own texture in these apps</string>
+    <string name="stylus_apps_feel_summary">While one of these apps is open, the pen uses the texture below instead of the main one. Other apps don\'t tell us which tool you\'re using, so it\'s the same for every tool. In Saber, \"texture follows tool\" takes precedence while it\'s on.</string>
+    <string name="stylus_apps_feel_card">Texture in these apps</string>
     <string name="stylus_apps_empty">No apps yet. Add one with the button below.</string>
     <string name="stylus_apps_add">Add app</string>
     <string name="stylus_apps_remove">Remove</string>

@@ -40,7 +40,57 @@ class StylusAppsActivity : AppCompatActivity() {
             (add.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = bottom + (16 * density).toInt()
             add.requestLayout()
         }
+        bindFeel()
         show()
+    }
+
+    /** The optional writing feel for these apps: a switch, then texture and strength. */
+    private fun bindFeel() {
+        val row = findViewById<View>(R.id.feel_switch)
+        val card = findViewById<View>(R.id.feel_card)
+        val toggle = row.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.toggle)
+        row.findViewById<TextView>(android.R.id.title).setText(R.string.stylus_apps_feel_title)
+        row.findViewById<TextView>(android.R.id.summary).setText(R.string.stylus_apps_feel_summary)
+        toggle.isChecked = settings.stylusAppsFeel
+        card.visibility = if (settings.stylusAppsFeel) View.VISIBLE else View.GONE
+        row.setOnClickListener {
+            val on = !settings.stylusAppsFeel
+            settings.prefs.edit().putBoolean(Settings.KEY_STYLUS_APPS_FEEL, on).apply()
+            toggle.isChecked = on
+            card.visibility = if (on) View.VISIBLE else View.GONE
+        }
+
+        card.findViewById<ImageView>(android.R.id.icon).setImageResource(R.drawable.ic_action_texture)
+        card.findViewById<TextView>(android.R.id.title).setText(R.string.stylus_apps_feel_card)
+        val summary = card.findViewById<TextView>(android.R.id.summary)
+        val textures = card.findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.textures)
+        val strengthLabel = card.findViewById<TextView>(R.id.strength_label)
+        val strength = card.findViewById<com.google.android.material.slider.Slider>(R.id.strength)
+        fun refresh() {
+            val texture = settings.stylusAppsTexture
+            val on = texture != Saber.TEXTURE_OFF
+            summary.text = if (on) {
+                getString(R.string.saber_tool_summary, SaberToolsActivity.textureName(this, texture), settings.stylusAppsLevel)
+            } else {
+                SaberToolsActivity.textureName(this, texture)
+            }
+            strength.isEnabled = on
+            strengthLabel.isEnabled = on
+        }
+        textures.check(SaberToolsActivity.BUTTONS.getValue(settings.stylusAppsTexture))
+        textures.addOnButtonCheckedListener { _, id, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            val texture = SaberToolsActivity.BUTTONS.entries.first { it.value == id }.key
+            settings.prefs.edit().putString(Settings.KEY_STYLUS_APPS_TEXTURE, texture.toString()).apply()
+            refresh()
+        }
+        strength.value = settings.stylusAppsLevel.coerceIn(0, PenProtocol.LEVEL_MAX).toFloat()
+        strength.addOnChangeListener { _, value, fromUser ->
+            if (!fromUser) return@addOnChangeListener
+            settings.prefs.edit().putString(Settings.KEY_STYLUS_APPS_LEVEL, value.toInt().toString()).apply()
+            refresh()
+        }
+        refresh()
     }
 
     override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {

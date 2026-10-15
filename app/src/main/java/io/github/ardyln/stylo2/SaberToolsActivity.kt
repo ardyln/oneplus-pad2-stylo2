@@ -50,15 +50,7 @@ class SaberToolsActivity : AppCompatActivity() {
         return true
     }
 
-    private fun textureName(texture: Int): String = getString(
-        when (texture) {
-            PenProtocol.TEXTURE_PENCIL -> R.string.texture_pencil
-            PenProtocol.TEXTURE_ERASER -> R.string.texture_eraser
-            PenProtocol.TEXTURE_BALLPEN -> R.string.texture_ballpen
-            PenProtocol.TEXTURE_PEN -> R.string.texture_pen
-            else -> R.string.texture_off
-        }
-    )
+    private fun textureName(texture: Int) = textureName(this, texture)
 
     /** Fills one tool's controls (view_tool_settings); [compact] for the pen types inside the pen card. */
     private fun bindTool(view: View, tool: Saber.Tool, compact: Boolean) {
@@ -179,7 +171,18 @@ class SaberToolsActivity : AppCompatActivity() {
         private const val TYPE_GROUP = 1
         private const val TYPE_HEADER = 2
         private const val TYPE_FOOTER = 3
-        private val BUTTONS = mapOf(
+        fun textureName(context: android.content.Context, texture: Int): String = context.getString(
+            when (texture) {
+                PenProtocol.TEXTURE_PENCIL -> R.string.texture_pencil
+                PenProtocol.TEXTURE_ERASER -> R.string.texture_eraser
+                PenProtocol.TEXTURE_BALLPEN -> R.string.texture_ballpen
+                PenProtocol.TEXTURE_PEN -> R.string.texture_pen
+                else -> R.string.texture_off
+            }
+        )
+
+        /** The texture toggle buttons in view_tool_settings, by texture. */
+        val BUTTONS = mapOf(
             Saber.TEXTURE_OFF to R.id.texture_off,
             PenProtocol.TEXTURE_PENCIL to R.id.texture_pencil,
             PenProtocol.TEXTURE_ERASER to R.id.texture_eraser,

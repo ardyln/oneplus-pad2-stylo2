@@ -14,6 +14,10 @@ class Settings(context: Context) {
     val buttonBuzz get() = prefs.getBoolean(KEY_BUTTON_BUZZ, false)
     val tapWindowMs get() = prefs.getInt(KEY_TAP_WINDOW, 1000).toLong()
     val broadcastAll get() = prefs.getBoolean(KEY_BROADCAST_ALL, false)
+    /** A texture of its own while one of the stylus button apps is in front (other than Saber's tools). */
+    val stylusAppsFeel get() = prefs.getBoolean(KEY_STYLUS_APPS_FEEL, false)
+    val stylusAppsTexture get() = prefs.getString(KEY_STYLUS_APPS_TEXTURE, PenProtocol.TEXTURE_PENCIL.toString())!!.toInt()
+    val stylusAppsLevel get() = prefs.getString(KEY_STYLUS_APPS_LEVEL, null)?.toIntOrNull() ?: level
     val stylusButtonApps: Set<String> get() = prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: setOf(Saber.PACKAGE)
     val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
     val presentation get() = prefs.getBoolean(KEY_PRESENTATION, false)
@@ -56,6 +60,9 @@ class Settings(context: Context) {
         const val KEY_SHORTCUTS_SCREEN = "shortcuts_screen"
         const val KEY_TEST_BUZZ = "test_buzz"
         const val KEY_STYLUS_BUTTON_APPS = "stylus_button_apps"
+        const val KEY_STYLUS_APPS_FEEL = "stylus_apps_feel"
+        const val KEY_STYLUS_APPS_TEXTURE = "stylus_apps_texture"
+        const val KEY_STYLUS_APPS_LEVEL = "stylus_apps_level"
         const val KEY_SABER_TEXTURE = "saber_texture"
         const val KEY_BRIDGE_STATUS = "bridge_status"
         const val KEY_PRESENTATION = "presentation"
