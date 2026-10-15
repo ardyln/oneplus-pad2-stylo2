@@ -12,7 +12,9 @@ Features:
 - **Thumb-button shortcuts**: the pen reports double taps; chain them (double tap, double tap ×2, …)
   and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
   or a Home Assistant webhook, next/previous page, applying a preset, and switching the app's own
-  settings. Attaching the pen to the charger and taking it off can run actions too.
+  settings ("Nothing" skips a count, e.g. to use only four double taps). Attaching the pen to the
+  charger and taking it off can run actions too, and every pen event can be broadcast to automation
+  apps.
 - **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture. Long-press a
   tile to open its page.
 - **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser, and the
@@ -22,8 +24,9 @@ Features:
   applies to all of them.
 - **Presentation mode**: the touch area near the tip becomes a remote: touch and move the pen to move
   the pointer (air mouse), and give each gesture (swipe toward or away from the tip, single tap, double
-  tap) an action: scroll with a chosen strength, click, next/previous page, or any shortcut action.
-  The tap timing is adjustable, with a live readout of how long each touch was.
+  tap) an action: scroll with a chosen strength, click, right click (opens menus, like a long press),
+  middle click, next/previous page, or any shortcut action. A live touch timeline shows how long each
+  touch lasted against the tap and hold zones, and its handles set the tap timing.
 - **Presets**: save all settings under a name and switch between setups from the app or with a
   shortcut ("Apply preset"). Every page can also be reset to its defaults.
 
@@ -63,10 +66,11 @@ At boot the module:
 - starts a root helper (`stylus-bridge.sh`) that pipes the app's commands into Android's `uinput`
   tool, which creates three virtual input devices: a stylus button (for Saber and the other apps), a
   mouse (presentation clicks and scrolling) and a keyboard with Page Up/Down (page shortcuts). The
-  helper also reads Saber's settings file to see its active tool, forwards the pen's presentation keys
-  to the app, and runs `penpointer.jar` (source in `helper/`), which takes the pen's HID mouse
-  exclusively while presentation mode is on, so swipes can be remapped; pointer movement is passed on
-  unchanged through a fourth virtual device.
+  helper also reads Saber's settings file to see its active tool, and runs `penpointer.jar` (source in
+  `helper/`), which forwards the touch area's keys from the pen's HID keyboard to the app and takes
+  the pen's HID mouse exclusively while presentation mode is on, so swipes can be remapped; pointer
+  movement is passed on unchanged through a fourth virtual device. Both are found again after the
+  pen reconnects.
 
 Removing the module undoes all of this (tested with KernelSU: removing it, rebooting, then
 installing the release zip and rebooting again leaves the system as before and sets everything up

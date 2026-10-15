@@ -168,6 +168,17 @@ Goal: let the user remap the swipes (e.g. to next/previous page) instead of Andr
   `REL_X`/`REL_Y` and buttons on through its own `uinput` device ("Stylo 2 pointer"), and forwards each
   wheel step to the app as `REL_WHEEL UP`/`DOWN`. The app then scrolls (its virtual mouse has
   `REL_WHEEL` and `REL_WHEEL_HI_RES`), sends Page Up/Down, clicks, or runs any shortcut action.
+- The helper also reads the pen's "Keyboard" device (not grabbed) for `KEY_F19`/`KEY_F20`. This used
+  to be `getevent -l` in the shell script, but **`getevent` doesn't exit when its device goes away**:
+  after a Bluetooth reconnect it kept reading the deleted node and no touch-area keys reached the app.
+  In Java a read on a removed evdev node fails, so the helper looks the device up again by name.
+- Up to v0.21 the helper crashed on the first forwarded movement: it used
+  `ProcessBuilder.Redirect.DISCARD` (Java 9), which Android's libcore doesn't have, and it had been
+  compiled against the JDK. It's now compiled against `android.jar` as the boot classpath (no
+  lambdas, since `android.jar` lacks `LambdaMetafactory`), so such calls fail the build.
+- **Clicks at the pointer:** a held left mouse button is not a long press for most apps; the right
+  button is (Android's "context click" opens the same menus). A real touch at the pointer isn't an
+  option either: Android 17's `dumpsys input` doesn't show the mouse pointer's position.
 
 ## 8. Saber
 

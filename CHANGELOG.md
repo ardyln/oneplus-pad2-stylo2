@@ -1,35 +1,34 @@
 # Changelog
 
 ## 0.22
-- **Fix:** the presentation pointer helper crashed on the first pen movement (it used a Java API that
-  Android doesn't have) and restarted every few seconds, so the air mouse didn't work since 0.15. The
-  helper is now compiled against Android's API, so this kind of error fails the build.
-- A release of the touch area without a press is ignored (it was measured from boot).
-- **Fix:** after the pen reconnected (e.g. Bluetooth off and on), taps and double taps on the touch
-  area no longer reached the app: the helper's `getevent` kept reading the removed device. The Java
-  helper now forwards F19/F20 itself and reopens the pen's keyboard after a reconnect.
+
+Fixes:
+- **Air mouse:** the presentation pointer helper crashed on the first pen movement (it used a Java
+  API that Android doesn't have) and restarted every few seconds, so the air mouse didn't work
+  since 0.15. The helper is now compiled against Android's API, so this kind of error fails the build.
+- **After a reconnect** (e.g. Bluetooth off and on), taps and double taps on the touch area no longer
+  reached the app: the helper's `getevent` kept reading the removed device. The Java helper now
+  forwards F19/F20 itself and finds the pen's keyboard again after a reconnect.
 - Webhooks and broadcasts from presentation gestures carry the gesture's name (e.g.
-  `presentation_tap`) instead of `double_tap`.
-- New actions for presentation gestures: right click (opens menus, like a long press) and middle
-  click, at the pointer. (A held mouse button isn't a long press for most apps, so there's no
-  separate long-press action.)
-- The live card on the presentation page shows the key the pen sent (F19, F20, wheel), how long it
-  was held, what it counted as, the action, and whether it ran.
-- Touch timeline on the presentation page: each touch's duration against the zones (too short, tap,
-  hold), when a single tap runs after letting go, and the last 15 seconds of taps, holds, double
-  taps and swipes. The longest tap and the single-tap delay are handles on it, replacing the two
-  sliders.
-- Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
-  Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
-- "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both
-  broadcasts, their extras and how to use them.
-- The charger actions can be set back to "Nothing", and double-tap shortcuts can be "Nothing" too, to
-  skip a count (e.g. an action only on four double taps).
-- App lists (shortcut "Open an app", "Add app" on the Other apps page) have a search field and show
-  app icons.
-- Presentation mode: single taps on the touch area run instantly by default. Tests showed the pen
-  reports double taps on its own (never as two taps), so "Delay single taps" (formerly "Wait for a
-  second tap") is only a safeguard now, and its explanations say so.
+  `presentation_tap`) instead of `double_tap`; a touch-area release without a press is ignored.
+
+New:
+- **Charger actions:** run any action when the pen is attached to the charger or taken off
+  (Shortcuts page), e.g. a Home Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`).
+- **"Send pen events to automation apps"** (formerly "Broadcast every gesture") describes both
+  broadcasts (`DOUBLE_TAP`, `CHARGER`), their extras and how to use them.
+- **"Nothing"** for double-tap shortcuts (to skip a count, e.g. an action only on four double taps)
+  and for the charger actions.
+- **Right click** (opens menus, like a long press) and **middle click** as presentation gesture
+  actions. A held mouse button isn't a long press for most apps, so there's no long-press action.
+- **Touch timeline** on the presentation page: each touch's duration against the zones (too short,
+  tap, hold), when a single tap runs after letting go, and the last 15 seconds of taps, holds,
+  double taps and swipes. The longest tap and the single-tap delay are handles on it.
+- The live card shows the key the pen sent (F19, F20, wheel), how long it was held, what it counted
+  as, the action, and whether it ran.
+- Single taps on the touch area run **instantly** by default: tests showed the pen reports double
+  taps on its own, so "Delay single taps" is only a safeguard now.
+- App lists (shortcut "Open an app", "Add app" on the Other apps page) have a search field and icons.
 
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.
