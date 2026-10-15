@@ -60,13 +60,16 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
     private val cOnTooShort get() = color(com.google.android.material.R.attr.colorOnErrorContainer)
     private val cTap get() = color(com.google.android.material.R.attr.colorPrimaryContainer)
     private val cOnTap get() = color(com.google.android.material.R.attr.colorOnPrimaryContainer)
-    private val cHold get() = color(com.google.android.material.R.attr.colorTertiaryContainer)
-    private val cOnHold get() = color(com.google.android.material.R.attr.colorOnTertiaryContainer)
+    // Holds are neutral, so both kinds of dots stand out on every zone
+    private val cHold get() = color(com.google.android.material.R.attr.colorSurfaceContainerHighest)
+    private val cOnHold get() = color(com.google.android.material.R.attr.colorOnSurfaceVariant)
     private val cWait get() = color(com.google.android.material.R.attr.colorSecondaryContainer)
     private val cOnWait get() = color(com.google.android.material.R.attr.colorOnSecondaryContainer)
     private val cTrack get() = color(com.google.android.material.R.attr.colorSurfaceContainerHighest)
     private val cMark get() = color(androidx.appcompat.R.attr.colorPrimary)
-    private val cHoldMark get() = color(com.google.android.material.R.attr.colorTertiary)
+    private val cHoldMark get() = color(com.google.android.material.R.attr.colorOnSurface)
+    private val cSwipe get() = color(com.google.android.material.R.attr.colorTertiary)
+    private val cOutline get() = color(com.google.android.material.R.attr.colorSurface)
     private val cText get() = color(com.google.android.material.R.attr.colorOnSurfaceVariant)
     private val cLine get() = color(com.google.android.material.R.attr.colorOutlineVariant)
     private val cHandle get() = color(com.google.android.material.R.attr.colorOnSurface)
@@ -132,9 +135,15 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
             val held = t.upAt - t.downAt
             val x = durationX(held)
             val newest = i == touches.lastIndex
+            val r = if (newest) 6 * dp else 4 * dp
+            val alpha = if (newest) 255 else 90 + 140 * (i + 1) / touches.size
+            // A dark ring keeps the dot visible on every zone
+            fill.color = cOutline
+            fill.alpha = alpha
+            c.drawCircle(x, barTop + 10 * dp, r + 2 * dp, fill)
             fill.color = if (held > tapMax) cHoldMark else cMark
-            fill.alpha = if (newest) 255 else 70 + 150 * (i + 1) / touches.size
-            c.drawCircle(x, barTop + 10 * dp, if (newest) 6 * dp else 4 * dp, fill)
+            fill.alpha = alpha
+            c.drawCircle(x, barTop + 10 * dp, r, fill)
             if (newest) {
                 stroke.color = fill.color
                 stroke.strokeWidth = 2 * dp
@@ -249,7 +258,7 @@ class TapTimelineView(context: Context, attrs: AttributeSet?) : View(context, at
                 InputKind.SWIPE_UP, InputKind.SWIPE_DOWN -> {
                     val x = xAt(e.downAt)
                     val up = e.kind == InputKind.SWIPE_UP
-                    fill.color = cHoldMark
+                    fill.color = cSwipe
                     path.reset()
                     val tip = if (up) trackBottom - 14 * dp else trackBottom
                     val base = if (up) trackBottom else trackBottom - 14 * dp
