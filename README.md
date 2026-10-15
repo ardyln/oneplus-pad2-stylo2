@@ -101,9 +101,17 @@ SettingsLib, which is only available inside the Android source tree.
 | `tools/research/` | test scripts and the tablet's input device list |
 | `update.json`, `CHANGELOG.md` | update information for KernelSU/Magisk, and the changes per version |
 
+## License
+
+[Apache License 2.0](LICENSE), copyright 2026 ardyln, chosen so parts can move into LineageOS or AOSP
+without relicensing. Third-party icons keep their own licenses (see [NOTICE](NOTICE) and below).
+Most of the code and docs were written with an AI assistant (Claude), under the author's direction
+and testing on the device.
+
 ## Credits
 
 - Tool and texture icons from [Font Awesome Free](https://fontawesome.com) 6 by Fonticons, Inc.,
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): the same icons
   [Saber](https://github.com/saber-notes/saber) uses for its tools.
-- Other icons from [Material Symbols](https://fonts.google.com/icons) by Google, Apache-2.0.
+- Other icons from [Material Symbols and Material Icons](https://fonts.google.com/icons) by Google,
+  Apache-2.0.

@@ -33,6 +33,7 @@ mkdir -p "$OUT/helper/classes" "$OUT/helper/dex"
 STAGE=$OUT/stage; cp -r "$ROOT/module" "$STAGE"
 cp "$OUT/Stylo2.apk" "$STAGE/Stylo2.apk"
 cp "$OUT/penpointer.jar" "$STAGE/penpointer.jar"
+cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$STAGE/"
 find "$STAGE" -name '*.sh' -exec sed -i 's/\r$//' {} + -exec chmod 0755 {} +
 chmod 0755 "$STAGE/META-INF/com/google/android/update-binary"
 ZIP=$OUT/OnePlus_Pad2_Stylo2-v$VERSION.zip
