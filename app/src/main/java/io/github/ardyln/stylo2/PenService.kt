@@ -540,6 +540,7 @@ class PenService : Service() {
                 EventLog.Source.PEN, "REL_WHEEL $value",
                 "Swipe ${if (value == "UP") "toward the tip" else "away from the tip"} → ${a.action.name.lowercase().replace('_', ' ')}",
             )
+            lastInput = LastInput("REL_WHEEL $value", -1, gesture, presentationActive())
             if (presentationActive()) {
                 runner.run(a, 1, battery, gesture.key)
                 if (settings.vibrateScroll) feedbackBuzz(now)
@@ -559,8 +560,7 @@ class PenService : Service() {
             val tap = held <= settings.tapMaxMs
             EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
             Log.i(TAG, "touch area released after ${held} ms (${if (tap) "tap" else "hold"})")
-            lastTouchMs = held
-            lastTouchAt = SystemClock.uptimeMillis()
+            lastInput = LastInput("KEY_F19", held, if (tap) PresentationGesture.TAP else null, tap && presentationActive())
             if (!tap || !presentationActive()) return
             if (handler.hasCallbacks(singleTap)) {
                 // Second tap of a double tap: the double tap (F20 and the Bluetooth notification) handles it
@@ -573,6 +573,7 @@ class PenService : Service() {
             if (wait <= 0) singleTap.run() else handler.postDelayed(singleTap, wait)
         } else if (key == "KEY_F20" && down) {
             Log.i(TAG, "KEY_F20 (double tap on the touch area)")
+            lastInput = LastInput("KEY_F20", -1, PresentationGesture.DOUBLE_TAP, presentationActive())
             handler.removeCallbacks(singleTap)
             EventLog.add(EventLog.Source.PEN, key, "Double tap on the touch area (the Bluetooth double tap handles it)")
         }
@@ -653,9 +654,8 @@ class PenService : Service() {
 
         private const val FEEDBACK_GAP_MS = 150L
 
-        /** The last touch on the touch area, for the presentation page's live feedback. */
-        @Volatile var lastTouchMs = -1L
-        @Volatile var lastTouchAt = 0L
+        /** The last presentation input, for the presentation page's live card. */
+        @Volatile var lastInput: LastInput? = null
 
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null
@@ -671,3 +671,10 @@ class PenService : Service() {
         private fun ByteArray.toHex() = joinToString("") { "%02x".format(it) }
     }
 }
+
+/**
+ * One input from the pen's touch area: the key it sent ("KEY_F19", "KEY_F20", "REL_WHEEL UP"), how
+ * long it was held (-1 if that doesn't apply), the gesture it counted as (null: a hold, which moves
+ * the pointer) and whether its action ran.
+ */
+data class LastInput(val key: String, val heldMs: Long, val gesture: PresentationGesture?, val ran: Boolean)

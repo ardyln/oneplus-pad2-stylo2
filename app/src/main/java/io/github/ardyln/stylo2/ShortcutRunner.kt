@@ -50,10 +50,6 @@ class ShortcutRunner(
             Shortcut.Action.SCROLL_UP -> scroll(steps(s))
             Shortcut.Action.SCROLL_DOWN -> scroll(-steps(s))
             Shortcut.Action.CLICK -> click(StylusBridge.BTN_LEFT, CLICK_MS)
-            // Held past the system's touch & hold delay, so Android sees a long press
-            Shortcut.Action.LONG_CLICK -> click(
-                StylusBridge.BTN_LEFT, android.view.ViewConfiguration.getLongPressTimeout() + LONG_PRESS_MARGIN_MS,
-            )
             Shortcut.Action.RIGHT_CLICK -> click(StylusBridge.BTN_RIGHT, CLICK_MS)
             Shortcut.Action.MIDDLE_CLICK -> click(StylusBridge.BTN_MIDDLE, CLICK_MS)
             Shortcut.Action.NOTHING -> {}
@@ -109,7 +105,6 @@ class ShortcutRunner(
     companion object {
         const val MAX_SCROLL = 5
         private const val CLICK_MS = 40L
-        private const val LONG_PRESS_MARGIN_MS = 300L
 
         /** Broadcast sent for every gesture when enabled (for Tasker and similar apps). */
         const val ACTION_GESTURE = "io.github.ardyln.stylo2.action.DOUBLE_TAP"

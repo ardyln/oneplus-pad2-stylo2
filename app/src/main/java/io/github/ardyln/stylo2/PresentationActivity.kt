@@ -133,15 +133,30 @@ class PresentationActivity : AppCompatActivity() {
     /** Live feedback: how long the last touch on the touch area was, and what it counted as. */
     private val lastTouch = object : Runnable {
         override fun run() {
-            val ms = PenService.lastTouchMs
+            val input = PenService.lastInput
             findViewById<TextView>(R.id.last_touch).text = when {
                 !settings.presentation -> getString(R.string.last_touch_off)
-                ms < 0 -> getString(R.string.last_touch_none)
-                ms <= settings.tapMaxMs -> getString(R.string.last_touch_tap, seconds(ms), seconds(settings.tapMaxMs))
-                else -> getString(R.string.last_touch_hold, seconds(ms), seconds(settings.tapMaxMs))
+                input == null -> getString(R.string.last_touch_none)
+                else -> describe(input)
             }
             handler.postDelayed(this, 300)
         }
+    }
+
+    /** The live card's text: the key, what it counted as, and the action (or why it didn't run). */
+    private fun describe(input: LastInput): String {
+        val key = if (input.heldMs >= 0) getString(R.string.last_input_key_held, input.key, seconds(input.heldMs))
+            else getString(R.string.last_input_key, input.key)
+        val g = input.gesture
+        val meaning = when (g) {
+            null -> getString(R.string.last_input_hold, seconds(settings.tapMaxMs))
+            PresentationGesture.TAP -> getString(R.string.last_input_tap, seconds(settings.tapMaxMs), actionName(g))
+            PresentationGesture.DOUBLE_TAP -> getString(R.string.last_input_double, actionName(g))
+            PresentationGesture.SWIPE_TOWARD_TIP -> getString(R.string.last_input_swipe_up, actionName(g))
+            PresentationGesture.SWIPE_AWAY -> getString(R.string.last_input_swipe_down, actionName(g))
+        }
+        val notRun = if (g != null && !input.ran) "\n" + getString(R.string.last_input_not_run) else ""
+        return "$key\n$meaning$notRun"
     }
 
     /** A slider in seconds for a setting stored in milliseconds; steps of 50 ms. */

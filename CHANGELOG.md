@@ -10,8 +10,11 @@
   helper now forwards F19/F20 itself and reopens the pen's keyboard after a reconnect.
 - Webhooks and broadcasts from presentation gestures carry the gesture's name (e.g.
   `presentation_tap`) instead of `double_tap`.
-- New actions for presentation gestures: long press (held past the system's touch & hold delay, opens
-  menus and details), right click and middle click, all at the pointer.
+- New actions for presentation gestures: right click (opens menus, like a long press) and middle
+  click, at the pointer. (A held mouse button isn't a long press for most apps, so there's no
+  separate long-press action.)
+- The live card on the presentation page shows the key the pen sent (F19, F20, wheel), how long it
+  was held, what it counted as, the action, and whether it ran.
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
 - "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both

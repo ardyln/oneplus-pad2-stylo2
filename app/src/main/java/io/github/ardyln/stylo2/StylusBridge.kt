@@ -95,7 +95,7 @@ class StylusBridge(
 
     /**
      * A click at the mouse pointer through the virtual "Stylo 2 click" mouse: [button] is pressed for
-     * [holdMs] (long enough, and the left button becomes a long press).
+     * [holdMs]. (Holding the left button isn't a long press for most apps; the right click is.)
      */
     fun click(button: Int = BTN_LEFT, holdMs: Long = CLICK_MS.toLong()) {
         if (!ready) return

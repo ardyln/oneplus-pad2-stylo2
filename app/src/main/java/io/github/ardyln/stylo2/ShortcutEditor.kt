@@ -47,8 +47,8 @@ class ShortcutEditor(private val context: Context) {
                 Shortcut.Action.PREVIOUS_PAGE -> R.drawable.ic_action_page_previous
                 Shortcut.Action.SCROLL_UP, Shortcut.Action.SCROLL_DOWN -> R.drawable.ic_gesture_swipe
                 Shortcut.Action.APPLY_PRESET -> R.drawable.ic_presets
-                Shortcut.Action.CLICK, Shortcut.Action.LONG_CLICK, Shortcut.Action.RIGHT_CLICK,
-                Shortcut.Action.MIDDLE_CLICK -> R.drawable.ic_gesture_click
+                Shortcut.Action.CLICK, Shortcut.Action.RIGHT_CLICK, Shortcut.Action.MIDDLE_CLICK ->
+                    R.drawable.ic_gesture_click
                 Shortcut.Action.NOTHING -> R.drawable.ic_texture_off
             }
         )
@@ -89,7 +89,6 @@ class ShortcutEditor(private val context: Context) {
             Shortcut.Action.APPLY_PRESET -> R.string.action_apply_preset
             Shortcut.Action.SCROLL_DOWN -> R.string.action_scroll_down
             Shortcut.Action.CLICK -> R.string.action_click
-            Shortcut.Action.LONG_CLICK -> R.string.action_long_click
             Shortcut.Action.RIGHT_CLICK -> R.string.action_right_click
             Shortcut.Action.MIDDLE_CLICK -> R.string.action_middle_click
             Shortcut.Action.NOTHING -> R.string.action_nothing
