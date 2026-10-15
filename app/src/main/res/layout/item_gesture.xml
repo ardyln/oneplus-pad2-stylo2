@@ -38,4 +38,12 @@
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?android:attr/textColorSecondary" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/chevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron"
+        android:visibility="gone" />
 </LinearLayout>

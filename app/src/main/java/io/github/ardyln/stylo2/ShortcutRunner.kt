@@ -18,6 +18,9 @@ class ShortcutRunner(
     private val buzz: () -> Unit,
     /** Presses a key through the root helper's virtual keyboard. */
     private val key: (Int) -> Unit,
+    /** Clicks, and scrolls by wheel steps (positive is up), through the virtual mouse. */
+    private val click: () -> Unit = {},
+    private val scroll: (Int) -> Unit = {},
 ) {
 
     fun run(s: Shortcut, taps: Int, battery: Int) {
@@ -42,8 +45,14 @@ class ShortcutRunner(
                 .putString(Settings.KEY_TEXTURE, ((settings.texture + 1) % 4).toString()).apply()
             Shortcut.Action.NEXT_PAGE -> key(StylusBridge.KEY_PAGEDOWN)
             Shortcut.Action.PREVIOUS_PAGE -> key(StylusBridge.KEY_PAGEUP)
+            Shortcut.Action.SCROLL_UP -> scroll(steps(s))
+            Shortcut.Action.SCROLL_DOWN -> scroll(-steps(s))
+            Shortcut.Action.CLICK -> click()
+            Shortcut.Action.NOTHING -> {}
         }
     }
+
+    private fun steps(s: Shortcut) = s.arg?.toIntOrNull()?.coerceIn(1, MAX_SCROLL) ?: 1
 
     private fun openApp(pkg: String?) {
         val launch = pkg?.let { context.packageManager.getLaunchIntentForPackage(it) }
@@ -90,6 +99,8 @@ class ShortcutRunner(
     }
 
     companion object {
+        const val MAX_SCROLL = 5
+
         /** Broadcast sent for every gesture when enabled (for Tasker and similar apps). */
         const val ACTION_GESTURE = "io.github.ardyln.stylo2.action.DOUBLE_TAP"
         const val EXTRA_TAPS = "taps"

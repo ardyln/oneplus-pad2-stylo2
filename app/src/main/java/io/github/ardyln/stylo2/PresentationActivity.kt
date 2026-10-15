@@ -21,8 +21,7 @@ class PresentationActivity : AppCompatActivity() {
     private lateinit var gestures: LinearLayout
     private lateinit var pointer: MaterialButtonToggleGroup
     private lateinit var pointerDescription: TextView
-    private lateinit var clickDoubleTap: View
-    private lateinit var clickSurfaceTap: View
+    private val editor by lazy { ShortcutEditor(this) }
     private lateinit var vibrateScroll: View
     private lateinit var vibrateTap: View
     private lateinit var staysOn: View
@@ -57,12 +56,7 @@ class PresentationActivity : AppCompatActivity() {
             }
         }
 
-        clickDoubleTap = findViewById(R.id.click_double_tap)
-        clickSurfaceTap = findViewById(R.id.click_surface_tap)
-        bindSwitchRow(clickDoubleTap, Settings.KEY_CLICK_DOUBLE_TAP, R.string.click_double_tap_title,
-            R.string.click_double_tap_summary) { settings.clickDoubleTap }
-        bindSwitchRow(clickSurfaceTap, Settings.KEY_CLICK_SURFACE_TAP, R.string.click_surface_title,
-            R.string.click_surface_summary) { settings.clickSurfaceTap }
+
         staysOn = findViewById(R.id.stays_on)
         bindSwitchRow(staysOn, Settings.KEY_PRESENTATION_STAYS, R.string.presentation_stays_title,
             R.string.presentation_stays_summary) { settings.presentationStays }
@@ -83,6 +77,17 @@ class PresentationActivity : AppCompatActivity() {
     override fun onPause() {
         settings.prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         super.onPause()
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.reset, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        if (item.itemId != R.id.reset) return super.onOptionsItemSelected(item)
+        ResetScope.PRESENTATION.confirm(this) { recreate() }
+        return true
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -107,42 +112,55 @@ class PresentationActivity : AppCompatActivity() {
             pointer.check(if (always) R.id.pointer_always else R.id.pointer_touch)
         }
         pointerDescription.setText(if (always) R.string.pointer_always_desc else R.string.pointer_touch_desc)
-        clickDoubleTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickDoubleTap
-        clickSurfaceTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickSurfaceTap
         staysOn.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.presentationStays
         vibrateScroll.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateScroll
         vibrateTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateTap
 
         gestures.removeAllViews()
-        gesture(R.drawable.ic_gesture_swipe, R.string.gesture_swipe, R.string.gesture_swipe_does)
-        gesture(
-            R.drawable.ic_gesture_hold,
-            if (always) R.string.gesture_point_always else R.string.gesture_point_touch,
-            R.string.gesture_point_does,
-        )
-        gesture(
-            R.drawable.ic_gesture_click, R.string.gesture_double_tap,
-            if (settings.clickDoubleTap) R.string.gesture_clicks else R.string.gesture_double_tap_shortcuts,
-        )
-        if (settings.clickDoubleTap) {
-            gesture(R.drawable.ic_gesture_click, R.string.gesture_chained, R.string.gesture_chained_does)
+        // Assignable gestures first, then the ones with a fixed meaning
+        for (g in PresentationGesture.entries) {
+            val a = g.action(settings)
+            val does = if (g == PresentationGesture.DOUBLE_TAP && a.action == Shortcut.Action.NOTHING) {
+                getString(R.string.gesture_double_tap_nothing)
+            } else {
+                editor.actionLabel(a)
+            }
+            gesture(g.icon, getString(g.label), does) {
+                editor.chooseAction(getString(g.label), a, presentation = true) { chosen ->
+                    g.setAction(settings, chosen)
+                }
+            }
         }
         gesture(
-            R.drawable.ic_gesture_click, R.string.gesture_surface_tap,
-            if (settings.clickSurfaceTap) R.string.gesture_clicks else R.string.gesture_not_used,
+            R.drawable.ic_gesture_hold,
+            getString(if (always) R.string.gesture_point_always else R.string.gesture_point_touch),
+            getString(R.string.gesture_point_does),
         )
+        if (PresentationGesture.DOUBLE_TAP.action(settings).action != Shortcut.Action.NOTHING) {
+            gesture(R.drawable.ic_gesture_click, getString(R.string.gesture_chained), getString(R.string.gesture_chained_does))
+        }
         gesture(
-            R.drawable.ic_gesture_attach, R.string.gesture_attach,
-            if (settings.presentationStays) R.string.gesture_attach_stays else R.string.gesture_attach_does,
+            R.drawable.ic_gesture_attach, getString(R.string.gesture_attach),
+            getString(if (settings.presentationStays) R.string.gesture_attach_stays else R.string.gesture_attach_does),
         )
+        findViewById<TextView>(R.id.gestures_help).text = getString(R.string.gesture_actions_help) +
+            if (PenService.stylusBridgeReady) "" else "\n" + getString(R.string.gesture_needs_helper)
         gestures.alpha = if (on) 1f else 0.6f
     }
 
-    private fun gesture(icon: Int, what: Int, does: Int) {
+    /** A gesture row; with [onClick] it can be tapped to change what the gesture does. */
+    private fun gesture(icon: Int, what: String, does: String, onClick: (() -> Unit)? = null) {
         val row = LayoutInflater.from(this).inflate(R.layout.item_gesture, gestures, false)
         row.findViewById<ImageView>(android.R.id.icon).setImageResource(icon)
-        row.findViewById<TextView>(android.R.id.title).setText(what)
-        row.findViewById<TextView>(android.R.id.summary).setText(does)
+        row.findViewById<TextView>(android.R.id.title).text = what
+        row.findViewById<TextView>(android.R.id.summary).text = does
+        row.findViewById<View>(R.id.chevron).visibility = if (onClick != null) View.VISIBLE else View.GONE
+        if (onClick != null) {
+            val bg = android.util.TypedValue()
+            theme.resolveAttribute(android.R.attr.selectableItemBackground, bg, true)
+            row.setBackgroundResource(bg.resourceId)
+            row.setOnClickListener { onClick() }
+        }
         gestures.addView(row)
     }
 }

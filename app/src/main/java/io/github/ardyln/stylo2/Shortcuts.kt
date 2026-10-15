@@ -18,11 +18,18 @@ data class Shortcut(
     enum class Action {
         OPEN_APP, MEDIA_PLAY_PAUSE, MEDIA_NEXT, MEDIA_PREVIOUS, BROADCAST, WEBHOOK, BUZZ,
         TOGGLE_PRESENTATION, TOGGLE_POINTER, TOGGLE_FEEDBACK, NEXT_TEXTURE, NEXT_PAGE, PREVIOUS_PAGE,
+
+        // Only for presentation gestures. SCROLL_* take the number of wheel steps as arg.
+        SCROLL_UP, SCROLL_DOWN, CLICK, NOTHING;
+
+        val presentationOnly get() = this in PRESENTATION_ONLY
     }
 
     fun toJson(): JSONObject = JSONObject().put("id", id).put("action", action.name).put("arg", arg)
 
     companion object {
+        private val PRESENTATION_ONLY = setOf(Action.SCROLL_UP, Action.SCROLL_DOWN, Action.CLICK, Action.NOTHING)
+
         fun fromJson(o: JSONObject) = Shortcut(
             id = o.getString("id"),
             action = Action.valueOf(o.getString("action")),

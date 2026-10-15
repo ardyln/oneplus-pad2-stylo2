@@ -12,8 +12,9 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 - **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
   eraser, and the texture follows the active tool, with a texture and strength per tool.
 
-- **Presentation mode**: the touch area near the tip becomes a remote: swipe to scroll or zoom, touch and
-  move the pen to move the pointer (air mouse), and click with a double tap or a brief tap.
+- **Presentation mode**: the touch area near the tip becomes a remote: touch and move the pen to move
+  the pointer (air mouse), and give each gesture (swipe toward or away from the tip, single tap, double
+  tap) an action: scroll with a chosen strength, click, next/previous page, or any shortcut action.
 
 It also shows the pen's battery level and whether it's on the magnetic charger, and has a live event
 log for troubleshooting.
@@ -40,7 +41,9 @@ At boot the module:
 - starts a root helper (`stylus-bridge.sh`) that creates two virtual input devices with Android's
   `uinput` tool (a stylus button for Saber, a mouse button for presentation clicks, and Page Up/Down keys for the
   page shortcuts), reads Saber's
-  settings file to see its active tool, and forwards the pen's presentation keys to the app.
+  settings file to see its active tool, forwards the pen's presentation keys to the app, and runs
+  `penpointer.jar`, which takes the pen's HID mouse exclusively in presentation mode so swipes can be
+  remapped (movement is passed on unchanged).
 
 Removing the module undoes all of this.
 

@@ -52,7 +52,13 @@ class PenService : Service() {
     private var sentPresentation: Boolean? = null
     private var sentPresentationMode = -1
     private val runner by lazy {
-        ShortcutRunner(this, settings, buzz = { write(PenProtocol.buzz()) }, key = { bridge.key(it) })
+        ShortcutRunner(
+            this, settings,
+            buzz = { write(PenProtocol.buzz()) },
+            key = { bridge.key(it) },
+            click = { bridge.click() },
+            scroll = { bridge.scroll(it) },
+        )
     }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
@@ -275,6 +281,7 @@ class PenService : Service() {
         if (!ready) return
         sentPresentation = on
         sentPresentationMode = mode
+        bridge.setGrab(on)
         write(PenProtocol.presentation(on))
         if (on) write(PenProtocol.presentationMode(mode))
     }
@@ -411,6 +418,7 @@ class PenService : Service() {
      * gesture; it runs once no shortcut can use more taps, or when the window passes.
      */
     private fun onButton() {
+        handler.removeCallbacks(singleTap)
         if (!FocusService.running) foreground.update()
         // In stylus-button apps (Saber) presentation mode pauses, so the double tap toggles the eraser.
         if (!presentationActive() && bridge.ready && activeApp in settings.stylusButtonApps) {
@@ -445,10 +453,11 @@ class PenService : Service() {
         tapCount = 0
         if (taps == 0) return@Runnable
         Log.i(TAG, "gesture: $taps double tap(s)")
-        if (taps == 1 && clicksOnDoubleTap()) {
-            // In presentation mode a single double tap clicks; chained ones still run shortcuts.
-            bridge.click()
-            EventLog.add(EventLog.Source.APP, "BTN_LEFT", "Double tap in presentation mode → click at the pointer")
+        if (taps == 1 && doubleTapAction() != null) {
+            // In presentation mode a single double tap runs its gesture action; chained ones run shortcuts.
+            val a = doubleTapAction()!!
+            EventLog.add(EventLog.Source.APP, "presentation double tap", "Double tap → ${a.action.name.lowercase().replace('_', ' ')}")
+            runner.run(a, 1, battery)
             return@Runnable
         }
         val shortcut = settings.shortcuts.load().getOrNull(taps - 1)
@@ -469,8 +478,17 @@ class PenService : Service() {
         val now = SystemClock.uptimeMillis()
         val down = value == "DOWN"
         if (key == "REL_WHEEL") {
-            EventLog.add(EventLog.Source.PEN, "REL_WHEEL $value", "Swipe on the touch area: scroll ${value.lowercase()}")
-            if (presentationActive() && settings.vibrateScroll) feedbackBuzz(now)
+            // Only arrives while the pointer helper holds the pen's mouse, so Android didn't scroll itself
+            val gesture = if (value == "UP") PresentationGesture.SWIPE_TOWARD_TIP else PresentationGesture.SWIPE_AWAY
+            val a = gesture.action(settings)
+            EventLog.add(
+                EventLog.Source.PEN, "REL_WHEEL $value",
+                "Swipe ${if (value == "UP") "toward the tip" else "away from the tip"} → ${a.action.name.lowercase().replace('_', ' ')}",
+            )
+            if (presentationActive()) {
+                runner.run(a, 1, battery)
+                if (settings.vibrateScroll) feedbackBuzz(now)
+            }
             return
         }
         if (key == "KEY_F19") {
@@ -480,16 +498,28 @@ class PenService : Service() {
             }
             val held = now - surfaceDownAt
             val tap = held < SURFACE_TAP_MS
-            EventLog.add(
-                EventLog.Source.PEN, "KEY_F19 ${held}ms",
-                if (tap) "Tap on the surface near the tip" + if (settings.clickSurfaceTap) " → click at the pointer" else ""
-                else "Surface near the tip held (air mouse)",
-            )
-            if (tap && presentationActive() && settings.clickSurfaceTap) bridge.click()
-            if (tap && presentationActive() && settings.vibrateTap) feedbackBuzz(now)
-        } else if (down) {
-            EventLog.add(EventLog.Source.PEN, key, "Presentation key (meaning unknown)")
+            EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
+            if (!tap || !presentationActive()) return
+            if (handler.hasCallbacks(singleTap)) {
+                // Second tap of a double tap: the double tap (F20 and the Bluetooth notification) handles it
+                handler.removeCallbacks(singleTap)
+                return
+            }
+            // A double tap on the touch area is two taps; wait to see whether a second one follows.
+            handler.postDelayed(singleTap, SINGLE_TAP_WAIT_MS)
+        } else if (key == "KEY_F20" && down) {
+            handler.removeCallbacks(singleTap)
+            EventLog.add(EventLog.Source.PEN, key, "Double tap on the touch area (the Bluetooth double tap handles it)")
         }
+    }
+
+    /** A single tap on the touch area that wasn't followed by a second one. */
+    private val singleTap = Runnable {
+        if (!presentationActive()) return@Runnable
+        val a = PresentationGesture.TAP.action(settings)
+        EventLog.add(EventLog.Source.APP, "presentation tap", "Single tap → ${a.action.name.lowercase().replace('_', ' ')}")
+        runner.run(a, 1, battery)
+        if (settings.vibrateTap) feedbackBuzz(SystemClock.uptimeMillis())
     }
 
     /** A short vibration for presentation gestures, at most one per [FEEDBACK_GAP_MS]. */
@@ -499,7 +529,13 @@ class PenService : Service() {
         write(PenProtocol.buzz())
     }
 
-    private fun clicksOnDoubleTap() = presentationActive() && settings.clickDoubleTap && bridge.ready
+    /** The double-tap action while presentation mode is active, or null to run shortcuts as usual. */
+    private fun doubleTapAction(): Shortcut? {
+        if (!presentationActive()) return null
+        return PresentationGesture.DOUBLE_TAP.action(settings).takeIf { it.action != Shortcut.Action.NOTHING }
+    }
+
+    private fun clicksOnDoubleTap() = doubleTapAction() != null
 
     // --- one GATT operation at a time ---
 
@@ -549,6 +585,7 @@ class PenService : Service() {
         private const val OP_TIMEOUT_MS = 5000L
         private const val FOREGROUND_POLL_MS = 1000L
         private const val SURFACE_TAP_MS = 250L
+        private const val SINGLE_TAP_WAIT_MS = 300L
         private const val FEEDBACK_GAP_MS = 150L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */

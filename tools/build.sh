@@ -20,8 +20,19 @@ fi
 
 rm -rf "$OUT"; mkdir -p "$OUT"
 cp "$ROOT/app/build/outputs/apk/release/app-release.apk" "$OUT/Stylo2.apk"
+
+# Root pointer helper (run by app_process, so a plain dex in a jar)
+ANDROID_JAR=$(ls -d "$ANDROID_HOME"/platforms/android-3*/android.jar | sort -V | tail -n1)
+BT=$(ls -d "$ANDROID_HOME"/build-tools/3* | sort -V | tail -n1)
+mkdir -p "$OUT/helper/classes" "$OUT/helper/dex"
+"$JAVA_HOME/bin/javac" --release 11 -Xlint:-options -nowarn -classpath "$ANDROID_JAR" \
+    -d "$OUT/helper/classes" $(find "$ROOT/helper/src" -name '*.java')
+"$BT/d8" --release --min-api 31 --lib "$ANDROID_JAR" --output "$OUT/helper/dex" \
+    $(find "$OUT/helper/classes" -name '*.class')
+(cd "$OUT/helper/dex" && zip -q "$OUT/penpointer.jar" classes.dex)
 STAGE=$OUT/stage; cp -r "$ROOT/module" "$STAGE"
 cp "$OUT/Stylo2.apk" "$STAGE/Stylo2.apk"
+cp "$OUT/penpointer.jar" "$STAGE/penpointer.jar"
 find "$STAGE" -name '*.sh' -exec sed -i 's/\r$//' {} + -exec chmod 0755 {} +
 chmod 0755 "$STAGE/META-INF/com/google/android/update-binary"
 ZIP=$OUT/OnePlus_Pad2_Stylo2-v$VERSION.zip

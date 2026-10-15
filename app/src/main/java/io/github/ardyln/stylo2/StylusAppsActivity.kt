@@ -43,6 +43,17 @@ class StylusAppsActivity : AppCompatActivity() {
         show()
     }
 
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.reset, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        if (item.itemId != R.id.reset) return super.onOptionsItemSelected(item)
+        ResetScope.STYLUS_APPS.confirm(this) { recreate() }
+        return true
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true

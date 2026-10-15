@@ -4,10 +4,11 @@
 #   external stylus whose button Android merges into the pen's events. When the app closes
 #   the pipe, `uinput` exits and the device goes away, so a held button can't get stuck.
 # - publishes Saber's active tool (its "lastTool" pref) to the app's saber_tool file.
-# - forwards the pen's presentation input to the app's pen_keys.fifo: the keys from its HID keyboard
-#   (F19 while the touch area near the tip is touched, F20) as "KEY_F19 DOWN", and the scroll steps
-#   from its HID mouse (swipes on the touch area) as "REL_WHEEL UP" / "REL_WHEEL DOWN".
+# - forwards the pen's presentation keys from its HID keyboard (F19 while the touch area near the
+#   tip is touched, F20) to the app's pen_keys.fifo as "KEY_F19 DOWN";
+# - runs the pointer helper, which takes over the pen's HID mouse in presentation mode.
 
+MODDIR=${0%/*}
 PKG=io.github.ardyln.stylo2
 FILES=/data/data/$PKG/files
 SABER_PREFS=/data/data/com.adilhanney.saber/shared_prefs/FlutterSharedPreferences.xml
@@ -84,27 +85,20 @@ keys_loop() {
     done
 }
 
-# The mouse also sends hundreds of movement events per second in presentation mode; grep keeps
-# only the scroll steps before the shell loop sees them.
-wheel_loop() {
+# Presentation mode: takes the pen's HID mouse exclusively while the app asks for it, passes the
+# movement on and sends the swipes (scroll steps) to the app (helper/src/.../PenPointer.java).
+pointer_loop() {
     while true; do
-        dev=$(pen_device Mouse)
-        if [ -z "$dev" ] || [ ! -p "$FILES/pen_keys.fifo" ]; then
-            sleep 5
-            continue
+        if [ -f "$MODDIR/penpointer.jar" ] && [ -d "$FILES" ]; then
+            CLASSPATH="$MODDIR/penpointer.jar" app_process /system/bin io.github.ardyln.stylo2.helper.PenPointer \
+                "$FILES" >/dev/null 2>&1
         fi
-        getevent -l "$dev" 2>/dev/null | grep --line-buffered ' REL_WHEEL ' | while read -r _ _ value; do
-            case "$value" in
-                ffff*) echo "REL_WHEEL DOWN" ;;
-                *) echo "REL_WHEEL UP" ;;
-            esac
-        done > "$FILES/pen_keys.fifo"
-        sleep 1
+        sleep 3
     done
 }
 
 log "stylus bridge started"
 button_loop &
 keys_loop &
-wheel_loop &
+pointer_loop &
 tool_loop

@@ -46,6 +46,9 @@ class ShortcutEditor(private val context: Context) {
                 Shortcut.Action.NEXT_TEXTURE -> R.drawable.ic_texture_pencil
                 Shortcut.Action.NEXT_PAGE -> R.drawable.ic_action_page_next
                 Shortcut.Action.PREVIOUS_PAGE -> R.drawable.ic_action_page_previous
+                Shortcut.Action.SCROLL_UP, Shortcut.Action.SCROLL_DOWN -> R.drawable.ic_gesture_swipe
+                Shortcut.Action.CLICK -> R.drawable.ic_gesture_click
+                Shortcut.Action.NOTHING -> R.drawable.ic_texture_off
             }
         )
     }
@@ -58,6 +61,8 @@ class ShortcutEditor(private val context: Context) {
         Shortcut.Action.OPEN_APP -> context.getString(R.string.action_open_app_named, s.arg?.let { appLabel(it) } ?: "?")
         Shortcut.Action.BROADCAST -> context.getString(R.string.action_broadcast_named, s.arg ?: "?")
         Shortcut.Action.WEBHOOK -> context.getString(R.string.action_webhook_named, webhookHost(s.arg))
+        Shortcut.Action.SCROLL_UP -> context.getString(R.string.action_scroll_up_named, s.arg?.toIntOrNull() ?: 1)
+        Shortcut.Action.SCROLL_DOWN -> context.getString(R.string.action_scroll_down_named, s.arg?.toIntOrNull() ?: 1)
         else -> actionName(s.action)
     }
 
@@ -76,6 +81,10 @@ class ShortcutEditor(private val context: Context) {
             Shortcut.Action.NEXT_TEXTURE -> R.string.action_next_texture
             Shortcut.Action.NEXT_PAGE -> R.string.action_next_page
             Shortcut.Action.PREVIOUS_PAGE -> R.string.action_previous_page
+            Shortcut.Action.SCROLL_UP -> R.string.action_scroll_up
+            Shortcut.Action.SCROLL_DOWN -> R.string.action_scroll_down
+            Shortcut.Action.CLICK -> R.string.action_click
+            Shortcut.Action.NOTHING -> R.string.action_nothing
         }
     )
 
@@ -84,8 +93,11 @@ class ShortcutEditor(private val context: Context) {
         url?.let { runCatching { android.net.Uri.parse(it).host }.getOrNull() } ?: "?"
 
     /** Picks an action (and its app, intent action or URL), then calls [onDone]. */
-    fun chooseAction(title: String, existing: Shortcut?, onDone: (Shortcut) -> Unit) {
-        val actions = Shortcut.Action.entries
+    /** [presentation]: also offer scroll, click and nothing first (presentation gestures). */
+    fun chooseAction(title: String, existing: Shortcut?, presentation: Boolean = false, onDone: (Shortcut) -> Unit) {
+        val actions = Shortcut.Action.entries.filter { !it.presentationOnly } .let { normal ->
+            if (presentation) Shortcut.Action.entries.filter { it.presentationOnly } + normal else normal
+        }
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setItems(actions.map { actionName(it) }.toTypedArray()) { _, which ->
@@ -103,8 +115,24 @@ class ShortcutEditor(private val context: Context) {
                         R.string.webhook_title, R.string.webhook_hint, R.string.webhook_help, previous,
                         valid = { it.startsWith("http://") || it.startsWith("https://") },
                     ) { onDone(base.copy(arg = it)) }
+                    Shortcut.Action.SCROLL_UP, Shortcut.Action.SCROLL_DOWN -> pickScrollSteps(previous) {
+                        onDone(base.copy(arg = it.toString()))
+                    }
                     else -> onDone(base.copy(arg = null))
                 }
+            }
+            .show()
+    }
+
+    private fun pickScrollSteps(previous: String?, onPicked: (Int) -> Unit) {
+        val max = ShortcutRunner.MAX_SCROLL
+        val labels = (1..max).map { context.getString(R.string.scroll_strength_item, it) }.toTypedArray()
+        val current = (previous?.toIntOrNull() ?: 1).coerceIn(1, max) - 1
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.scroll_strength_title)
+            .setSingleChoiceItems(labels, current) { d, which ->
+                d.dismiss()
+                onPicked(which + 1)
             }
             .show()
     }

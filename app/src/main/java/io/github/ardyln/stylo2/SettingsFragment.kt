@@ -65,6 +65,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
             )
             true
         }
+        findPreference<Preference>("reset_all")!!.setOnPreferenceClickListener {
+            ResetScope.ALL.confirm(requireContext()) { requireActivity().recreate() }
+            true
+        }
         focusPreference.setOnPreferenceClickListener {
             if (!FocusService.running && !FocusService.ensureEnabled(requireContext())) {
                 Toast.makeText(requireContext(), R.string.focus_needs_module, Toast.LENGTH_LONG).show()

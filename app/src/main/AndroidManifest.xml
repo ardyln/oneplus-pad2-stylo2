@@ -59,6 +59,18 @@
             android:exported="false"
             android:parentActivityName=".SettingsActivity" />
 
+        <!-- Long-pressing one of the Quick Settings tiles opens its page -->
+        <activity
+            android:name=".TileSettingsActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+        </activity>
+
         <service android:name=".PenService" android:exported="false" />
 
         <service

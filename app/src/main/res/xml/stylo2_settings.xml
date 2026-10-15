@@ -95,5 +95,11 @@
             android:key="bridge_status"
             android:title="@string/bridge_title"
             android:selectable="false" />
+
+        <Preference
+            android:key="reset_all"
+            android:title="@string/reset_all_title"
+            android:summary="@string/reset_all_summary"
+            android:persistent="false" />
     </PreferenceCategory>
 </PreferenceScreen>

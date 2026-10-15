@@ -31,6 +31,7 @@ class StylusBridge(
     private val keysFifo = File(context.filesDir, "pen_keys.fifo")
     private val keysThread = Thread(::readKeys, "pen-keys").apply { isDaemon = true }
     private val toolFile = File(context.filesDir, "saber_tool")
+    private val grabFile = File(context.filesDir, "pen_grab")
     private val io = Executors.newSingleThreadExecutor()
     private var out: FileOutputStream? = null
     private var observer: FileObserver? = null
@@ -71,6 +72,7 @@ class StylusBridge(
 
     fun stop() {
         stopped = true
+        setGrab(false)
         observer?.stopWatching()
         // If connect() is still waiting for the helper, open the reading end ourselves so it returns.
         if (!ready) {
@@ -99,6 +101,24 @@ class StylusBridge(
             send("""{"id":2,"command":"delay","duration":$CLICK_MS}""")
             send("""{"id":2,"command":"inject","events":[1,$BTN_LEFT,0,0,0,0]}""")
         }
+    }
+
+    /**
+     * Asks the root pointer helper to take over the pen's HID mouse (presentation mode), so swipes
+     * reach the app instead of scrolling directly. See helper/.../PenPointer.java.
+     */
+    fun setGrab(on: Boolean) {
+        try {
+            grabFile.writeText(if (on) "1" else "0")
+        } catch (e: IOException) {
+            Log.w(PenService.TAG, "pen_grab: $e")
+        }
+    }
+
+    /** Scrolls [steps] wheel steps (positive is up) through the virtual "Stylo 2 click" mouse. */
+    fun scroll(steps: Int) {
+        if (!ready || steps == 0) return
+        io.execute { send("""{"id":2,"command":"inject","events":[2,8,$steps,2,11,${steps * 120},0,0,0]}""") }
     }
 
     /** A key press (down and up) through the virtual "Stylo 2 keys" keyboard, e.g. [KEY_PAGEDOWN]. */
@@ -199,7 +219,7 @@ class StylusBridge(
         private const val REGISTER_CLICK = """{"id":2,"command":"register","name":"Stylo 2 click",""" +
             """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
             """{"type":"UI_SET_EVBIT","data":[1,2]},{"type":"UI_SET_KEYBIT","data":[$BTN_LEFT,$BTN_RIGHT]},""" +
-            """{"type":"UI_SET_RELBIT","data":[0,1]}]}"""
+            """{"type":"UI_SET_RELBIT","data":[0,1,8,11]}]}"""
 
         /** A keyboard with only the page keys, for the next/previous page shortcuts. */
         private const val REGISTER_KEYS = """{"id":3,"command":"register","name":"Stylo 2 keys",""" +

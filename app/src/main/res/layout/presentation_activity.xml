@@ -83,7 +83,17 @@
 
             <TextView
                 style="@style/Stylo2.SectionHeader"
-                android:text="@string/presentation_gestures" />
+                android:text="@string/gesture_actions_header" />
+
+            <TextView
+                android:id="@+id/gestures_help"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:paddingBottom="4dp"
+                android:text="@string/gesture_actions_help"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?android:attr/textColorSecondary" />
 
             <LinearLayout
                 android:id="@+id/gestures"
@@ -123,18 +133,6 @@
                 android:paddingHorizontal="8dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="?android:attr/textColorSecondary" />
-
-            <TextView
-                style="@style/Stylo2.SectionHeader"
-                android:text="@string/presentation_click" />
-
-            <include
-                android:id="@+id/click_double_tap"
-                layout="@layout/item_switch_row" />
-
-            <include
-                android:id="@+id/click_surface_tap"
-                layout="@layout/item_switch_row" />
 
             <TextView
                 style="@style/Stylo2.SectionHeader"
