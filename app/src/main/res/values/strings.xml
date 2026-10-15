@@ -86,7 +86,7 @@
     <string name="charger_detached">Removed from the charger</string>
     <string name="tap_window_value">Time to chain double taps: %1$.1f s</string>
     <string name="seconds_value">%1$.1f s</string>
-    <string name="shortcuts_help">Double tap the thumb area of the pen to run a shortcut. Double tap twice in a row for the second one, three times for the third, and so on. Drag the handle to reorder, swipe sideways to remove.</string>
+    <string name="shortcuts_help">Double tap the thumb area of the pen to run a shortcut. Double tap twice in a row for the second one, three times for the third, and so on. Drag the handle to reorder, swipe sideways to remove. Choose Nothing to skip a count, for example to run something only on four double taps in a row.</string>
     <string name="shortcuts_empty">No shortcuts yet. Tap Add shortcut and choose what a double tap should do.</string>
     <string name="shortcut_add">Add shortcut</string>
     <string name="shortcut_drag">Drag to reorder</string>

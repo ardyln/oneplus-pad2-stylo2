@@ -52,7 +52,7 @@ class ShortcutsActivity : AppCompatActivity() {
 
         val add = findViewById<ExtendedFloatingActionButton>(R.id.add)
         add.setOnClickListener {
-            editor.chooseAction(editor.tapsLabel(items.size + 1), null) { s ->
+            editor.chooseAction(editor.tapsLabel(items.size + 1), null, allowNothing = true) { s ->
                 items += s
                 adapter.notifyItemInserted(items.size - 1)
                 list.scrollToPosition(items.size - 1)
@@ -214,7 +214,7 @@ class ShortcutsActivity : AppCompatActivity() {
             h.itemView.setOnClickListener {
                 val pos = h.bindingAdapterPosition
                 if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
-                editor.chooseAction(editor.tapsLabel(pos + 1), items[pos]) { changed ->
+                editor.chooseAction(editor.tapsLabel(pos + 1), items[pos], allowNothing = true) { changed ->
                     items[pos] = changed
                     adapter.notifyItemChanged(pos)
                     saved()
