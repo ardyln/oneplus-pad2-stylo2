@@ -222,6 +222,22 @@ tablet learns its address from the kernel's `pencil_addr` event). The app itself
 to the Pad 2 apart from the install check, but without a way to pair the pen elsewhere, the module
 stays Pad 2 only.
 
+## 11. Installing the app from the boot script
+
+KernelSU without a mounting metamodule doesn't overlay `system/`, so `service.sh` installs the app with
+`pm install`. `pm` hands its stdin and output to `system_server`, which matters:
+
+- **A pipe** (`out=$(pm install …)`) stays open on the `system_server` side while an install waits,
+  so `$(…)` never returned and the boot script hung (seen after removing and reinstalling the module).
+- **A file under `/data/adb`** is refused: the call fails at once with `Failed transaction`
+  (`system_server` may not use those file descriptors). The same applies to `settings`, which goes
+  through the same path.
+
+So `pm` reads from `/dev/null` and writes to a file in `/data/local/tmp`, with a 2-minute limit, and
+the app is only recorded as installed when the output says `Success`; otherwise the next boot tries
+again. Tested by removing and reinstalling both Pad 2 modules and rebooting: both apps installed at
+boot.
+
 ## Tools
 
 `tools/research/` has the scripts used for the tests above (they need adb and root). The pen's address is
