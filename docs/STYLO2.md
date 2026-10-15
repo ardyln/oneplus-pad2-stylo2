@@ -30,7 +30,7 @@ It is reported only over a vendor GATT characteristic that nothing on AOSP subsc
 | `18093398-2a69-11ec-8d3d-0242ac130003` / **`180938ac-…`** | notify | **Thumb button**: `01` per **double tap** (corrected 2026-10-14; single taps, holds and slides send nothing). Events can come ~0.4 s apart. Doesn't wake a sleeping pen. Only sent while other notifications are subscribed too |
 | `18093398-…` / `1809396a-…` | notify | On the magnetic charger: `20` attached, `21` detached (with `chg evt …` on the console). Corrected 2026-10-14; first noted the other way round |
 | `18093398-…` / `180937bc-…` | notify | Battery level (`64` = 100 %) |
-| `18093398-…` / `180932da-…` | notify | not seen yet |
+| `18093398-…` / `180932da-…` | notify | not seen yet (stock: a 2-byte log code) |
 | `18092dbc-…` / `18093046-…` | write, notify | Pencil status `2c900101` + `00` idle / `01` active (LineageOS already decodes/acks this) |
 | `18092dbc-…` / `1809314a-…` | read | battery percent (`64` = 100 %, `60` = 96 %) |
 | `18092dbc-…` / `18093212-…` | read | unknown: read `21` both on and off the magnet; not the charger state |
@@ -63,9 +63,10 @@ not kept in this repo.
 | `2c 90 01 01 01` / `… 00` | pencil enabled / disabled (`settings_enable_oppo_pencil`) |
 | `2c 92 01 02 ff 02` | **one-shot vibration** (SDK `FUNCTION_VIBRATION`) |
 | `2c 94 02 <type> <level+1>` | **writing texture**: type 0 pencil, 1 eraser, 2 ballpen, 3 pen; level default 2 (sent as `03`). Sent on connect (`initFeedbackTypeAndLevel`) and when the setting changes |
-| `2c 91 01 00`, `2c 93 01 00` | not decoded yet |
+| `2c 91 01 00`, `2c 93 01 00` | not decoded yet (later: presentation mode off/on and its pointer mode, see RESEARCH.md) |
 
-**Textured vibration while writing is not driven over BLE.** The SDK calls `startFeedBackVibration()` /
+**Textured vibration while writing is not driven over BLE.** (Corrected by the tests below: on the
+Pad 2 the pen produces the texture itself once it has `2c 94`.) The SDK calls `startFeedBackVibration()` /
 `stopFeedBackVibration()` map to `OplusTouchNodeManager.writeNodeFileByDevice(0, 38, "3" / "2")`.
 Node 38 in the touch HAL table (`/odm/bin/hw/vendor-oplus-hardware-touch-V2-service`) is
 **`/proc/touchpanel/pencil_control`** (0666). In the NT36532 driver, `3` sends
@@ -136,6 +137,10 @@ matter for other tablets or touch ICs. Its value after these tests is `2`; it re
 - The pen sleeps after about a minute idle; thumb touches don't wake it, but moving it or hovering near the screen does.
 
 ## Next steps
+
+(Step 1 is done: that's this repo's module and app, with an app instead of a priv-app and actions instead
+of `KEYCODE_STYLUS_BUTTON_*`. Step 2 is still open.)
+
 1. Service (KernelSU module, priv-app), written from this spec only: on each pen BLE connection send the
    chosen texture (or off); settings for type, level and on/off; thumb button (`180938ac`) →
    `KEYCODE_STYLUS_BUTTON_*` or a chosen action, with an optional `oneshot` buzz as confirmation.

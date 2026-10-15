@@ -2,12 +2,11 @@
 
 How the OnePlus Stylo 2 features were worked out for AOSP ROMs, on a OnePlus Pad 2 (`caihong`) running
 PixelOS 17 (Android 17) with KernelSU, October 2026. The protocol summary is in [PROTOCOL.md](PROTOCOL.md);
-the earlier passive GATT investigation is in `docs/STYLO2.md` of the
-[keyboard module repo](https://github.com/ardyln/oneplus-pad2-keyboard-ble).
+the earlier passive GATT investigation is the research log in [STYLO2.md](STYLO2.md).
 
 Not included here, on purpose: OnePlus's APK, its decompiled code and the touch HAL binary (copyrighted
 by OnePlus; only facts learned from them are written down), copies of AOSP, kernel and Saber sources
-(linked instead), device addresses and screenshots.
+(linked instead), device addresses, and screenshots of the stock app or OxygenOS.
 
 ## 1. The stock OxygenOS app
 
@@ -45,7 +44,7 @@ by OnePlus; only facts learned from them are written down), copies of AOSP, kern
   | `2c 90 01 01 01` / `00` | pencil enabled / disabled |
   | `2c 92 01 02 ff 02` | startVibration (one short vibration) |
   | `2c 94 02 <type> <level+1>` | writing feedback type and level; `<type> 00` = off (`setWrittenFeedbackState`) |
-  | `2c 91 01 00`, `2c 93 01 00` | not decoded |
+  | `2c 91 01 <0/1>`, `2c 93 01 <0/1>` | presentation mode off/on, and its pointer mode (see section 6) |
 
 - `a6ed0401-…` is the **Goodix DFU** (firmware update) service (`com.goodix.ble.gr.lib.dfu.v2.DfuProfile`).
   This project never writes to it.
@@ -112,13 +111,21 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
   `TouchInputMapper::applyExternalStylusButtonState` merges its buttons into the touchscreen's stylus
   pointer. Without a pressure axis, `assignExternalStylusId` skips pointer fusion ("Stylus does not
   support pressure, no pointer fusion needed"), so the pen's own pressure, tilt and timing are untouched.
-  A tool type (eraser) is only passed on by devices that also report pressure, so that route wasn't used.
+  A tool type (eraser) is only passed on by devices that also report pressure (`applyExternalStylusTouchState`;
+  `assignExternalStylusId` starts pointer fusion only when the external pressure is above 0).
 - **Creating the device:** Android's own `/system/bin/uinput` tool (`uinput -` reads JSON commands from
   stdin). Registering `{"type":"UI_SET_EVBIT","data":[1]}`, `{"type":"UI_SET_KEYBIT","data":[331,332]}`
   gives `classes=KEYBOARD | EXTERNAL_STYLUS | EXTERNAL`; injecting `[1,331,1,0,0,0]` presses the button.
   When the stdin stream closes, the tool exits and the device disappears.
 - Verified with Saber: while the virtual button was held, hovering switched Saber to the eraser and
   every stroke erased.
+- Other apps with the primary button held: Notewise and Xodo react to it (their own stylus button
+  handling); Google Keep and Xournal++ Mobile ignore it.
+- **Eraser end, tried and dropped:** a test device with `BTN_TOOL_RUBBER` (and, in a second try,
+  `ABS_PRESSURE` held at its maximum so Android fuses the pointer) did not make Google Keep erase. With
+  pressure, the fused pen would also lose its own pressure, and while such a device reports zero
+  pressure every touch waits up to 72 ms (`EXTERNAL_STYLUS_DATA_TIMEOUT`) for stylus data, so this
+  route isn't used.
 
 ## 6. Presentation mode
 
@@ -133,8 +140,25 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
   `180938ac` double-tap notification (tested later), so it adds no gesture of its own.
 - Nothing extra is sent on the vendor characteristics; the console prints `film FF` / `film 05`
   (swipes), `film 06` / `film 08` (hold start and end).
+- **Tap timing,** measured with the app's log: taps on the touch area lasted 30–420 ms, deliberate holds
+  600 ms and more. A double tap on the touch area is two short F19 presses followed by `KEY_F20` and
+  the `180938ac` notification, so a single tap has to wait briefly (default 300 ms) before it can run.
 
-## 7. Saber
+## 7. Taking over the pen's mouse
+
+Goal: let the user remap the swipes (e.g. to next/previous page) instead of Android scrolling.
+
+- `EVIOCGRAB` (`0x40044590`) on the pen's "OnePlus Stylo 2 Mouse" event device gives one process all of
+  its events; Android then ignores the pen's mouse (tested: Android stayed still while the test caught
+  1,183 events). The kernel ends the grab when the process exits, so a crash can't leave the pen dead.
+- Java in a root `app_process` can call it through the hidden `android.system.Os.ioctlInt` (reflection).
+  Calling `available()` on the event device's stream killed the process; blocking reads work.
+- The helper (`helper/`, `penpointer.jar`) grabs while the app's `files/pen_grab` contains `1`, sends
+  `REL_X`/`REL_Y` and buttons on through its own `uinput` device ("Stylo 2 pointer"), and forwards each
+  wheel step to the app as `REL_WHEEL UP`/`DOWN`. The app then scrolls (its virtual mouse has
+  `REL_WHEEL` and `REL_WHEEL_HI_RES`), sends Page Up/Down, clicks, or runs any shortcut action.
+
+## 8. Saber
 
 - Package `com.adilhanney.saber` (GPL-3.0). Saber doesn't use any OnePlus API.
 - Tools are `ToolId` (`packages/sbn/lib/tool_id.dart`): 0 highlighter, 1 fountain pen, 2 ballpoint pen,
@@ -149,7 +173,7 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
 - Saber's [contributing rules](https://github.com/saber-notes/saber/blob/main/.github/CONTRIBUTING.md)
   don't accept AI-generated code, so this project integrates from the outside instead of patching Saber.
 
-## 8. Which app is in front
+## 9. Which app is in front
 
 - In desktop windowing mode several apps stay resumed, so `UsageEvents.ACTIVITY_RESUMED` misses focus
   changes between visible windows.

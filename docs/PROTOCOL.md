@@ -99,7 +99,7 @@ pen's motion sensor. Everything then arrives as **standard HID input** on the pe
 
 | Gesture on the flat surface near the tip | HID input |
 |---|---|
-| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released |
+| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released (taps measured 30–420 ms, deliberate holds 600 ms and more) |
 | swipe in one direction / the other | `REL_WHEEL` +1 / −1 (with `REL_WHEEL_HI_RES` ±120) |
 | moving the pen | `REL_X` / `REL_Y` (air mouse): mode 0 only while the surface is touched, mode 1 always |
 | double tap on the touch area | a short `KEY_F20` press, together with the usual double tap on `180938ac` (tested) |
@@ -110,7 +110,9 @@ On OxygenOS the system turns this into page turns and an on-screen laser dot (`I
 .setLaserMode`, system feature `oplus.software.laser.support`); stock's "Presentation mode" switch sends
 `2c 91 01 01` and resets the mode to 0, and per its settings the pen stays in presentation mode until
 it's attached to the tablet again. On PixelOS, Android treats the input as a mouse: the wheel scrolls
-or zooms, and the motion moves a mouse cursor.
+or zooms, and the motion moves a mouse cursor. This module instead takes the pen's mouse exclusively
+while presentation mode is on (`EVIOCGRAB`), passes the movement on through a virtual mouse, and runs
+the action the user chose for each swipe.
 
 ## Messages from the pen on `18093046`
 
@@ -127,7 +129,9 @@ Stock treats any reply it doesn't recognise as a charging-state reply (byte 4: 1
 In order, about 300 ms apart: query battery, firmware version, pencil type, serial number, hardware
 version and charging state; send the magnet state (`2c 38`/`2c 39`); enable battery notifications;
 then send the writing feedback setting (`2c 94`) and the presentation-mode settings (`2c 91`, `2c 93`).
-This module only sends `2c 94` (and reads `1809314a`), which is enough.
+This module sends `2c 94` after every connection and on each change (which is enough for the
+haptics), `2c 91` and `2c 93` when presentation mode is turned on or off, and `2c 92` for its
+confirmation buzz. It reads `1809314a` for the battery and never sends the queries.
 
 ## Debug console (Nordic UART `6e400003`)
 

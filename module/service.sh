@@ -47,5 +47,5 @@ case ":$cur:" in
         ;;
 esac
 
-# Virtual stylus button and Saber's tool, for the notes-app features.
+# Root helper: virtual input devices, Saber's tool, the pen's presentation keys and its mouse.
 sh "$MODDIR/stylus-bridge.sh" </dev/null >/dev/null 2>&1 &

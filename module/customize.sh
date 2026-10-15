@@ -11,4 +11,4 @@ set_perm_recursive "$MODPATH" 0 0 0755 0644
 for f in service.sh uninstall.sh stylus-bridge.sh; do
     set_perm "$MODPATH/$f" 0 0 0755
 done
-ui_print "- After reboot, open the Stylo 2 app to choose texture, strength and button action."
+ui_print "- After reboot, open the Stylo 2 app to set up writing feel, shortcuts and presentation mode."

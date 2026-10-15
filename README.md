@@ -7,22 +7,32 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
   the texture (pencil, eraser, ballpoint pen, pen) and the strength.
 - **Thumb-button shortcuts**: the pen reports double taps; chain them (double tap, double tap ×2, …)
   and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
-  or a Home Assistant webhook, next/previous page, and switching the app's own settings.
-- **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture.
-- **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
-  eraser, and the texture follows the active tool, with a texture and strength per tool.
+  or a Home Assistant webhook, next/previous page, applying a preset, and switching the app's own
+  settings.
+- **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture. Long-press a
+  tile to open its page.
+- **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser, and the
+  texture follows the active tool, with a texture and strength per tool. Both can be turned off.
 - **Other apps**: in apps you add to this list, a double tap holds or releases Android's primary
   stylus button (`BUTTON_STYLUS_PRIMARY`); what that does is up to the app. Optionally, one texture
   applies to all of them.
-
-- **Presets**: save all settings under a name and switch between setups from the app or with a
-  shortcut ("Apply preset").
 - **Presentation mode**: the touch area near the tip becomes a remote: touch and move the pen to move
   the pointer (air mouse), and give each gesture (swipe toward or away from the tip, single tap, double
   tap) an action: scroll with a chosen strength, click, next/previous page, or any shortcut action.
+  The tap timing is adjustable, with a live readout of how long each touch was.
+- **Presets**: save all settings under a name and switch between setups from the app or with a
+  shortcut ("Apply preset"). Every page can also be reset to its defaults.
 
 It also shows the pen's battery level and whether it's on the magnetic charger, and has a live event
 log for troubleshooting.
+
+## Screenshots
+
+| Main page | Saber |
+|---|---|
+| ![Main page: pen status, writing feedback, thumb button](docs/screenshots/main.png) | ![Saber: texture and strength per tool](docs/screenshots/saber.png) |
+| **Presentation mode** | **Other apps** |
+| ![Presentation mode: what each gesture does](docs/screenshots/presentation.png) | ![Other apps: primary stylus button and their own texture](docs/screenshots/other-apps.png) |
 
 ## How it works
 
@@ -35,28 +45,32 @@ No OnePlus code or apps are used.
 ## Install
 
 1. Pair the pen with the tablet as usual.
-2. Install the module zip with KernelSU or Magisk and reboot.
+2. Download the module zip from [Releases](https://github.com/ardyln/oneplus-pad2-stylo2/releases),
+   install it with KernelSU or Magisk and reboot.
 3. Open the **Stylo 2** app to choose the texture, strength, shortcuts and notes-app options.
 
 At boot the module:
 - installs the app and grants it background activity starts (to open apps from a shortcut), usage
   access, and an exemption from battery optimization;
 - enables the app's accessibility service "Stylo 2: active app", which only reads the package name of
-  the focused window (to know when Saber is in use, also in desktop windowing mode);
-- starts a root helper (`stylus-bridge.sh`) that creates two virtual input devices with Android's
-  `uinput` tool (a stylus button for Saber, a mouse button for presentation clicks, and Page Up/Down keys for the
-  page shortcuts), reads Saber's
-  settings file to see its active tool, forwards the pen's presentation keys to the app, and runs
-  `penpointer.jar`, which takes the pen's HID mouse exclusively in presentation mode so swipes can be
-  remapped (movement is passed on unchanged).
+  the focused window (to know when Saber or one of the other apps is in use, also in desktop
+  windowing mode);
+- starts a root helper (`stylus-bridge.sh`) that pipes the app's commands into Android's `uinput`
+  tool, which creates three virtual input devices: a stylus button (for Saber and the other apps), a
+  mouse (presentation clicks and scrolling) and a keyboard with Page Up/Down (page shortcuts). The
+  helper also reads Saber's settings file to see its active tool, forwards the pen's presentation keys
+  to the app, and runs `penpointer.jar` (source in `helper/`), which takes the pen's HID mouse
+  exclusively while presentation mode is on, so swipes can be remapped; pointer movement is passed on
+  unchanged through a fourth virtual device.
 
-Removing the module undoes all of this.
+Removing the module undoes all of this. KernelSU and Magisk show new versions from this repo's
+releases as module updates.
 
 ## Saber
 
 Saber itself is not modified. The integration works from the outside: Android merges the virtual
-stylus button into the pen's input (Saber uses the stylus button as its eraser), and the active tool
-is read from Saber's settings. Saber's developers aren't involved, so please don't report problems
+stylus button (`BUTTON_STYLUS_PRIMARY`) into the pen's input, which Saber uses as its eraser, and the
+active tool is read from Saber's settings. Saber's developers aren't involved, so please don't report problems
 with this integration to Saber.
 
 ## Build
@@ -75,12 +89,14 @@ SettingsLib, which is only available inside the Android source tree.
 | Path | Contents |
 |---|---|
 | `app/` | the Android app (Kotlin) |
+| `helper/` | `penpointer.jar`, the root helper for presentation mode (Java, run with `app_process`) |
 | `module/` | KernelSU/Magisk module scripts, including the root helper `stylus-bridge.sh` |
 | `docs/` | `PROTOCOL.md` (the pen's BLE protocol), `RESEARCH.md` (findings), `STYLO2.md` (research log) |
 | `tools/build.sh` | builds the app and the module zip |
 | `tools/penprobe/` | debug app used for the research: subscribes to the pen's notifications and can send a small allowlist of stock commands |
 | `tools/gatt_cache_dump.py` | decodes an Android `gatt_cache_*` file into services and characteristics |
 | `tools/research/` | test scripts and the tablet's input device list |
+| `update.json`, `CHANGELOG.md` | update information for KernelSU/Magisk, and the changes per version |
 
 ## Credits
 

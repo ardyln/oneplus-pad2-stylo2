@@ -22,7 +22,11 @@ class Settings(context: Context) {
     val otherStylusApps: Set<String> get() =
         (prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: emptySet()) - Saber.PACKAGE
     /** Whether a double tap toggles Saber's eraser (the primary stylus button). */
-    val saberEraser get() = prefs.getBoolean(KEY_SABER_ERASER, true)
+    val saberEraser get() = prefs.getBoolean(
+        KEY_SABER_ERASER,
+        // Settings from before v0.20 (e.g. an old preset): Saber was on or off the app list
+        prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null)?.contains(Saber.PACKAGE) ?: true,
+    )
     /** Every app where a double tap holds the stylus button: Saber (if on) and the other apps. */
     val stylusButtonApps: Set<String> get() = otherStylusApps + if (saberEraser) setOf(Saber.PACKAGE) else emptySet()
     val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
