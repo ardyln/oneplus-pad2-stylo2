@@ -143,8 +143,8 @@
     <string name="button_buzz_summary">A short vibration in the pen confirms that the double tap was detected</string>
     <string name="tap_window_title">Time to chain double taps</string>
     <string name="tap_window_summary">How long the app waits for the next double tap in a row. Shorter feels snappier, longer makes chains easier. Only matters when you have two or more shortcuts.</string>
-    <string name="broadcast_all_title">Broadcast every gesture</string>
-    <string name="broadcast_all_summary">Sends io.github.ardyln.stylo2.action.DOUBLE_TAP with the extras taps and gesture for every double tap, and io.github.ardyln.stylo2.action.CHARGER with attached and gesture when the pen goes on or off the charger, for Tasker and other automation apps</string>
+    <string name="broadcast_all_title">Send pen events to automation apps</string>
+    <string name="broadcast_all_summary">For Tasker, MacroDroid, Automate and similar apps. Besides running your shortcuts, the app sends an Android broadcast for every pen event:\n• Double taps: action io.github.ardyln.stylo2.action.DOUBLE_TAP, extras taps (1, 2, 3, …) and gesture (double_tap, double_tap_2, …)\n• Charger: action io.github.ardyln.stylo2.action.CHARGER, extras attached (true or false) and gesture (pen_attached, pen_detached)\nIn your automation app, add an \"intent received\" trigger with that action. While this is on, a double tap always waits for the full chain time before it runs, so automations can use longer chains.</string>
     <string name="test_buzz_title">Test vibration</string>
     <string name="test_buzz_summary">Makes the pen vibrate once</string>
 

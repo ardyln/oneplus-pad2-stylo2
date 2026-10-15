@@ -3,6 +3,8 @@
 ## 0.22
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
+- "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both
+  broadcasts, their extras and how to use them.
 
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.

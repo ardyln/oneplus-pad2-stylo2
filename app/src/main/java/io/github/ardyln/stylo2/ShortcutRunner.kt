@@ -108,7 +108,7 @@ class ShortcutRunner(
         const val EXTRA_TAPS = "taps"
         const val EXTRA_GESTURE = "gesture"
 
-        /** Broadcast for the charger, sent with "Broadcast every gesture": extras attached and gesture. */
+        /** Broadcast for the charger, sent with "Send pen events to automation apps": extras attached and gesture. */
         const val ACTION_CHARGER = "io.github.ardyln.stylo2.action.CHARGER"
         const val EXTRA_ATTACHED = "attached"
 
