@@ -87,7 +87,8 @@ Replies come as notifications on `18093046` and start with the same first 3–4 
 
 **Writing feedback** (`2c 94`):
 - `<type>`: `00` pencil, `01` eraser, `02` ballpoint pen, `03` pen.
-- `<level>`: `01`–`05` = strength 0–4 (the stock slider), `00` = off. Stock defaults: type 0, strength 2,
+- `<level>`: `01`–`05` = strength 0–4 (the stock slider), `00` = off. Strength 0 (`01`) is accepted
+  but can't be felt. Stock defaults: type 0, strength 2,
   feedback off.
 - The pen produces the texture itself while the tip touches the screen; nothing else has to be sent.
 - **The pen forgets it on every Bluetooth disconnect**; resend after each connection. It's kept while the

@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.21
+- Strength 0 is described correctly: the pen accepts it, but it can't be felt.
 - Other apps: the default texture is pencil at strength 4 (the strength used to follow the main one).
 
 ## 0.20

@@ -101,7 +101,7 @@ license, so only these facts are reused here, no code.
 
 - Types at default level: 1 eraser "more subtle, still friction"; 2 ballpen "even more subtle?"; 3 pen
   "subtle but consistent"; 0 pencil the clearest.
-- Pencil level 0 (`…00 01`): barely noticeable. Level 4 (`…00 05`): "definitely stronger than anything else".
+- Pencil level 0 (`…00 01`): barely noticeable. (Corrected later: in everyday use it can't be felt.) Level 4 (`…00 05`): "definitely stronger than anything else".
 - `2c 92 01 02 ff 02` (one-shot): single buzz felt, no screen contact needed.
 - `2` → `pencil_control` with texture set: **still vibrates**. After a Bluetooth reconnect with
   `pencil_control` = `2`, `2c 94 02 00 05` alone: **vibrates**. → **`pencil_control` is not needed on the

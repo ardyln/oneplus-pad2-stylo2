@@ -75,7 +75,7 @@ by OnePlus; only facts learned from them are written down), copies of AOSP, kern
 | Bluetooth off/on (pen reconnects) | texture gone; the pen forgets it on every disconnect |
 | only `2c 94 02 00 03` after reconnecting | texture back, so this is the only command needed |
 | types 0–3 at level 2 | pencil clearest; eraser subtler; ballpoint subtler still; pen subtle but steady |
-| level `01` / `05` | barely noticeable / strongest |
+| level `01` / `05` | barely noticeable / strongest (later, in everyday use, `01` couldn't be felt at all) |
 | `pencil_control` = 2 with texture set, and after a reconnect | still vibrates: the node isn't needed |
 | `2c 94 02 00 00` | vibration off |
 | `2c 92 01 02 ff 02` | one buzz, no screen contact needed |

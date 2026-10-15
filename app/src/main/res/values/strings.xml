@@ -17,7 +17,7 @@
     <string name="feedback_switch">Vibrate while writing</string>
     <string name="feedback_switch_summary">The pen gives a textured feel while you write, in every app</string>
     <string name="texture_label">Texture: %1$s</string>
-    <string name="strength_label">Strength: %1$d (0 is barely noticeable, 4 is the strongest)</string>
+    <string name="strength_label">Strength: %1$d (0 can\'t be felt, 4 is the strongest)</string>
     <string name="apps_category">Apps</string>
     <string name="reset_page">Reset to defaults</string>
     <string name="presets_title">Presets</string>
