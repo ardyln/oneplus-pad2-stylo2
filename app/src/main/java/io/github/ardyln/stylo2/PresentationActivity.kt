@@ -22,6 +22,9 @@ class PresentationActivity : AppCompatActivity() {
     private lateinit var pointer: MaterialButtonToggleGroup
     private lateinit var pointerDescription: TextView
     private val editor by lazy { ShortcutEditor(this) }
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    // The explanations mention the gesture actions, so they're redrawn when those change
+    private val sliderRefreshers = mutableListOf<() -> Unit>()
     private lateinit var vibrateScroll: View
     private lateinit var vibrateTap: View
     private lateinit var staysOn: View
@@ -58,9 +61,9 @@ class PresentationActivity : AppCompatActivity() {
 
 
         bindMsSlider(findViewById(R.id.tap_max), Settings.KEY_TAP_MAX, settings.tapMaxMs, 150, 800,
-            R.string.tap_max_title, R.string.tap_max_summary, instantAtZero = false)
+            R.string.tap_max_title, instantAtZero = false, ::tapMaxExplanation)
         bindMsSlider(findViewById(R.id.tap_wait), Settings.KEY_TAP_WAIT, settings.tapWaitMs, 0, 600,
-            R.string.tap_wait_title, R.string.tap_wait_summary, instantAtZero = true)
+            R.string.tap_wait_title, instantAtZero = true, ::tapWaitExplanation)
         staysOn = findViewById(R.id.stays_on)
         bindSwitchRow(staysOn, Settings.KEY_PRESENTATION_STAYS, R.string.presentation_stays_title,
             R.string.presentation_stays_summary) { settings.presentationStays }
@@ -74,11 +77,13 @@ class PresentationActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        handler.post(lastTouch)
         settings.prefs.registerOnSharedPreferenceChangeListener(prefsListener)
         refresh()
     }
 
     override fun onPause() {
+        handler.removeCallbacks(lastTouch)
         settings.prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         super.onPause()
     }
@@ -99,13 +104,53 @@ class PresentationActivity : AppCompatActivity() {
         return true
     }
 
+    private fun actionName(g: PresentationGesture): String {
+        val a = g.action(settings)
+        return if (g == PresentationGesture.DOUBLE_TAP && a.action == Shortcut.Action.NOTHING) {
+            getString(R.string.tap_runs_shortcuts)
+        } else {
+            editor.actionLabel(a)
+        }
+    }
+
+    private fun seconds(ms: Long) = getString(R.string.seconds_value_2, ms / 1000f)
+
+    /** What the "longest tap" value means, with the user's own actions. */
+    private fun tapMaxExplanation(ms: Int) = getString(
+        R.string.tap_max_explained, seconds(ms.toLong()), actionName(PresentationGesture.TAP),
+    )
+
+    /** What the "wait for a second tap" value means, with the user's own actions. */
+    private fun tapWaitExplanation(ms: Int) = if (ms == 0) {
+        getString(R.string.tap_wait_instant_explained, actionName(PresentationGesture.TAP), actionName(PresentationGesture.DOUBLE_TAP))
+    } else {
+        getString(
+            R.string.tap_wait_explained, seconds(ms.toLong()), actionName(PresentationGesture.TAP),
+            actionName(PresentationGesture.DOUBLE_TAP),
+        )
+    }
+
+    /** Live feedback: how long the last touch on the touch area was, and what it counted as. */
+    private val lastTouch = object : Runnable {
+        override fun run() {
+            val ms = PenService.lastTouchMs
+            findViewById<TextView>(R.id.last_touch).text = when {
+                !settings.presentation -> getString(R.string.last_touch_off)
+                ms < 0 -> getString(R.string.last_touch_none)
+                ms <= settings.tapMaxMs -> getString(R.string.last_touch_tap, seconds(ms), seconds(settings.tapMaxMs))
+                else -> getString(R.string.last_touch_hold, seconds(ms), seconds(settings.tapMaxMs))
+            }
+            handler.postDelayed(this, 300)
+        }
+    }
+
     /** A slider in seconds for a setting stored in milliseconds; steps of 50 ms. */
     private fun bindMsSlider(
         row: View, key: String, current: Long, minMs: Int, maxMs: Int,
-        title: Int, summary: Int, instantAtZero: Boolean,
+        title: Int, instantAtZero: Boolean, explain: (Int) -> String,
     ) {
         val titleView = row.findViewById<TextView>(android.R.id.title)
-        row.findViewById<TextView>(android.R.id.summary).setText(summary)
+        val summaryView = row.findViewById<TextView>(android.R.id.summary)
         val slider = row.findViewById<com.google.android.material.slider.Slider>(R.id.slider)
         fun label(ms: Int) = if (instantAtZero && ms == 0) getString(R.string.tap_instant)
             else getString(R.string.seconds_value_2, ms / 1000f)
@@ -114,11 +159,16 @@ class PresentationActivity : AppCompatActivity() {
         slider.stepSize = 50f
         slider.value = current.coerceIn(minMs.toLong(), maxMs.toLong()).toFloat()
         slider.setLabelFormatter { label(it.toInt()) }
-        titleView.text = getString(R.string.slider_title_value, getString(title), label(slider.value.toInt()))
+        fun show(ms: Int) {
+            titleView.text = getString(R.string.slider_title_value, getString(title), label(ms))
+            summaryView.text = explain(ms)
+        }
+        show(slider.value.toInt())
         slider.addOnChangeListener { _, v, fromUser ->
-            titleView.text = getString(R.string.slider_title_value, getString(title), label(v.toInt()))
+            show(v.toInt())
             if (fromUser) settings.prefs.edit().putInt(key, v.toInt()).apply()
         }
+        sliderRefreshers += { show(slider.value.toInt()) }
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
@@ -130,6 +180,7 @@ class PresentationActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
+        sliderRefreshers.forEach { it() }
         val on = settings.presentation
         val always = settings.presentationMode == 1
         mainSwitch.isChecked = on

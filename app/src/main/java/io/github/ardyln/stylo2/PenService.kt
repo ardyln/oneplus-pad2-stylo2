@@ -501,6 +501,8 @@ class PenService : Service() {
             val tap = held <= settings.tapMaxMs
             EventLog.add(EventLog.Source.PEN, "KEY_F19 ${held}ms", if (tap) "Tap on the touch area" else "Touch area held (air mouse)")
             Log.i(TAG, "touch area released after ${held} ms (${if (tap) "tap" else "hold"})")
+            lastTouchMs = held
+            lastTouchAt = SystemClock.uptimeMillis()
             if (!tap || !presentationActive()) return
             if (handler.hasCallbacks(singleTap)) {
                 // Second tap of a double tap: the double tap (F20 and the Bluetooth notification) handles it
@@ -591,6 +593,10 @@ class PenService : Service() {
         private const val FOREGROUND_POLL_MS = 1000L
 
         private const val FEEDBACK_GAP_MS = 150L
+
+        /** The last touch on the touch area, for the presentation page's live feedback. */
+        @Volatile var lastTouchMs = -1L
+        @Volatile var lastTouchAt = 0L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null
