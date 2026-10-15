@@ -60,10 +60,22 @@ class PresentationActivity : AppCompatActivity() {
         }
 
 
-        bindMsSlider(findViewById(R.id.tap_max), Settings.KEY_TAP_MAX, settings.tapMaxMs, 150, 800,
+        val tapMaxSlider = bindMsSlider(findViewById(R.id.tap_max), Settings.KEY_TAP_MAX, settings.tapMaxMs, 150, 800,
             R.string.tap_max_title, instantAtZero = false, ::tapMaxExplanation)
-        bindMsSlider(findViewById(R.id.tap_wait), Settings.KEY_TAP_WAIT, settings.tapWaitMs, 0, 600,
+        val tapWaitSlider = bindMsSlider(findViewById(R.id.tap_wait), Settings.KEY_TAP_WAIT, settings.tapWaitMs, 0, 600,
             R.string.tap_wait_title, instantAtZero = true, ::tapWaitExplanation)
+        findViewById<TapTimelineView>(R.id.timeline).apply {
+            tapMaxMs = settings.tapMaxMs
+            tapWaitMs = settings.tapWaitMs
+            onTapMaxChanged = { ms ->
+                settings.prefs.edit().putInt(Settings.KEY_TAP_MAX, ms.toInt()).apply()
+                tapMaxSlider.value = ms.toFloat()
+            }
+            onTapWaitChanged = { ms ->
+                settings.prefs.edit().putInt(Settings.KEY_TAP_WAIT, ms.toInt()).apply()
+                tapWaitSlider.value = ms.toFloat()
+            }
+        }
         staysOn = findViewById(R.id.stays_on)
         bindSwitchRow(staysOn, Settings.KEY_PRESENTATION_STAYS, R.string.presentation_stays_title,
             R.string.presentation_stays_summary) { settings.presentationStays }
@@ -133,7 +145,10 @@ class PresentationActivity : AppCompatActivity() {
     /** Live feedback: how long the last touch on the touch area was, and what it counted as. */
     private val lastTouch = object : Runnable {
         override fun run() {
-            findViewById<TapTimelineView>(R.id.timeline).tapMaxMs = settings.tapMaxMs
+            findViewById<TapTimelineView>(R.id.timeline).apply {
+                tapMaxMs = settings.tapMaxMs
+                tapWaitMs = settings.tapWaitMs
+            }
             val input = PenService.lastInput
             findViewById<TextView>(R.id.last_touch).text = when {
                 !settings.presentation -> getString(R.string.last_touch_off)
@@ -164,7 +179,7 @@ class PresentationActivity : AppCompatActivity() {
     private fun bindMsSlider(
         row: View, key: String, current: Long, minMs: Int, maxMs: Int,
         title: Int, instantAtZero: Boolean, explain: (Int) -> String,
-    ) {
+    ): com.google.android.material.slider.Slider {
         val titleView = row.findViewById<TextView>(android.R.id.title)
         val summaryView = row.findViewById<TextView>(android.R.id.summary)
         val slider = row.findViewById<com.google.android.material.slider.Slider>(R.id.slider)
@@ -185,6 +200,9 @@ class PresentationActivity : AppCompatActivity() {
             if (fromUser) settings.prefs.edit().putInt(key, v.toInt()).apply()
         }
         sliderRefreshers += { show(slider.value.toInt()) }
+        // The timeline's handles set these values; the slider itself stays hidden
+        slider.visibility = View.GONE
+        return slider
     }
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()

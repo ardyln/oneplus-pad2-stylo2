@@ -206,10 +206,14 @@
     <string name="last_input_swipe_down">Swipe away from the tip → %1$s</string>
     <string name="last_input_not_run">Not run: presentation mode is paused in this app.</string>
     <string name="timeline_header">Touch timeline</string>
-    <string name="timeline_help">Top: how long each touch lasted, against the zones. Touches shorter than about 30 ms never reach the tablet; up to your longest tap they\'re taps; longer ones are holds that move the pointer. The newest touch is the big dot. Bottom: the last seconds, with taps and holds as bars, double taps as 2× and swipes as arrows.</string>
+    <string name="timeline_help">Drag the handles to change the longest tap and the delay; your recent touches move between the zones as you do. Top: how long each touch lasted (the newest is the big dot); touches shorter than about 30 ms never reach the tablet. Middle: when a single tap runs after you let go. Bottom: the last seconds, with taps and holds as bars, a dot where each tap ran, double taps as 2× and swipes as arrows.</string>
     <string name="timeline_durations">How long you touched</string>
     <string name="timeline_recent">Last %1$d seconds</string>
     <string name="timeline_now">now</string>
+    <string name="timeline_delay">After you let go: when a single tap runs</string>
+    <string name="timeline_delay_zone">delay</string>
+    <string name="timeline_runs_here">single tap runs</string>
+    <string name="timeline_let_go">let go</string>
     <string name="timeline_zone_short">too short</string>
     <string name="timeline_zone_tap">tap</string>
     <string name="timeline_zone_hold">hold (pointer)</string>
