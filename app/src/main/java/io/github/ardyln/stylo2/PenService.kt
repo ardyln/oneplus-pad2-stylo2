@@ -47,7 +47,7 @@ class PenService : Service() {
     private var onCharger = false
     private var tapCount = 0
     private var surfaceDownAt = 0L
-    private val runner by lazy { ShortcutRunner(this) { write(PenProtocol.buzz()) } }
+    private val runner by lazy { ShortcutRunner(this, settings) { write(PenProtocol.buzz()) } }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
     private var saberTool: Int? = null
@@ -374,14 +374,9 @@ class PenService : Service() {
      * gesture; it runs once no shortcut can use more taps, or when the window passes.
      */
     private fun onButton() {
-        if (settings.presentation && settings.clickDoubleTap && bridge.ready) {
-            bridge.click()
-            EventLog.add(EventLog.Source.APP, "BTN_LEFT", "Double tap in presentation mode → click at the pointer")
-            if (settings.buttonBuzz) write(PenProtocol.buzz())
-            return
-        }
         if (!FocusService.running) foreground.update()
-        if (bridge.ready && activeApp in settings.stylusButtonApps) {
+        // Presentation mode comes first: even in Saber, the double tap then clicks or runs shortcuts.
+        if (!settings.presentation && bridge.ready && activeApp in settings.stylusButtonApps) {
             // In notes apps the double tap holds or releases a virtual stylus button (Saber: eraser).
             bridge.setPressed(!bridge.pressed)
             Log.i(TAG, "stylus button ${if (bridge.pressed) "held" else "released"} in $activeApp")
@@ -399,7 +394,8 @@ class PenService : Service() {
         if (settings.buttonBuzz) write(PenProtocol.buzz())
         handler.removeCallbacks(fireGesture)
         // The broadcast reports any count, so then it always waits for the window to close.
-        val last = settings.shortcuts.load().size
+        // In presentation mode one double tap clicks, so that counts as a gesture too.
+        val last = maxOf(settings.shortcuts.load().size, if (clicksOnDoubleTap()) 1 else 0)
         if (!settings.broadcastAll && tapCount >= last) {
             fireGesture.run()
         } else {
@@ -412,6 +408,12 @@ class PenService : Service() {
         tapCount = 0
         if (taps == 0) return@Runnable
         Log.i(TAG, "gesture: $taps double tap(s)")
+        if (taps == 1 && clicksOnDoubleTap()) {
+            // In presentation mode a single double tap clicks; chained ones still run shortcuts.
+            bridge.click()
+            EventLog.add(EventLog.Source.APP, "BTN_LEFT", "Double tap in presentation mode → click at the pointer")
+            return@Runnable
+        }
         val shortcut = settings.shortcuts.load().getOrNull(taps - 1)
         EventLog.add(
             EventLog.Source.APP, "gesture taps=$taps",
@@ -445,6 +447,8 @@ class PenService : Service() {
             EventLog.add(EventLog.Source.PEN, key, "Presentation key (meaning unknown)")
         }
     }
+
+    private fun clicksOnDoubleTap() = settings.presentation && settings.clickDoubleTap && bridge.ready
 
     // --- one GATT operation at a time ---
 

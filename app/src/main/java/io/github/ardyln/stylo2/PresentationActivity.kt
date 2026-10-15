@@ -109,6 +109,9 @@ class PresentationActivity : AppCompatActivity() {
             R.drawable.ic_gesture_click, R.string.gesture_double_tap,
             if (settings.clickDoubleTap) R.string.gesture_clicks else R.string.gesture_double_tap_shortcuts,
         )
+        if (settings.clickDoubleTap) {
+            gesture(R.drawable.ic_gesture_click, R.string.gesture_chained, R.string.gesture_chained_does)
+        }
         gesture(
             R.drawable.ic_gesture_click, R.string.gesture_surface_tap,
             if (settings.clickSurfaceTap) R.string.gesture_clicks else R.string.gesture_not_used,

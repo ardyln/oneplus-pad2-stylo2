@@ -50,6 +50,10 @@
     <string name="action_webhook">Home Assistant webhook</string>
     <string name="action_webhook_named">Webhook %1$s</string>
     <string name="action_buzz">Vibrate the pen</string>
+    <string name="action_toggle_presentation">Presentation mode on/off</string>
+    <string name="action_toggle_pointer">Presentation pointer: while touching / always</string>
+    <string name="action_toggle_feedback">Vibrate while writing on/off</string>
+    <string name="action_next_texture">Next writing texture</string>
     <string name="choose_app">Choose app</string>
     <string name="broadcast_action_title">Intent action</string>
     <string name="broadcast_action_hint">e.g. net.dinglisch.android.tasker.STYLO</string>
@@ -93,6 +97,8 @@
     <string name="gesture_point_does">Moves the pointer, like a mouse</string>
     <string name="gesture_double_tap">Double tap the touch area</string>
     <string name="gesture_double_tap_shortcuts">Runs your thumb-button shortcuts as usual</string>
+    <string name="gesture_chained">Double tap two or more times in a row</string>
+    <string name="gesture_chained_does">Runs your shortcuts for 2, 3, … double taps, as usual</string>
     <string name="gesture_surface_tap">Tap the touch area once, briefly</string>
     <string name="gesture_clicks">Clicks where the pointer is</string>
     <string name="gesture_not_used">Not used (turn on below to click)</string>
@@ -105,7 +111,7 @@
     <string name="pointer_always_desc">The pointer follows every movement of the pen, like a laser pointer. Handy for presenting, but it also moves while you hold the pen otherwise.</string>
     <string name="presentation_click">Click</string>
     <string name="click_double_tap_title">Click with a double tap</string>
-    <string name="click_double_tap_summary">A double tap on the touch area clicks where the pointer is, instead of running shortcuts</string>
+    <string name="click_double_tap_summary">A double tap on the touch area clicks where the pointer is. Two or more double taps in a row still run your shortcuts, e.g. one that turns presentation mode off</string>
     <string name="click_surface_title">Click with a single tap</string>
     <string name="click_surface_summary">A brief tap on the touch area clicks where the pointer is. Touching longer moves the pointer instead</string>
     <string name="debug_category">Troubleshooting</string>

@@ -12,7 +12,11 @@ import java.net.URL
 import kotlin.concurrent.thread
 
 /** Carries out shortcut actions. [buzz] makes the pen vibrate once. */
-class ShortcutRunner(private val context: Context, private val buzz: () -> Unit) {
+class ShortcutRunner(
+    private val context: Context,
+    private val settings: Settings,
+    private val buzz: () -> Unit,
+) {
 
     fun run(s: Shortcut, taps: Int, battery: Int) {
         // Webhook URLs contain a secret id, so they're never logged.
@@ -26,6 +30,14 @@ class ShortcutRunner(private val context: Context, private val buzz: () -> Unit)
             Shortcut.Action.BROADCAST -> s.arg?.let { context.sendBroadcast(gestureIntent(it, taps)) }
             Shortcut.Action.WEBHOOK -> s.arg?.let { webhook(it, taps, battery) }
             Shortcut.Action.BUZZ -> buzz()
+            // The pen service picks these setting changes up and updates the pen.
+            Shortcut.Action.TOGGLE_PRESENTATION -> settings.setPresentation(!settings.presentation)
+            Shortcut.Action.TOGGLE_POINTER -> settings.prefs.edit()
+                .putString(Settings.KEY_PRESENTATION_MODE, if (settings.presentationMode == 1) "0" else "1").apply()
+            Shortcut.Action.TOGGLE_FEEDBACK -> settings.prefs.edit()
+                .putBoolean(Settings.KEY_FEEDBACK, !settings.feedbackOn).apply()
+            Shortcut.Action.NEXT_TEXTURE -> settings.prefs.edit()
+                .putString(Settings.KEY_TEXTURE, ((settings.texture + 1) % 4).toString()).apply()
         }
     }
 

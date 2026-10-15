@@ -33,6 +33,10 @@ class ShortcutEditor(private val context: Context) {
             Shortcut.Action.BROADCAST -> R.string.action_broadcast
             Shortcut.Action.WEBHOOK -> R.string.action_webhook
             Shortcut.Action.BUZZ -> R.string.action_buzz
+            Shortcut.Action.TOGGLE_PRESENTATION -> R.string.action_toggle_presentation
+            Shortcut.Action.TOGGLE_POINTER -> R.string.action_toggle_pointer
+            Shortcut.Action.TOGGLE_FEEDBACK -> R.string.action_toggle_feedback
+            Shortcut.Action.NEXT_TEXTURE -> R.string.action_next_texture
         }
     )
 
