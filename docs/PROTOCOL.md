@@ -101,7 +101,7 @@ sent on the vendor characteristics.
 
 | Gesture on the flat surface near the tip | HID input |
 |---|---|
-| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released; it stays down for as long as the finger stays (taps measured 30–420 ms, deliberate holds 600 ms and more) |
+| finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released; it stays down for as long as the finger stays (taps measured 30–420 ms, deliberate holds 600 ms and more). Durations come in steps of about 15 ms; touches shorter than about 30–45 ms are dropped by the pen |
 | swipe in one direction / the other | `REL_WHEEL` +1 / −1 (with `REL_WHEEL_HI_RES` ±120) |
 | moving the pen | `REL_X` / `REL_Y` (air mouse): mode 0 only while the surface is touched, mode 1 always |
 | double tap on the touch area | a short `KEY_F20` press, within a few ms of the usual double tap on `180938ac` (either order), and no `KEY_F19` (20 logged, both pointer modes) |

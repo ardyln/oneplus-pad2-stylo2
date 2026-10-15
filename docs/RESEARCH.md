@@ -145,6 +145,11 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
   and the `180938ac` notification within 0–5 ms of each other, in either order, and **never any
   `KEY_F19`**: the pen recognises them itself. So single taps run at once by default; a delay can
   still be set as a safeguard.
+- **Shortest tap:** with ten very quick taps three seconds apart, only six arrived, held 45–75 ms.
+  All F19 durations seen so far are multiples of about 15 ms (30, 45, 60, 75, 90 ms), so the pen
+  seems to scan the touch area every ~15 ms and report a touch after two or three scans; quicker
+  flicks are dropped in the firmware. Very quick taps less than about half a second apart are
+  reported as double taps (`KEY_F20`) instead.
 - Android's developer option "Show key presses" seemed to show `KEY_F19` only after the finger was
   lifted. A raw recording (`getevent -lt` on the pen's Keyboard device) showed the press arriving at
   touch time and the release at lift time (for example 993 ms apart), so the overlay just isn't a
