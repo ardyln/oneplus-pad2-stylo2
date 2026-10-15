@@ -15,6 +15,22 @@
     <string name="status_unsupported">The paired pen is not a Stylo 2</string>
 
     <string name="feedback_switch">Vibrate while writing</string>
+    <string name="feedback_switch_summary">The pen gives a textured feel while you write, in every app</string>
+    <string name="texture_label">Texture: %1$s</string>
+    <string name="strength_label">Strength: %1$d (0 is barely noticeable, 4 is the strongest)</string>
+    <string name="apps_category">Apps</string>
+    <string name="saber_title">Saber</string>
+    <string name="saber_intro">Stylo 2 works with the Saber notes app without changing it. A double tap toggles Saber\'s eraser, and the pen\'s writing feel can follow the tool you pick in Saber.</string>
+    <string name="saber_tools_header">Texture and strength per tool</string>
+    <string name="saber_not_installed">Not installed. Integration for the Saber notes app</string>
+    <string name="saber_summary_on">The texture follows the active tool · double tap toggles the eraser</string>
+    <string name="saber_summary_off">Double tap toggles the eraser · texture per tool is off</string>
+    <string name="focus_status_title">Active app detection</string>
+    <string name="focus_on">On. Knows which app you\'re using, also with windows side by side</string>
+    <string name="focus_off">Off. Saber and stylus button apps may not be recognised. Tap to turn on</string>
+    <string name="focus_needs_module">Needs the KernelSU/Magisk module. Or turn on \"Stylo 2: active app\" in Settings → Accessibility</string>
+    <string name="shortcut_pair">%1$s → %2$s</string>
+    <string name="shortcuts_more">+%1$d more</string>
     <string name="feedback_category">Writing feedback</string>
     <string name="texture_title">Texture</string>
     <string name="texture_pencil">Pencil</string>
@@ -31,8 +47,11 @@
         <item quantity="one">%d shortcut</item>
         <item quantity="other">%d shortcuts</item>
     </plurals>
-    <string name="shortcuts_help">The pen detects double taps on the thumb button. The first shortcut runs on a double tap, the second on two double taps in a row, and so on. Drag to reorder, swipe to remove.</string>
-    <string name="shortcuts_empty">No shortcuts yet</string>
+    <string name="shortcuts_options">Options</string>
+    <string name="tap_window_value">Time to chain double taps: %1$.1f s</string>
+    <string name="seconds_value">%1$.1f s</string>
+    <string name="shortcuts_help">Double tap the thumb area of the pen to run a shortcut. Double tap twice in a row for the second one, three times for the third, and so on. Drag the handle to reorder, swipe sideways to remove.</string>
+    <string name="shortcuts_empty">No shortcuts yet. Tap Add shortcut and choose what a double tap should do.</string>
     <string name="shortcut_add">Add shortcut</string>
     <string name="shortcut_drag">Drag to reorder</string>
     <string name="shortcut_deleted">Removed: %1$s</string>
@@ -66,7 +85,7 @@
     <string name="button_buzz_title">Vibrate on each double tap</string>
     <string name="button_buzz_summary">A short vibration in the pen confirms that the double tap was detected</string>
     <string name="tap_window_title">Time to chain double taps</string>
-    <string name="tap_window_summary">How long to wait for another double tap, in milliseconds. Shortcuts with fewer double taps run after this delay when longer ones exist.</string>
+    <string name="tap_window_summary">How long the app waits for the next double tap in a row. Shorter feels snappier, longer makes chains easier. Only matters when you have two or more shortcuts.</string>
     <string name="broadcast_all_title">Broadcast every gesture</string>
     <string name="broadcast_all_summary">Sends io.github.ardyln.stylo2.action.DOUBLE_TAP with the extras taps and gesture, for Tasker and other automation apps</string>
     <string name="test_buzz_title">Test vibration</string>
@@ -76,7 +95,12 @@
     <string name="focus_service_label">Stylo 2: active app</string>
     <string name="focus_service_description">Tells the Stylo 2 app which app window is focused, so double taps and textures can follow notes apps like Saber. Only the package name of the focused window is read.</string>
     <string name="bridge_focus_off">Running, but the accessibility service "Stylo 2: active app" is off</string>
-    <string name="stylus_button_apps_title">Double tap as stylus button</string>
+    <string name="stylus_button_apps_title">Stylus button apps</string>
+    <string name="stylus_apps_intro">In these apps a double tap works like the button on other styluses: the first double tap presses it, the next one releases it. Any app that supports a stylus button can use it. Saber, for example, erases while it\'s pressed. Shortcuts and presentation mode pause in these apps.</string>
+    <string name="stylus_apps_header">Apps</string>
+    <string name="stylus_apps_empty">No apps yet. Add one with the button below.</string>
+    <string name="stylus_apps_add">Add app</string>
+    <string name="stylus_apps_remove">Remove</string>
     <string name="stylus_button_apps_summary">%1$s: a double tap holds or releases the stylus button instead of running shortcuts. Saber uses the stylus button as its eraser.</string>
     <string name="stylus_button_apps_none">No apps chosen</string>
     <string name="stylus_button_apps_dialog">Apps</string>

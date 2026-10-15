@@ -60,8 +60,15 @@ class DebugActivity : AppCompatActivity() {
         val chips = findViewById<ChipGroup>(R.id.filters)
         for (source in EventLog.Source.entries) {
             chips.addView(Chip(this).apply {
+                // Filter chips show a checkmark, so it's clear they switch a source on and off
+                setChipDrawable(
+                    com.google.android.material.chip.ChipDrawable.createFromAttributes(
+                        this@DebugActivity, null, 0, com.google.android.material.R.style.Widget_Material3_Chip_Filter,
+                    )
+                )
                 setText(source.label)
                 isCheckable = true
+                isCheckedIconVisible = true
                 isChecked = true
                 setOnCheckedChangeListener { _, on ->
                     if (on) sources += source else sources -= source

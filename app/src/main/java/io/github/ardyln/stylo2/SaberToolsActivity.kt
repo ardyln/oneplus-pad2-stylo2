@@ -25,7 +25,7 @@ class SaberToolsActivity : AppCompatActivity() {
         setContentView(R.layout.saber_tools_activity)
         setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        title = getString(R.string.saber_tools_title)
+        title = getString(R.string.saber_title)
         settings = Settings(this)
 
         val list = findViewById<RecyclerView>(R.id.list)
@@ -108,18 +108,45 @@ class SaberToolsActivity : AppCompatActivity() {
     private inner class Adapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val cards: List<List<Saber.Tool>> = Saber.Tool.toolbarCards
 
-        override fun getItemCount() = cards.size
+        // Header (intro and switch), the tool cards, then the note about the integration
+        override fun getItemCount() = cards.size + 2
 
-        override fun getItemViewType(position: Int) = if (cards[position].size > 1) TYPE_GROUP else TYPE_TOOL
+        override fun getItemViewType(position: Int) = when {
+            position == 0 -> TYPE_HEADER
+            position == cards.size + 1 -> TYPE_FOOTER
+            cards[position - 1].size > 1 -> TYPE_GROUP
+            else -> TYPE_TOOL
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val layout = if (viewType == TYPE_GROUP) R.layout.item_saber_pen else R.layout.item_saber_tool
+            val layout = when (viewType) {
+                TYPE_HEADER -> R.layout.item_saber_header
+                TYPE_FOOTER -> R.layout.item_saber_footer
+                TYPE_GROUP -> R.layout.item_saber_pen
+                else -> R.layout.item_saber_tool
+            }
             return object : RecyclerView.ViewHolder(inflater.inflate(layout, parent, false)) {}
         }
 
         override fun onBindViewHolder(h: RecyclerView.ViewHolder, position: Int) {
-            val tools = cards[position]
+            when (getItemViewType(position)) {
+                TYPE_FOOTER -> return
+                TYPE_HEADER -> {
+                    val toggle = h.itemView.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(
+                        R.id.main_switch_toggle,
+                    )
+                    toggle.isChecked = settings.saberTexture
+                    h.itemView.findViewById<View>(R.id.main_switch).setOnClickListener {
+                        settings.prefs.edit().putBoolean(Settings.KEY_SABER_TEXTURE, !settings.saberTexture).apply()
+                        notifyDataSetChanged()
+                    }
+                    return
+                }
+            }
+            // The tool settings only apply while the switch is on
+            h.itemView.alpha = if (settings.saberTexture) 1f else 0.5f
+            val tools = cards[position - 1]
             if (tools.size == 1) {
                 bindTool(h.itemView, tools[0], compact = false)
                 return
@@ -139,6 +166,8 @@ class SaberToolsActivity : AppCompatActivity() {
     companion object {
         private const val TYPE_TOOL = 0
         private const val TYPE_GROUP = 1
+        private const val TYPE_HEADER = 2
+        private const val TYPE_FOOTER = 3
         private val BUTTONS = mapOf(
             Saber.TEXTURE_OFF to R.id.texture_off,
             PenProtocol.TEXTURE_PENCIL to R.id.texture_pencil,

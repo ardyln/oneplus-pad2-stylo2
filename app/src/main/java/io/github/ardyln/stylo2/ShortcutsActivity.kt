@@ -36,6 +36,7 @@ class ShortcutsActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.shortcuts_activity)
         setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
+        title = getString(R.string.shortcuts_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         store = Settings(this).shortcuts
@@ -59,7 +60,8 @@ class ShortcutsActivity : AppCompatActivity() {
             }
         }
         val density = resources.displayMetrics.density
-        list.padForBottomBars(extra = (88 * density).toInt()) { bottom ->
+        bindOptions()
+        findViewById<androidx.core.widget.NestedScrollView>(R.id.scroll).padForBottomBars(extra = (88 * density).toInt()) { bottom ->
             // Keep the add button above the bars too
             (add.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = bottom + (16 * density).toInt()
             add.requestLayout()
@@ -94,6 +96,35 @@ class ShortcutsActivity : AppCompatActivity() {
         return true
     }
 
+    /** Chain time (in seconds here, stored in ms) and the broadcast for every gesture. */
+    private fun bindOptions() {
+        val settings = Settings(this)
+        val chain = findViewById<com.google.android.material.slider.Slider>(R.id.chain_time)
+        val chainTitle = findViewById<TextView>(R.id.chain_title)
+        fun showChain(seconds: Float) {
+            chainTitle.text = getString(R.string.tap_window_value, seconds)
+        }
+        val seconds = (settings.tapWindowMs / 100L).toInt().coerceIn(4, 20) / 10f
+        chain.value = seconds
+        chain.setLabelFormatter { getString(R.string.seconds_value, it) }
+        showChain(seconds)
+        chain.addOnChangeListener { _, v, fromUser ->
+            if (!fromUser) return@addOnChangeListener
+            settings.prefs.edit().putInt(Settings.KEY_TAP_WINDOW, Math.round(v * 1000)).apply()
+            showChain(v)
+        }
+
+        val row = findViewById<View>(R.id.broadcast_all)
+        val toggle = row.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.toggle)
+        row.findViewById<TextView>(android.R.id.title).setText(R.string.broadcast_all_title)
+        row.findViewById<TextView>(android.R.id.summary).setText(R.string.broadcast_all_summary)
+        toggle.isChecked = settings.broadcastAll
+        row.setOnClickListener {
+            settings.prefs.edit().putBoolean(Settings.KEY_BROADCAST_ALL, !settings.broadcastAll).apply()
+            toggle.isChecked = settings.broadcastAll
+        }
+    }
+
     private fun saved() {
         store.save(items)
         updateEmpty()
@@ -125,6 +156,7 @@ class ShortcutsActivity : AppCompatActivity() {
     }
 
     private inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
+        val icon: ImageView = view.findViewById(android.R.id.icon)
         val title: TextView = view.findViewById(android.R.id.title)
         val summary: TextView = view.findViewById(android.R.id.summary)
         val handle: ImageView = view.findViewById(R.id.drag_handle)
@@ -142,6 +174,7 @@ class ShortcutsActivity : AppCompatActivity() {
             val s = items[position]
             h.title.text = editor.tapsLabel(position + 1)
             h.summary.text = editor.actionLabel(s)
+            editor.bindIcon(h.icon, s)
             h.itemView.setOnClickListener {
                 val pos = h.bindingAdapterPosition
                 if (pos == RecyclerView.NO_POSITION) return@setOnClickListener

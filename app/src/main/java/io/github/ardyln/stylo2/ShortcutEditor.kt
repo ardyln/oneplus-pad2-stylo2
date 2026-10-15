@@ -13,6 +13,41 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 /** Labels and the dialogs that pick a shortcut's action and its details. */
 class ShortcutEditor(private val context: Context) {
 
+    /** Shows the shortcut's icon: the app's own icon for "open an app", else a symbol in a circle. */
+    fun bindIcon(view: android.widget.ImageView, s: Shortcut) {
+        val appIcon = if (s.action == Shortcut.Action.OPEN_APP) s.arg?.let {
+            try { context.packageManager.getApplicationIcon(it) } catch (e: PackageManager.NameNotFoundException) { null }
+        } else null
+        if (appIcon != null) {
+            view.background = null
+            view.setPadding(0, 0, 0, 0)
+            view.imageTintList = null
+            view.setImageDrawable(appIcon)
+            return
+        }
+        val pad = (8 * context.resources.displayMetrics.density).toInt()
+        view.setBackgroundResource(R.drawable.tool_icon_background)
+        view.setPadding(pad, pad, pad, pad)
+        val tint = android.util.TypedValue()
+        context.theme.resolveAttribute(com.google.android.material.R.attr.colorOnSecondaryContainer, tint, true)
+        view.imageTintList = android.content.res.ColorStateList.valueOf(tint.data)
+        view.setImageResource(
+            when (s.action) {
+                Shortcut.Action.OPEN_APP -> R.drawable.ic_action_apps
+                Shortcut.Action.MEDIA_PLAY_PAUSE -> R.drawable.ic_action_play_pause
+                Shortcut.Action.MEDIA_NEXT -> R.drawable.ic_action_next
+                Shortcut.Action.MEDIA_PREVIOUS -> R.drawable.ic_action_previous
+                Shortcut.Action.BROADCAST -> R.drawable.ic_action_broadcast
+                Shortcut.Action.WEBHOOK -> R.drawable.ic_action_webhook
+                Shortcut.Action.BUZZ -> R.drawable.ic_action_buzz
+                Shortcut.Action.TOGGLE_PRESENTATION -> R.drawable.ic_presentation
+                Shortcut.Action.TOGGLE_POINTER -> R.drawable.ic_action_pointer
+                Shortcut.Action.TOGGLE_FEEDBACK -> R.drawable.ic_action_texture
+                Shortcut.Action.NEXT_TEXTURE -> R.drawable.ic_texture_pencil
+            }
+        )
+    }
+
     fun tapsLabel(taps: Int): String =
         if (taps == 1) context.getString(R.string.shortcut_taps_1)
         else context.getString(R.string.shortcut_taps_n, taps)

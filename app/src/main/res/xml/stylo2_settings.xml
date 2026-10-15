@@ -5,149 +5,95 @@
     <Preference
         android:key="status"
         android:title="@string/status_title"
-        android:selectable="false"
-        app:iconSpaceReserved="false" />
+        android:icon="@drawable/ic_stylus_note"
+        android:selectable="false" />
 
-    <SwitchPreferenceCompat
-        android:key="feedback_enable"
-        android:title="@string/feedback_switch"
-        android:defaultValue="true"
-        android:layout="@layout/preference_main_switch" />
+    <Preference
+        android:key="test_buzz"
+        android:title="@string/test_buzz_title"
+        android:summary="@string/test_buzz_summary"
+        android:icon="@drawable/ic_action_buzz"
+        android:persistent="false" />
 
-    <PreferenceCategory
-        android:title="@string/feedback_category"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/feedback_category">
 
-        <ListPreference
-            android:key="feedback_texture"
-            android:title="@string/texture_title"
-            android:entries="@array/texture_entries"
-            android:entryValues="@array/texture_values"
-            android:defaultValue="0"
-            app:useSimpleSummaryProvider="true"
-            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="feedback_enable"
+            android:title="@string/feedback_switch"
+            android:summary="@string/feedback_switch_summary"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_action_texture"
+            android:widgetLayout="@layout/preference_material_switch" />
 
-        <SeekBarPreference
-            android:key="feedback_level"
-            android:title="@string/level_title"
-            android:summary="@string/level_summary"
-            android:defaultValue="2"
-            android:max="4"
-            app:min="0"
-            app:showSeekBarValue="true"
-            app:updatesContinuously="false"
-            app:iconSpaceReserved="false" />
+        <io.github.ardyln.stylo2.TexturePreference
+            android:key="feedback_texture_widget"
+            android:persistent="false"
+            android:selectable="false" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/button_category"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/button_category">
 
         <Preference
             android:key="shortcuts_screen"
             android:title="@string/shortcuts_title"
+            android:icon="@drawable/ic_gesture_click"
             android:persistent="false"
-            android:widgetLayout="@layout/preference_chevron"
-            app:iconSpaceReserved="false" />
+            android:widgetLayout="@layout/preference_chevron" />
 
         <SwitchPreferenceCompat
             android:key="button_buzz"
             android:title="@string/button_buzz_title"
             android:summary="@string/button_buzz_summary"
             android:defaultValue="false"
-            android:widgetLayout="@layout/preference_material_switch"
-            app:iconSpaceReserved="false" />
-
-        <SeekBarPreference
-            android:key="button_tap_window"
-            android:title="@string/tap_window_title"
-            android:summary="@string/tap_window_summary"
-            android:defaultValue="1000"
-            android:max="2000"
-            app:min="400"
-            app:seekBarIncrement="100"
-            app:showSeekBarValue="true"
-            app:iconSpaceReserved="false" />
-
-        <SwitchPreferenceCompat
-            android:key="button_broadcast_all"
-            android:title="@string/broadcast_all_title"
-            android:summary="@string/broadcast_all_summary"
-            android:defaultValue="false"
-            android:widgetLayout="@layout/preference_material_switch"
-            app:iconSpaceReserved="false" />
-
-        <Preference
-            android:key="test_buzz"
-            android:title="@string/test_buzz_title"
-            android:summary="@string/test_buzz_summary"
-            android:persistent="false"
-            app:iconSpaceReserved="false" />
+            android:icon="@drawable/ic_action_buzz"
+            android:widgetLayout="@layout/preference_material_switch" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/notes_category"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/apps_category">
 
         <Preference
-            android:key="stylus_button_apps"
+            android:key="saber_screen"
+            android:title="@string/saber_title"
+            android:icon="@drawable/ic_texture_pen"
+            android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron" />
+
+        <Preference
+            android:key="stylus_apps_screen"
             android:title="@string/stylus_button_apps_title"
+            android:icon="@drawable/ic_action_apps"
             android:persistent="false"
-            app:iconSpaceReserved="false" />
-
-        <SwitchPreferenceCompat
-            android:key="saber_texture"
-            android:title="@string/saber_texture_title"
-            android:summary="@string/saber_texture_summary"
-            android:defaultValue="true"
-            android:widgetLayout="@layout/preference_material_switch"
-            app:iconSpaceReserved="false" />
-
-        <Preference
-            android:key="saber_tools"
-            android:title="@string/saber_tools_title"
-            android:summary="@string/saber_tools_summary"
-            android:dependency="saber_texture"
-            android:persistent="false"
-            android:widgetLayout="@layout/preference_chevron"
-            app:iconSpaceReserved="false" />
-
-        <Preference
-            android:key="bridge_status"
-            android:title="@string/bridge_title"
-            android:selectable="false"
-            app:iconSpaceReserved="false" />
-
-        <io.github.ardyln.stylo2.LongTextPreference
-            android:key="saber_about"
-            android:title="@string/saber_about_title"
-            android:summary="@string/saber_about_summary"
-            android:selectable="false"
-            app:iconSpaceReserved="false" />
+            android:widgetLayout="@layout/preference_chevron" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/presentation_category"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/presentation_category">
 
         <Preference
             android:key="presentation_screen"
             android:title="@string/presentation_title"
+            android:icon="@drawable/ic_presentation"
             android:persistent="false"
-            android:widgetLayout="@layout/preference_chevron"
-            app:iconSpaceReserved="false" />
+            android:widgetLayout="@layout/preference_chevron" />
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/debug_category"
-        app:iconSpaceReserved="false">
+    <PreferenceCategory android:title="@string/debug_category">
 
         <Preference
             android:key="debug_log"
             android:title="@string/debug_title"
             android:summary="@string/debug_summary"
+            android:icon="@drawable/ic_bug"
             android:persistent="false"
-            android:widgetLayout="@layout/preference_chevron"
-            app:iconSpaceReserved="false" />
+            android:widgetLayout="@layout/preference_chevron" />
+
+        <Preference
+            android:key="focus_status"
+            android:title="@string/focus_status_title"
+            android:persistent="false" />
+
+        <Preference
+            android:key="bridge_status"
+            android:title="@string/bridge_title"
+            android:selectable="false" />
     </PreferenceCategory>
 </PreferenceScreen>

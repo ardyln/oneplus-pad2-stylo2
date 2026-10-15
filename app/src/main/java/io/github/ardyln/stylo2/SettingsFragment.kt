@@ -1,38 +1,45 @@
 package io.github.ardyln.stylo2
 
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import androidx.preference.ListPreference
+import android.widget.Toast
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
+class SettingsFragment : PreferenceFragmentCompat() {
     private lateinit var settings: Settings
     private lateinit var statusPreference: Preference
-    private lateinit var texturePreference: ListPreference
-    private lateinit var levelPreference: SeekBarPreference
-    private lateinit var shortcutsPreference: Preference
-    private lateinit var stylusAppsPreference: Preference
+    private lateinit var texturePreference: TexturePreference
+    private lateinit var focusPreference: Preference
     private lateinit var bridgePreference: Preference
 
     private val handler = Handler(Looper.getMainLooper())
     private val refresh = object : Runnable {
         override fun run() {
             statusPreference.summary = PenService.status ?: getString(R.string.status_not_running)
+            focusPreference.summary = getString(if (FocusService.running) R.string.focus_on else R.string.focus_off)
             bridgePreference.summary = getString(
-                when {
-                    !PenService.stylusBridgeReady -> R.string.bridge_not_ready
-                    !FocusService.running -> R.string.bridge_focus_off
-                    else -> R.string.bridge_ready
-                }
+                if (PenService.stylusBridgeReady) R.string.bridge_ready else R.string.bridge_not_ready
             )
             handler.postDelayed(this, 1000)
+        }
+    }
+
+    // Shortcuts, pages and the service can change settings; keep the summaries current.
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        when (key) {
+            Settings.KEY_FEEDBACK -> {
+                findPreference<SwitchPreferenceCompat>(key)?.isChecked = settings.feedbackOn
+                texturePreference.isEnabled = settings.feedbackOn
+            }
+            Settings.KEY_TEXTURE, Settings.KEY_LEVEL -> texturePreference.notifyChangedPublic()
+            else -> updateSummaries()
         }
     }
 
@@ -41,40 +48,34 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         settings = Settings(requireContext())
 
         statusPreference = findPreference(Settings.KEY_STATUS)!!
-        texturePreference = findPreference(Settings.KEY_TEXTURE)!!
-        levelPreference = findPreference(Settings.KEY_LEVEL)!!
-        shortcutsPreference = findPreference(Settings.KEY_SHORTCUTS_SCREEN)!!
-        stylusAppsPreference = findPreference(Settings.KEY_STYLUS_BUTTON_APPS)!!
+        texturePreference = findPreference("feedback_texture_widget")!!
+        focusPreference = findPreference("focus_status")!!
         bridgePreference = findPreference(Settings.KEY_BRIDGE_STATUS)!!
-        findPreference<Preference>(Settings.KEY_PRESENTATION_SCREEN)!!.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), PresentationActivity::class.java))
-            true
-        }
-        findPreference<Preference>("debug_log")!!.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), DebugActivity::class.java))
-            true
-        }
-        findPreference<Preference>("saber_tools")!!.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), SaberToolsActivity::class.java))
-            true
-        }
-        stylusAppsPreference.setOnPreferenceClickListener {
-            pickStylusButtonApps()
-            true
-        }
-        updateStylusAppsSummary()
+        texturePreference.isEnabled = settings.feedbackOn
 
-        findPreference<SwitchPreferenceCompat>(Settings.KEY_FEEDBACK)!!.onPreferenceChangeListener = this
-        updateFeedbackEnabled(settings.feedbackOn)
+        open(Settings.KEY_SHORTCUTS_SCREEN, ShortcutsActivity::class.java)
+        open("saber_screen", SaberToolsActivity::class.java)
+        open("stylus_apps_screen", StylusAppsActivity::class.java)
+        open(Settings.KEY_PRESENTATION_SCREEN, PresentationActivity::class.java)
+        open("debug_log", DebugActivity::class.java)
 
-        shortcutsPreference.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), ShortcutsActivity::class.java))
-            true
-        }
         findPreference<Preference>(Settings.KEY_TEST_BUZZ)!!.setOnPreferenceClickListener {
             requireContext().startForegroundService(
                 Intent(requireContext(), PenService::class.java).setAction(PenService.ACTION_BUZZ)
             )
+            true
+        }
+        focusPreference.setOnPreferenceClickListener {
+            if (!FocusService.running && !FocusService.ensureEnabled(requireContext())) {
+                Toast.makeText(requireContext(), R.string.focus_needs_module, Toast.LENGTH_LONG).show()
+            }
+            true
+        }
+    }
+
+    private fun open(key: String, page: Class<*>) {
+        findPreference<Preference>(key)!!.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), page))
             true
         }
     }
@@ -86,18 +87,11 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         listView.padForBottomBars()
     }
 
-    // The service can change settings too (presentation mode ends when the pen is attached).
-    private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-        if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE) updatePresentationSummary()
-    }
-
     override fun onResume() {
         super.onResume()
         settings.prefs.registerOnSharedPreferenceChangeListener(prefsListener)
-        updatePresentationSummary()
-        val count = settings.shortcuts.load().size
-        shortcutsPreference.summary = if (count == 0) getString(R.string.shortcuts_none)
-            else resources.getQuantityString(R.plurals.shortcuts_summary, count, count)
+        updateSummaries()
+        texturePreference.notifyChangedPublic()
         handler.post(refresh)
     }
 
@@ -107,44 +101,29 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         super.onPause()
     }
 
-    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-        if (preference.key == Settings.KEY_FEEDBACK) updateFeedbackEnabled(newValue as Boolean)
-        return true
-    }
-
-    private fun launcherApps(): List<Pair<String, String>> {
-        val pm = requireContext().packageManager
-        return pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-            .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
-            .distinctBy { it.first }
-            .sortedBy { it.second.lowercase() }
-    }
-
-    private fun updateStylusAppsSummary() {
-        val chosen = settings.stylusButtonApps
-        val labels = launcherApps().filter { it.first in chosen }.map { it.second }
-        stylusAppsPreference.summary = if (labels.isEmpty()) getString(R.string.stylus_button_apps_none)
-            else getString(R.string.stylus_button_apps_summary, labels.joinToString(", "))
-    }
-
-    private fun pickStylusButtonApps() {
-        val apps = launcherApps()
-        val chosen = settings.stylusButtonApps.toMutableSet()
-        val checked = apps.map { it.first in chosen }.toBooleanArray()
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.stylus_button_apps_dialog)
-            .setMultiChoiceItems(apps.map { it.second }.toTypedArray(), checked) { _, which, isChecked ->
-                if (isChecked) chosen += apps[which].first else chosen -= apps[which].first
+    private fun updateSummaries() {
+        val editor = ShortcutEditor(requireContext())
+        val shortcuts = settings.shortcuts.load()
+        findPreference<Preference>(Settings.KEY_SHORTCUTS_SCREEN)?.summary = when {
+            shortcuts.isEmpty() -> getString(R.string.shortcuts_none)
+            else -> {
+                val shown = shortcuts.take(3).mapIndexed { i, s ->
+                    getString(R.string.shortcut_pair, editor.tapsLabel(i + 1), editor.actionLabel(s))
+                }
+                val more = shortcuts.size - shown.size
+                shown.joinToString(" · ") + if (more > 0) " " + getString(R.string.shortcuts_more, more) else ""
             }
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                settings.setStylusButtonApps(chosen)
-                updateStylusAppsSummary()
+        }
+        findPreference<Preference>("saber_screen")?.summary = getString(
+            when {
+                !isInstalled(Saber.PACKAGE) -> R.string.saber_not_installed
+                settings.saberTexture -> R.string.saber_summary_on
+                else -> R.string.saber_summary_off
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
-    }
-
-    private fun updatePresentationSummary() {
+        )
+        val apps = settings.stylusButtonApps.map { appLabel(it) }.sortedBy { it.lowercase() }
+        findPreference<Preference>("stylus_apps_screen")?.summary =
+            if (apps.isEmpty()) getString(R.string.stylus_button_apps_none) else apps.joinToString(", ")
         findPreference<Preference>(Settings.KEY_PRESENTATION_SCREEN)?.summary = when {
             !settings.presentation -> getString(R.string.presentation_off)
             settings.presentationMode == 1 -> getString(R.string.presentation_on_always)
@@ -152,8 +131,19 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         }
     }
 
-    private fun updateFeedbackEnabled(on: Boolean) {
-        texturePreference.isEnabled = on
-        levelPreference.isEnabled = on
+    private fun isInstalled(pkg: String) = try {
+        requireContext().packageManager.getApplicationInfo(pkg, 0)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    private fun appLabel(pkg: String): String {
+        val pm = requireContext().packageManager
+        return try {
+            pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            pkg
+        }
     }
 }
