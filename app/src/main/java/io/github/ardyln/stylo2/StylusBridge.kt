@@ -18,8 +18,15 @@ import java.util.concurrent.Executors
  *   closes, `uinput` exits and the device (and any held button) goes away.
  * - saber_tool: the helper writes Saber's active tool id (its ToolId index) here.
  */
-class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
+class StylusBridge(
+    context: Context,
+    private val onSaberTool: (Int?) -> Unit,
+    /** Called on a background thread for the pen's presentation keys: (key, pressed). */
+    private val onPenKey: (String, Boolean) -> Unit,
+) {
     private val fifo = File(context.filesDir, "stylus_button.fifo")
+    private val keysFifo = File(context.filesDir, "pen_keys.fifo")
+    private val keysThread = Thread(::readKeys, "pen-keys").apply { isDaemon = true }
     private val toolFile = File(context.filesDir, "saber_tool")
     private val io = Executors.newSingleThreadExecutor()
     private var out: FileOutputStream? = null
@@ -44,6 +51,14 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
             }
         }
         if (!toolFile.exists()) toolFile.writeText("")
+        if (!keysFifo.exists()) {
+            try {
+                Os.mkfifo(keysFifo.path, 0x180) // 0600
+            } catch (e: Exception) {
+                Log.w(PenService.TAG, "could not create the pen keys pipe: $e")
+            }
+        }
+        keysThread.start()
         observer = object : FileObserver(toolFile, CLOSE_WRITE) {
             override fun onEvent(event: Int, path: String?) = onSaberTool(readTool())
         }.also { it.startWatching() }
@@ -73,6 +88,36 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
         io.shutdown()
     }
 
+    /** A left click at the mouse pointer, through the virtual "Stylo 2 click" mouse. */
+    fun click() {
+        if (!ready) return
+        io.execute {
+            send("""{"id":2,"command":"inject","events":[1,$BTN_LEFT,1,0,0,0]}""")
+            send("""{"id":2,"command":"delay","duration":$CLICK_MS}""")
+            send("""{"id":2,"command":"inject","events":[1,$BTN_LEFT,0,0,0,0]}""")
+        }
+    }
+
+    /**
+     * Reads the pen's presentation keys, which the root helper forwards from the pen's HID keyboard
+     * as lines like "KEY_F19 DOWN". Blocks until the helper opens the pipe; reopens when it closes.
+     */
+    private fun readKeys() {
+        while (!stopped) {
+            try {
+                keysFifo.bufferedReader().use { r ->
+                    while (true) {
+                        val parts = (r.readLine() ?: break).trim().split(Regex("\\s+"))
+                        if (parts.size == 2) onPenKey(parts[0], parts[1] == "DOWN")
+                    }
+                }
+            } catch (e: IOException) {
+                Log.w(PenService.TAG, "pen keys pipe: $e")
+                Thread.sleep(5000)
+            }
+        }
+    }
+
     fun setPressed(down: Boolean) {
         if (down == pressed) return
         pressed = down
@@ -96,6 +141,7 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
                 return
             }
             send(REGISTER)
+            send(REGISTER_CLICK)
             ready = out != null
             Log.i(PenService.TAG, "virtual stylus button ready")
             EventLog.add(
@@ -124,10 +170,19 @@ class StylusBridge(context: Context, private val onSaberTool: (Int?) -> Unit) {
     }
 
     companion object {
+        private const val BTN_LEFT = 272
+        private const val BTN_RIGHT = 273
+        private const val CLICK_MS = 40
         private const val BTN_STYLUS = 331
         private const val BTN_STYLUS2 = 332
         private const val REGISTER = """{"id":1,"command":"register","name":"Stylo 2 buttons",""" +
             """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
             """{"type":"UI_SET_EVBIT","data":[1]},{"type":"UI_SET_KEYBIT","data":[$BTN_STYLUS,$BTN_STYLUS2]}]}"""
+
+        /** A mouse with a left and right button; Android shares one pointer between all mice. */
+        private const val REGISTER_CLICK = """{"id":2,"command":"register","name":"Stylo 2 click",""" +
+            """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
+            """{"type":"UI_SET_EVBIT","data":[1,2]},{"type":"UI_SET_KEYBIT","data":[$BTN_LEFT,$BTN_RIGHT]},""" +
+            """{"type":"UI_SET_RELBIT","data":[0,1]}]}"""
     }
 }

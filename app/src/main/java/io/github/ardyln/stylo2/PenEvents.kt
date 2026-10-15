@@ -37,6 +37,10 @@ object PenEvents {
         v.size == 5 && v[1] == 0x94.toByte() ->
             "Writing feedback: " + textureSetting(v[4].toInt() != 0, v[3].toInt(), v[4].toInt() - 1)
         v.contentEquals(PenProtocol.buzz()) -> "One short vibration"
+        v.size == 4 && v[1] == 0x91.toByte() ->
+            "Presentation mode " + if (v[3].toInt() == 1) "on: touch surface and air mouse active" else "off"
+        v.size == 4 && v[1] == 0x93.toByte() ->
+            "Presentation pointer: " + if (v[3].toInt() == 1) "always moves" else "moves only while the surface is touched"
         else -> "Command"
     }
 

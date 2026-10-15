@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT=$ROOT/build
 export JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-21-openjdk-amd64}
-export ANDROID_HOME=${ANDROID_HOME:-/usr/lib/android-sdk}
+export ANDROID_HOME=${ANDROID_HOME:-$HOME/Android/Sdk}
 # Personal signing key, kept out of the repo. Created on first build if missing.
 # Keep a copy: updates must be signed with the same key to install over the old app.
 export KEYSTORE=${KEYSTORE:-$HOME/tools/stylo2-release.jks}

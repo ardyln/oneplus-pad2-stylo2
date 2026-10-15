@@ -127,6 +127,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/presentation_category"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="presentation_screen"
+            android:title="@string/presentation_title"
+            android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/debug_category"
         app:iconSpaceReserved="false">
 

@@ -34,6 +34,12 @@ object PenProtocol {
         return byteArrayOf(0x2c, 0x94.toByte(), 0x02, t.toByte(), (if (on) l + 1 else 0).toByte())
     }
 
+    /** Presentation mode: the touch surface near the tip and the motion sensor (see PROTOCOL.md). */
+    fun presentation(on: Boolean) = byteArrayOf(0x2c, 0x91.toByte(), 0x01, if (on) 1 else 0)
+
+    /** Presentation pointer: 0 moves only while the surface is touched, 1 always. */
+    fun presentationMode(mode: Int) = byteArrayOf(0x2c, 0x93.toByte(), 0x01, mode.coerceIn(0, 1).toByte())
+
     /** A single short vibration. */
     fun buzz() = byteArrayOf(0x2c, 0x92.toByte(), 0x01, 0x02, 0xff.toByte(), 0x02)
 }

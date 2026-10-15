@@ -16,6 +16,13 @@ class Settings(context: Context) {
     val broadcastAll get() = prefs.getBoolean(KEY_BROADCAST_ALL, false)
     val stylusButtonApps: Set<String> get() = prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: setOf(Saber.PACKAGE)
     val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
+    val presentation get() = prefs.getBoolean(KEY_PRESENTATION, false)
+    val presentationMode get() = prefs.getString(KEY_PRESENTATION_MODE, "0")!!.toInt()
+
+    val clickDoubleTap get() = prefs.getBoolean(KEY_CLICK_DOUBLE_TAP, true)
+    val clickSurfaceTap get() = prefs.getBoolean(KEY_CLICK_SURFACE_TAP, false)
+
+    fun setPresentation(on: Boolean) = prefs.edit().putBoolean(KEY_PRESENTATION, on).apply()
 
     fun setStylusButtonApps(apps: Set<String>) = prefs.edit().putStringSet(KEY_STYLUS_BUTTON_APPS, apps).apply()
     val shortcuts = ShortcutStore(prefs)
@@ -44,6 +51,11 @@ class Settings(context: Context) {
         const val KEY_STYLUS_BUTTON_APPS = "stylus_button_apps"
         const val KEY_SABER_TEXTURE = "saber_texture"
         const val KEY_BRIDGE_STATUS = "bridge_status"
+        const val KEY_PRESENTATION = "presentation"
+        const val KEY_PRESENTATION_MODE = "presentation_mode"
+        const val KEY_CLICK_DOUBLE_TAP = "presentation_click_double_tap"
+        const val KEY_CLICK_SURFACE_TAP = "presentation_click_surface_tap"
+        const val KEY_PRESENTATION_SCREEN = "presentation_screen"
 
         private const val OLD_KEY_BUTTON_ACTION = "button_action"
         private const val OLD_KEY_BUTTON_APP = "button_app"

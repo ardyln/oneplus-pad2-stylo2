@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Material 3 with the wallpaper colors (Material You), like the system Settings app -->
-    <style name="Theme.Stylo2" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+    <style name="Theme.Stylo2" parent="Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
@@ -10,13 +10,33 @@
     </style>
 
     <!-- Icon-only buttons in the Saber tool texture picker -->
-    <style name="Stylo2.TextureButton" parent="Widget.Material3.Button.OutlinedButton">
+    <style name="Stylo2.TextureButton" parent="Widget.Material3Expressive.Button.IconButton.Tonal">
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:checkable">true</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:paddingStart">0dp</item>
         <item name="android:paddingEnd">0dp</item>
         <item name="iconGravity">textStart</item>
         <item name="iconPadding">0dp</item>
+    </style>
+
+    <!-- Text choices in a button group (presentation pointer) -->
+    <style name="Stylo2.ChoiceButton" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:checkable">true</item>
+    </style>
+
+    <!-- Section titles on hand-built pages, matching the preference category titles -->
+    <style name="Stylo2.SectionHeader" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingTop">28dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
     </style>
 </resources>

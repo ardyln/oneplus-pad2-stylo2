@@ -4,6 +4,8 @@
 #   external stylus whose button Android merges into the pen's events. When the app closes
 #   the pipe, `uinput` exits and the device goes away, so a held button can't get stuck.
 # - publishes Saber's active tool (its "lastTool" pref) to the app's saber_tool file.
+# - forwards the pen's presentation keys (F19 while the touch surface near the tip is touched,
+#   F20) from its HID keyboard to the app's pen_keys.fifo, as lines like "KEY_F19 DOWN".
 
 PKG=io.github.ardyln.stylo2
 FILES=/data/data/$PKG/files
@@ -53,6 +55,34 @@ tool_loop() {
     done
 }
 
+# The pen's HID keyboard, e.g. /dev/input/event14; empty while the pen isn't connected.
+pen_keyboard() {
+    for d in /sys/class/input/event*; do
+        if [ "$(cat "$d/device/name" 2>/dev/null)" = "OnePlus Stylo 2 Keyboard" ]; then
+            echo "/dev/input/${d##*/}"
+            return
+        fi
+    done
+}
+
+keys_loop() {
+    while true; do
+        dev=$(pen_keyboard)
+        if [ -z "$dev" ] || [ ! -p "$FILES/pen_keys.fifo" ]; then
+            sleep 5
+            continue
+        fi
+        # Ends when the pen disconnects (the device goes away) or the app closes the pipe.
+        getevent -l "$dev" 2>/dev/null | while read -r type key value; do
+            case "$key" in
+                KEY_F19|KEY_F20) [ "$type" = EV_KEY ] && echo "$key $value" ;;
+            esac
+        done > "$FILES/pen_keys.fifo"
+        sleep 1
+    done
+}
+
 log "stylus bridge started"
 button_loop &
+keys_loop &
 tool_loop

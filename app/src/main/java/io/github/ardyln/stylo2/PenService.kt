@@ -22,6 +22,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import java.util.UUID
 
@@ -45,6 +46,7 @@ class PenService : Service() {
     private var battery = -1
     private var onCharger = false
     private var tapCount = 0
+    private var surfaceDownAt = 0L
     private val runner by lazy { ShortcutRunner(this) { write(PenProtocol.buzz()) } }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
@@ -75,6 +77,7 @@ class PenService : Service() {
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key in Settings.FEEDBACK_KEYS || key?.startsWith("saber_") == true) sendFeedbackSetting()
+        if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE) sendPresentation()
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -106,7 +109,11 @@ class PenService : Service() {
         })
         settings.prefs.registerOnSharedPreferenceChangeListener(prefsListener)
         foreground = ForegroundApp(this)
-        bridge = StylusBridge(this) { tool -> handler.post { onSaberTool(tool) } }
+        bridge = StylusBridge(
+            this,
+            onSaberTool = { tool -> handler.post { onSaberTool(tool) } },
+            onPenKey = { key, down -> handler.post { onPenKey(key, down) } },
+        )
         bridge.start()
         FocusService.listener = { handler.post { onForegroundChanged() } }
         handler.post(foregroundPoll)
@@ -245,7 +252,14 @@ class PenService : Service() {
         subscribe(g, statusService.getCharacteristic(PenProtocol.MAGNET))
         read(g, comService.getCharacteristic(PenProtocol.BATTERY_READ))
         sendFeedbackSetting()
+        sendPresentation()
         setStatus(connectedText())
+    }
+
+    /** Presentation mode state, sent on every connection like the stock app does. */
+    private fun sendPresentation() {
+        write(PenProtocol.presentation(settings.presentation))
+        if (settings.presentation) write(PenProtocol.presentationMode(settings.presentationMode))
     }
 
     private fun subscribe(g: BluetoothGatt, c: BluetoothGattCharacteristic?) {
@@ -265,7 +279,14 @@ class PenService : Service() {
     private fun onValue(u: UUID, v: ByteArray) {
         when (u) {
             PenProtocol.BATTERY, PenProtocol.BATTERY_READ -> battery = v[0].toInt() and 0xff
-            PenProtocol.MAGNET -> onCharger = (v[0].toInt() and 0x01) == 0
+            PenProtocol.MAGNET -> {
+                onCharger = (v[0].toInt() and 0x01) == 0
+                // Like OxygenOS: presentation mode lasts until the pen is attached again.
+                if (onCharger && settings.presentation) {
+                    EventLog.add(EventLog.Source.APP, "presentation=false", "Pen attached: presentation mode turned off")
+                    settings.setPresentation(false)
+                }
+            }
             else -> return
         }
         setStatus(connectedText())
@@ -353,6 +374,12 @@ class PenService : Service() {
      * gesture; it runs once no shortcut can use more taps, or when the window passes.
      */
     private fun onButton() {
+        if (settings.presentation && settings.clickDoubleTap && bridge.ready) {
+            bridge.click()
+            EventLog.add(EventLog.Source.APP, "BTN_LEFT", "Double tap in presentation mode → click at the pointer")
+            if (settings.buttonBuzz) write(PenProtocol.buzz())
+            return
+        }
         if (!FocusService.running) foreground.update()
         if (bridge.ready && activeApp in settings.stylusButtonApps) {
             // In notes apps the double tap holds or releases a virtual stylus button (Saber: eraser).
@@ -393,6 +420,30 @@ class PenService : Service() {
         )
         if (settings.broadcastAll) sendBroadcast(ShortcutRunner.gestureIntent(ShortcutRunner.ACTION_GESTURE, taps))
         settings.shortcuts.load().getOrNull(taps - 1)?.let { runner.run(it, taps, battery) }
+    }
+
+    /**
+     * The pen's presentation keys (forwarded by the root helper): F19 is held while a finger is on
+     * the touch surface near the tip. A short touch counts as a tap and clicks at the pointer.
+     */
+    private fun onPenKey(key: String, down: Boolean) {
+        val now = SystemClock.uptimeMillis()
+        if (key == "KEY_F19") {
+            if (down) {
+                surfaceDownAt = now
+                return
+            }
+            val held = now - surfaceDownAt
+            val tap = held < SURFACE_TAP_MS
+            EventLog.add(
+                EventLog.Source.PEN, "KEY_F19 ${held}ms",
+                if (tap) "Tap on the surface near the tip" + if (settings.clickSurfaceTap) " → click at the pointer" else ""
+                else "Surface near the tip held (air mouse)",
+            )
+            if (tap && settings.presentation && settings.clickSurfaceTap) bridge.click()
+        } else if (down) {
+            EventLog.add(EventLog.Source.PEN, key, "Presentation key (meaning unknown)")
+        }
     }
 
     // --- one GATT operation at a time ---
@@ -442,6 +493,7 @@ class PenService : Service() {
         private const val NOTIFICATION_ID = 1
         private const val OP_TIMEOUT_MS = 5000L
         private const val FOREGROUND_POLL_MS = 1000L
+        private const val SURFACE_TAP_MS = 250L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null

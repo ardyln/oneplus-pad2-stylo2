@@ -11,7 +11,11 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 - **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
   eraser, and the texture follows the active tool, with a texture and strength per tool.
 
-It also shows the pen's battery level and whether it's on the magnetic charger.
+- **Presentation mode**: the touch area near the tip becomes a remote: swipe to scroll or zoom, touch and
+  move the pen to move the pointer (air mouse), and click with a double tap or a brief tap.
+
+It also shows the pen's battery level and whether it's on the magnetic charger, and has a live event
+log for troubleshooting.
 
 ## How it works
 
@@ -32,8 +36,9 @@ At boot the module:
   access, and an exemption from battery optimization;
 - enables the app's accessibility service "Stylo 2: active app", which only reads the package name of
   the focused window (to know when Saber is in use, also in desktop windowing mode);
-- starts a root helper (`stylus-bridge.sh`) that creates a virtual stylus button with Android's
-  `uinput` tool, and reads Saber's settings file to see its active tool.
+- starts a root helper (`stylus-bridge.sh`) that creates two virtual input devices with Android's
+  `uinput` tool (a stylus button for Saber, and a mouse button for presentation clicks), reads Saber's
+  settings file to see its active tool, and forwards the pen's presentation keys to the app.
 
 Removing the module undoes all of this.
 
@@ -47,8 +52,8 @@ with this integration to Saber.
 ## Build
 
 `KS_PASS=<keystore password> tools/build.sh` builds the app with the Gradle wrapper (Kotlin, AndroidX
-Preference, Material Components) and packs the module zip into `build/`. It needs JDK 21 and an Android
-SDK with platform 34 and build-tools 36 (`ANDROID_HOME`, default `/usr/lib/android-sdk`). The signing key
+Preference, Material Components 1.14 with Material 3 Expressive) and packs the module zip into `build/`. It needs JDK 21 and an Android
+SDK with platform 35 and build-tools 36 (`ANDROID_HOME`, default `~/Android/Sdk`). The signing key
 is created on the first build at `~/tools/stylo2-release.jks` and is not part of the repo.
 
 The settings screen follows the structure of LineageOS's device settings (a preference screen in

@@ -41,6 +41,11 @@
             android:parentActivityName=".SettingsActivity" />
 
         <activity
+            android:name=".PresentationActivity"
+            android:exported="false"
+            android:parentActivityName=".SettingsActivity" />
+
+        <activity
             android:name=".DebugActivity"
             android:exported="false"
             android:parentActivityName=".SettingsActivity" />

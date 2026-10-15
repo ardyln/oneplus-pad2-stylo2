@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "io.github.ardyln.stylo2"
-    compileSdk = 34
+    compileSdk = 35
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
@@ -13,8 +13,8 @@ android {
         minSdk = 31
         // 28: legacy Bluetooth permissions, no runtime BLUETOOTH_CONNECT prompt
         targetSdk = 28
-        versionCode = 7
-        versionName = "0.7"
+        versionCode = 8
+        versionName = "0.8"
     }
 
     signingConfigs {
@@ -55,5 +55,5 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.android.material:material:1.14.0")
 }

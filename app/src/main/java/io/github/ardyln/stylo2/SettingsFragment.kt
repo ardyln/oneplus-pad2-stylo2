@@ -46,6 +46,10 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         shortcutsPreference = findPreference(Settings.KEY_SHORTCUTS_SCREEN)!!
         stylusAppsPreference = findPreference(Settings.KEY_STYLUS_BUTTON_APPS)!!
         bridgePreference = findPreference(Settings.KEY_BRIDGE_STATUS)!!
+        findPreference<Preference>(Settings.KEY_PRESENTATION_SCREEN)!!.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), PresentationActivity::class.java))
+            true
+        }
         findPreference<Preference>("debug_log")!!.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), DebugActivity::class.java))
             true
@@ -79,10 +83,18 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         super.onViewCreated(view, savedInstanceState)
         // Like the system Settings: no lines between categories
         setDivider(null)
+        listView.padForBottomBars()
+    }
+
+    // The service can change settings too (presentation mode ends when the pen is attached).
+    private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+        if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE) updatePresentationSummary()
     }
 
     override fun onResume() {
         super.onResume()
+        settings.prefs.registerOnSharedPreferenceChangeListener(prefsListener)
+        updatePresentationSummary()
         val count = settings.shortcuts.load().size
         shortcutsPreference.summary = if (count == 0) getString(R.string.shortcuts_none)
             else resources.getQuantityString(R.plurals.shortcuts_summary, count, count)
@@ -90,6 +102,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
     }
 
     override fun onPause() {
+        settings.prefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         handler.removeCallbacks(refresh)
         super.onPause()
     }
@@ -129,6 +142,14 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun updatePresentationSummary() {
+        findPreference<Preference>(Settings.KEY_PRESENTATION_SCREEN)?.summary = when {
+            !settings.presentation -> getString(R.string.presentation_off)
+            settings.presentationMode == 1 -> getString(R.string.presentation_on_always)
+            else -> getString(R.string.presentation_on_touch)
+        }
     }
 
     private fun updateFeedbackEnabled(on: Boolean) {

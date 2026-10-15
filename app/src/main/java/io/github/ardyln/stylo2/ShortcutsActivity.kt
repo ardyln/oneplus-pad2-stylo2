@@ -10,10 +10,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -61,13 +58,11 @@ class ShortcutsActivity : AppCompatActivity() {
                 saved()
             }
         }
-        ViewCompat.setOnApplyWindowInsetsListener(list) { v, insets ->
-            val bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-            v.updatePadding(bottom = bottom + (88 * resources.displayMetrics.density).toInt())
-            (add.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
-                bottom + (16 * resources.displayMetrics.density).toInt()
+        val density = resources.displayMetrics.density
+        list.padForBottomBars(extra = (88 * density).toInt()) { bottom ->
+            // Keep the add button above the bars too
+            (add.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = bottom + (16 * density).toInt()
             add.requestLayout()
-            insets
         }
         updateEmpty()
     }
