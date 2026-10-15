@@ -1,6 +1,6 @@
 # OnePlus Stylo 2 for the OnePlus Pad 2 on AOSP ROMs
 
-A KernelSU/Magisk module with a small app that brings back two OxygenOS features of the OnePlus Stylo 2
+A KernelSU module (Magisk untested) with a small app that brings the OxygenOS features of the OnePlus Stylo 2, and a few more,
 on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 
 - **Writing feedback** ("textured vibration"): the pen vibrates while you write, in every app. Choose
@@ -46,7 +46,8 @@ No OnePlus code or apps are used.
 
 1. Pair the pen with the tablet as usual.
 2. Download the module zip from [Releases](https://github.com/ardyln/oneplus-pad2-stylo2/releases),
-   install it with KernelSU or Magisk and reboot.
+   install it with KernelSU and reboot. Magisk should work the same way, but it has never been
+   tested.
 3. Open the **Stylo 2** app to choose the texture, strength, shortcuts and notes-app options.
 
 At boot the module:
@@ -63,7 +64,7 @@ At boot the module:
   exclusively while presentation mode is on, so swipes can be remapped; pointer movement is passed on
   unchanged through a fourth virtual device.
 
-Removing the module undoes all of this. KernelSU and Magisk show new versions from this repo's
+Removing the module undoes all of this. KernelSU (and presumably Magisk) shows new versions from this repo's
 releases as module updates.
 
 ## Saber

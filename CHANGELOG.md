@@ -12,7 +12,7 @@
   next/previous page or any shortcut action) through a root helper that takes the pen's mouse
   exclusively; long-press a Quick Settings tile to open its page; reset to defaults on every page and
   for everything (0.15).
-- Module updates through KernelSU/Magisk (`updateJson`).
+- Module updates through KernelSU (`updateJson`; Magisk untested).
 
 ## 0.14
 - Next/previous page shortcuts (Page Down/Up) and Quick Settings tiles for presentation mode, the
