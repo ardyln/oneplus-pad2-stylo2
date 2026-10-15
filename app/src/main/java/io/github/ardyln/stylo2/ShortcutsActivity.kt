@@ -123,7 +123,7 @@ class ShortcutsActivity : AppCompatActivity() {
             theme.resolveAttribute(android.R.attr.selectableItemBackground, bg, true)
             row.setBackgroundResource(bg.resourceId)
             row.setOnClickListener {
-                editor.chooseAction(getString(t.label), t.action(settings)) { chosen ->
+                editor.chooseAction(getString(t.label), t.action(settings), allowNothing = true) { chosen ->
                     t.setAction(settings, chosen)
                     bindCharger()
                 }

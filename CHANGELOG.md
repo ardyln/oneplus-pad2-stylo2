@@ -5,6 +5,7 @@
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
 - "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both
   broadcasts, their extras and how to use them.
+- The charger actions can be set back to "Nothing".
 
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.

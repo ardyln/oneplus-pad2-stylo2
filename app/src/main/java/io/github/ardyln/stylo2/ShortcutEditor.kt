@@ -98,10 +98,20 @@ class ShortcutEditor(private val context: Context) {
         url?.let { runCatching { android.net.Uri.parse(it).host }.getOrNull() } ?: "?"
 
     /** Picks an action (and its app, intent action or URL), then calls [onDone]. */
-    /** [presentation]: also offer scroll, click and nothing first (presentation gestures). */
-    fun chooseAction(title: String, existing: Shortcut?, presentation: Boolean = false, onDone: (Shortcut) -> Unit) {
-        val actions = Shortcut.Action.entries.filter { !it.presentationOnly } .let { normal ->
-            if (presentation) Shortcut.Action.entries.filter { it.presentationOnly } + normal else normal
+    /**
+     * [presentation]: also offer scroll, click and nothing first (presentation gestures).
+     * [allowNothing]: offer "Nothing" first (triggers that can be left unused, like the charger).
+     */
+    fun chooseAction(
+        title: String, existing: Shortcut?, presentation: Boolean = false, allowNothing: Boolean = false,
+        onDone: (Shortcut) -> Unit,
+    ) {
+        val actions = Shortcut.Action.entries.filter { !it.presentationOnly }.let { normal ->
+            when {
+                presentation -> Shortcut.Action.entries.filter { it.presentationOnly } + normal
+                allowNothing -> listOf(Shortcut.Action.NOTHING) + normal
+                else -> normal
+            }
         }
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
