@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.21
+- Other apps: the default texture is pencil at strength 4 (the strength used to follow the main one).
+
 ## 0.20
 - "Stylus button apps" is now **Other apps**: empty by default, without Saber, and it says plainly
   that a double tap holds Android's primary stylus button (`BUTTON_STYLUS_PRIMARY`).

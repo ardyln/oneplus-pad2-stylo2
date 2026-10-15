@@ -17,7 +17,7 @@ class Settings(context: Context) {
     /** A texture of its own while one of the other apps (not Saber) is in front. */
     val stylusAppsFeel get() = prefs.getBoolean(KEY_STYLUS_APPS_FEEL, false)
     val stylusAppsTexture get() = prefs.getString(KEY_STYLUS_APPS_TEXTURE, PenProtocol.TEXTURE_PENCIL.toString())!!.toInt()
-    val stylusAppsLevel get() = prefs.getString(KEY_STYLUS_APPS_LEVEL, null)?.toIntOrNull() ?: level
+    val stylusAppsLevel get() = prefs.getString(KEY_STYLUS_APPS_LEVEL, null)?.toIntOrNull() ?: 4
     /** Apps other than Saber where a double tap holds Android's primary stylus button. */
     val otherStylusApps: Set<String> get() =
         (prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: emptySet()) - Saber.PACKAGE
