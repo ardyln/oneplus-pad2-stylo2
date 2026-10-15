@@ -88,6 +88,14 @@ class PenService : Service() {
     }
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == null) {
+            // All settings replaced at once (a preset was applied): send everything to the pen again
+            lastFeedback = null
+            sendFeedbackSetting()
+            sendPresentation(force = true)
+            SettingTile.requestUpdate(this)
+            return@OnSharedPreferenceChangeListener
+        }
         if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE ||
             key == Settings.KEY_FEEDBACK || key == Settings.KEY_TEXTURE
         ) SettingTile.requestUpdate(this)

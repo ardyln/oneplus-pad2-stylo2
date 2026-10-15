@@ -58,6 +58,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         open("stylus_apps_screen", StylusAppsActivity::class.java)
         open(Settings.KEY_PRESENTATION_SCREEN, PresentationActivity::class.java)
         open("debug_log", DebugActivity::class.java)
+        open("presets_screen", PresetsActivity::class.java)
 
         findPreference<Preference>(Settings.KEY_TEST_BUZZ)!!.setOnPreferenceClickListener {
             requireContext().startForegroundService(
@@ -128,6 +129,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val apps = settings.stylusButtonApps.map { appLabel(it) }.sortedBy { it.lowercase() }
         findPreference<Preference>("stylus_apps_screen")?.summary =
             if (apps.isEmpty()) getString(R.string.stylus_button_apps_none) else apps.joinToString(", ")
+        val presets = PresetStore(requireContext()).load()
+        findPreference<Preference>("presets_screen")?.summary = if (presets.isEmpty()) {
+            getString(R.string.presets_summary_none)
+        } else {
+            presets.sortedBy { it.name.lowercase() }.joinToString(", ") { it.name }
+        }
         findPreference<Preference>(Settings.KEY_PRESENTATION_SCREEN)?.summary = when {
             !settings.presentation -> getString(R.string.presentation_off)
             settings.presentationMode == 1 -> getString(R.string.presentation_on_always)

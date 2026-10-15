@@ -43,6 +43,7 @@ class ShortcutRunner(
                 .putBoolean(Settings.KEY_FEEDBACK, !settings.feedbackOn).apply()
             Shortcut.Action.NEXT_TEXTURE -> settings.prefs.edit()
                 .putString(Settings.KEY_TEXTURE, ((settings.texture + 1) % 4).toString()).apply()
+            Shortcut.Action.APPLY_PRESET -> PresetStore(context).get(s.arg)?.let { PresetStore(context).apply(it) }
             Shortcut.Action.NEXT_PAGE -> key(StylusBridge.KEY_PAGEDOWN)
             Shortcut.Action.PREVIOUS_PAGE -> key(StylusBridge.KEY_PAGEUP)
             Shortcut.Action.SCROLL_UP -> scroll(steps(s))

@@ -47,6 +47,7 @@ class ShortcutEditor(private val context: Context) {
                 Shortcut.Action.NEXT_PAGE -> R.drawable.ic_action_page_next
                 Shortcut.Action.PREVIOUS_PAGE -> R.drawable.ic_action_page_previous
                 Shortcut.Action.SCROLL_UP, Shortcut.Action.SCROLL_DOWN -> R.drawable.ic_gesture_swipe
+                Shortcut.Action.APPLY_PRESET -> R.drawable.ic_presets
                 Shortcut.Action.CLICK -> R.drawable.ic_gesture_click
                 Shortcut.Action.NOTHING -> R.drawable.ic_texture_off
             }
@@ -61,6 +62,9 @@ class ShortcutEditor(private val context: Context) {
         Shortcut.Action.OPEN_APP -> context.getString(R.string.action_open_app_named, s.arg?.let { appLabel(it) } ?: "?")
         Shortcut.Action.BROADCAST -> context.getString(R.string.action_broadcast_named, s.arg ?: "?")
         Shortcut.Action.WEBHOOK -> context.getString(R.string.action_webhook_named, webhookHost(s.arg))
+        Shortcut.Action.APPLY_PRESET -> context.getString(
+            R.string.action_apply_preset_named, PresetStore(context).get(s.arg)?.name ?: "?",
+        )
         Shortcut.Action.SCROLL_UP -> context.getString(R.string.action_scroll_up_named, s.arg?.toIntOrNull() ?: 1)
         Shortcut.Action.SCROLL_DOWN -> context.getString(R.string.action_scroll_down_named, s.arg?.toIntOrNull() ?: 1)
         else -> actionName(s.action)
@@ -82,6 +86,7 @@ class ShortcutEditor(private val context: Context) {
             Shortcut.Action.NEXT_PAGE -> R.string.action_next_page
             Shortcut.Action.PREVIOUS_PAGE -> R.string.action_previous_page
             Shortcut.Action.SCROLL_UP -> R.string.action_scroll_up
+            Shortcut.Action.APPLY_PRESET -> R.string.action_apply_preset
             Shortcut.Action.SCROLL_DOWN -> R.string.action_scroll_down
             Shortcut.Action.CLICK -> R.string.action_click
             Shortcut.Action.NOTHING -> R.string.action_nothing
@@ -115,12 +120,25 @@ class ShortcutEditor(private val context: Context) {
                         R.string.webhook_title, R.string.webhook_hint, R.string.webhook_help, previous,
                         valid = { it.startsWith("http://") || it.startsWith("https://") },
                     ) { onDone(base.copy(arg = it)) }
+                    Shortcut.Action.APPLY_PRESET -> pickPreset { onDone(base.copy(arg = it)) }
                     Shortcut.Action.SCROLL_UP, Shortcut.Action.SCROLL_DOWN -> pickScrollSteps(previous) {
                         onDone(base.copy(arg = it.toString()))
                     }
                     else -> onDone(base.copy(arg = null))
                 }
             }
+            .show()
+    }
+
+    private fun pickPreset(onPicked: (String) -> Unit) {
+        val presets = PresetStore(context).load().sortedBy { it.name.lowercase() }
+        if (presets.isEmpty()) {
+            android.widget.Toast.makeText(context, R.string.presets_none_yet, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.action_apply_preset)
+            .setItems(presets.map { it.name }.toTypedArray()) { _, which -> onPicked(presets[which].id) }
             .show()
     }
 

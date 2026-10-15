@@ -12,6 +12,8 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 - **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
   eraser, and the texture follows the active tool, with a texture and strength per tool.
 
+- **Presets**: save all settings under a name and switch between setups from the app or with a
+  shortcut ("Apply preset").
 - **Presentation mode**: the touch area near the tip becomes a remote: touch and move the pen to move
   the pointer (air mouse), and give each gesture (swipe toward or away from the tip, single tap, double
   tap) an action: scroll with a chosen strength, click, next/previous page, or any shortcut action.

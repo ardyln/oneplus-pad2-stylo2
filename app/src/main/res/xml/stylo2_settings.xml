@@ -76,6 +76,16 @@
             android:widgetLayout="@layout/preference_chevron" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/presets_title">
+
+        <Preference
+            android:key="presets_screen"
+            android:title="@string/presets_title"
+            android:icon="@drawable/ic_presets"
+            android:persistent="false"
+            android:widgetLayout="@layout/preference_chevron" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/debug_category">
 
         <Preference
