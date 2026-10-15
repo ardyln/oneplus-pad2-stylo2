@@ -102,7 +102,7 @@ pen's motion sensor. Everything then arrives as **standard HID input** on the pe
 | finger on the surface (tap or hold) | `KEY_F19` down while touching, up when released |
 | swipe in one direction / the other | `REL_WHEEL` +1 / −1 (with `REL_WHEEL_HI_RES` ±120) |
 | moving the pen | `REL_X` / `REL_Y` (air mouse): mode 0 only while the surface is touched, mode 1 always |
-| (unclear) | an occasional short `KEY_F20` press, seen in mode 0 only |
+| double tap on the touch area | a short `KEY_F20` press, together with the usual double tap on `180938ac` (tested) |
 
 The pen's debug console also prints a code per gesture: `film FF` and `film 05` (the two swipe
 directions), `film 06` (hold starts) and `film 08` (hold ends), next to `film 24` for the thumb button.

@@ -129,7 +129,8 @@ Goal: make Saber (or any app) see a stylus button press without changing the app
   `KEY_F19` (a tap gives a 60–90 ms press), swipes send mouse wheel steps (Google Photos zoomed), and the
   pen moves the mouse cursor with its motion sensor. In mode 0 the cursor only moves while the surface
   is touched (1,464 of 1,464 movement events during an F19 hold); in mode 1 it moves all the time
-  (4,279 of 5,729 outside a hold). A short `KEY_F20` appeared now and then in mode 0, cause unknown.
+  (4,279 of 5,729 outside a hold). A short `KEY_F20` press comes with a double tap on the touch area, together with the usual
+  `180938ac` double-tap notification (tested later), so it adds no gesture of its own.
 - Nothing extra is sent on the vendor characteristics; the console prints `film FF` / `film 05`
   (swipes), `film 06` / `film 08` (hold start and end).
 
