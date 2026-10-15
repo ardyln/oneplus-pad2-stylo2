@@ -87,7 +87,10 @@
     <string name="presentation_off">Off. Use the pen as a remote and pointer</string>
     <string name="presentation_on_touch">On · pointer moves while you touch the pen</string>
     <string name="presentation_on_always">On · pointer always follows the pen</string>
-    <string name="presentation_intro">Use the pen as a remote and pointer for slides, documents, photos and maps. It uses the touch area near the tip, the same place you double tap. Presentation mode ends when you attach the pen to the tablet.</string>
+    <string name="presentation_intro">Use the pen as a remote and pointer for slides, documents, photos and maps. It uses the touch area near the tip, the same place you double tap. Presentation mode ends when you attach the pen to the tablet, unless you keep it on below.</string>
+    <string name="presentation_stays_title">Stay on when attached</string>
+    <string name="presentation_stays_summary">Presentation mode stays on when the pen is attached to the tablet, until you turn it off here or with a shortcut</string>
+    <string name="gesture_attach_stays">Presentation mode stays on (turn it off here or with a shortcut)</string>
     <string name="presentation_switch">Use presentation mode</string>
     <string name="presentation_gestures">Gestures</string>
     <string name="gesture_swipe">Swipe along the touch area</string>

@@ -282,10 +282,15 @@ class PenService : Service() {
             PenProtocol.BATTERY, PenProtocol.BATTERY_READ -> battery = v[0].toInt() and 0xff
             PenProtocol.MAGNET -> {
                 onCharger = (v[0].toInt() and 0x01) == 0
-                // Like OxygenOS: presentation mode lasts until the pen is attached again.
-                if (onCharger && settings.presentation) {
-                    EventLog.add(EventLog.Source.APP, "presentation=false", "Pen attached: presentation mode turned off")
-                    settings.setPresentation(false)
+                if (settings.presentation) {
+                    if (onCharger && !settings.presentationStays) {
+                        // Like OxygenOS: presentation mode lasts until the pen is attached again.
+                        EventLog.add(EventLog.Source.APP, "presentation=false", "Pen attached: presentation mode turned off")
+                        settings.setPresentation(false)
+                    } else if (!onCharger) {
+                        // Kept on: make sure the pen is in presentation mode again once it's picked up.
+                        sendPresentation()
+                    }
                 }
             }
             else -> return

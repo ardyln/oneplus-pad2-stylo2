@@ -22,6 +22,7 @@ class Settings(context: Context) {
     val clickDoubleTap get() = prefs.getBoolean(KEY_CLICK_DOUBLE_TAP, true)
     val clickSurfaceTap get() = prefs.getBoolean(KEY_CLICK_SURFACE_TAP, false)
     val vibrateScroll get() = prefs.getBoolean(KEY_VIBRATE_SCROLL, true)
+    val presentationStays get() = prefs.getBoolean(KEY_PRESENTATION_STAYS, false)
     val vibrateTap get() = prefs.getBoolean(KEY_VIBRATE_TAP, true)
 
     fun setPresentation(on: Boolean) = prefs.edit().putBoolean(KEY_PRESENTATION, on).apply()
@@ -59,6 +60,7 @@ class Settings(context: Context) {
         const val KEY_CLICK_SURFACE_TAP = "presentation_click_surface_tap"
         const val KEY_PRESENTATION_SCREEN = "presentation_screen"
         const val KEY_VIBRATE_SCROLL = "presentation_vibrate_scroll"
+        const val KEY_PRESENTATION_STAYS = "presentation_stays_on"
         const val KEY_VIBRATE_TAP = "presentation_vibrate_tap"
 
         private const val OLD_KEY_BUTTON_ACTION = "button_action"

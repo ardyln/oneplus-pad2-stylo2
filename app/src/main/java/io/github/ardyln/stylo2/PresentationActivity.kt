@@ -25,6 +25,7 @@ class PresentationActivity : AppCompatActivity() {
     private lateinit var clickSurfaceTap: View
     private lateinit var vibrateScroll: View
     private lateinit var vibrateTap: View
+    private lateinit var staysOn: View
 
     // The service turns presentation mode off when the pen is attached.
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refresh() }
@@ -62,6 +63,9 @@ class PresentationActivity : AppCompatActivity() {
             R.string.click_double_tap_summary) { settings.clickDoubleTap }
         bindSwitchRow(clickSurfaceTap, Settings.KEY_CLICK_SURFACE_TAP, R.string.click_surface_title,
             R.string.click_surface_summary) { settings.clickSurfaceTap }
+        staysOn = findViewById(R.id.stays_on)
+        bindSwitchRow(staysOn, Settings.KEY_PRESENTATION_STAYS, R.string.presentation_stays_title,
+            R.string.presentation_stays_summary) { settings.presentationStays }
         vibrateScroll = findViewById(R.id.vibrate_scroll)
         vibrateTap = findViewById(R.id.vibrate_tap)
         bindSwitchRow(vibrateScroll, Settings.KEY_VIBRATE_SCROLL, R.string.vibrate_scroll_title,
@@ -105,6 +109,7 @@ class PresentationActivity : AppCompatActivity() {
         pointerDescription.setText(if (always) R.string.pointer_always_desc else R.string.pointer_touch_desc)
         clickDoubleTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickDoubleTap
         clickSurfaceTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickSurfaceTap
+        staysOn.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.presentationStays
         vibrateScroll.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateScroll
         vibrateTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateTap
 
@@ -126,7 +131,10 @@ class PresentationActivity : AppCompatActivity() {
             R.drawable.ic_gesture_click, R.string.gesture_surface_tap,
             if (settings.clickSurfaceTap) R.string.gesture_clicks else R.string.gesture_not_used,
         )
-        gesture(R.drawable.ic_gesture_attach, R.string.gesture_attach, R.string.gesture_attach_does)
+        gesture(
+            R.drawable.ic_gesture_attach, R.string.gesture_attach,
+            if (settings.presentationStays) R.string.gesture_attach_stays else R.string.gesture_attach_does,
+        )
         gestures.alpha = if (on) 1f else 0.6f
     }
 

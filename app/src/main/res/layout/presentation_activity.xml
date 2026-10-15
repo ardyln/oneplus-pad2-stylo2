@@ -77,6 +77,10 @@
                     android:focusable="false" />
             </LinearLayout>
 
+            <include
+                android:id="@+id/stays_on"
+                layout="@layout/item_switch_row" />
+
             <TextView
                 style="@style/Stylo2.SectionHeader"
                 android:text="@string/presentation_gestures" />
