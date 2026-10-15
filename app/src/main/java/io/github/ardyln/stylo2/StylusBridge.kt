@@ -93,13 +93,16 @@ class StylusBridge(
         io.shutdown()
     }
 
-    /** A left click at the mouse pointer, through the virtual "Stylo 2 click" mouse. */
-    fun click() {
+    /**
+     * A click at the mouse pointer through the virtual "Stylo 2 click" mouse: [button] is pressed for
+     * [holdMs] (long enough, and the left button becomes a long press).
+     */
+    fun click(button: Int = BTN_LEFT, holdMs: Long = CLICK_MS.toLong()) {
         if (!ready) return
         io.execute {
-            send("""{"id":2,"command":"inject","events":[1,$BTN_LEFT,1,0,0,0]}""")
-            send("""{"id":2,"command":"delay","duration":$CLICK_MS}""")
-            send("""{"id":2,"command":"inject","events":[1,$BTN_LEFT,0,0,0,0]}""")
+            send("""{"id":2,"command":"inject","events":[1,$button,1,0,0,0]}""")
+            send("""{"id":2,"command":"delay","duration":$holdMs}""")
+            send("""{"id":2,"command":"inject","events":[1,$button,0,0,0,0]}""")
         }
     }
 
@@ -206,8 +209,9 @@ class StylusBridge(
     companion object {
         const val KEY_PAGEUP = 104
         const val KEY_PAGEDOWN = 109
-        private const val BTN_LEFT = 272
-        private const val BTN_RIGHT = 273
+        const val BTN_LEFT = 272
+        const val BTN_RIGHT = 273
+        const val BTN_MIDDLE = 274
         private const val CLICK_MS = 40
         private const val BTN_STYLUS = 331
         private const val BTN_STYLUS2 = 332
@@ -215,10 +219,10 @@ class StylusBridge(
             """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
             """{"type":"UI_SET_EVBIT","data":[1]},{"type":"UI_SET_KEYBIT","data":[$BTN_STYLUS,$BTN_STYLUS2]}]}"""
 
-        /** A mouse with a left and right button; Android shares one pointer between all mice. */
+        /** A mouse with left, right and middle buttons; Android shares one pointer between all mice. */
         private const val REGISTER_CLICK = """{"id":2,"command":"register","name":"Stylo 2 click",""" +
             """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
-            """{"type":"UI_SET_EVBIT","data":[1,2]},{"type":"UI_SET_KEYBIT","data":[$BTN_LEFT,$BTN_RIGHT]},""" +
+            """{"type":"UI_SET_EVBIT","data":[1,2]},{"type":"UI_SET_KEYBIT","data":[$BTN_LEFT,$BTN_RIGHT,$BTN_MIDDLE]},""" +
             """{"type":"UI_SET_RELBIT","data":[0,1,8,11]}]}"""
 
         /** A keyboard with only the page keys, for the next/previous page shortcuts. */

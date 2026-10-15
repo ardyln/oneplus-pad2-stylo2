@@ -59,7 +59,7 @@ class PenService : Service() {
             this, settings,
             buzz = { write(PenProtocol.buzz()) },
             key = { bridge.key(it) },
-            click = { bridge.click() },
+            click = { button, holdMs -> bridge.click(button, holdMs) },
             scroll = { bridge.scroll(it) },
         )
     }

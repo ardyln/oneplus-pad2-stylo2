@@ -5,6 +5,8 @@
   Android doesn't have) and restarted every few seconds, so the air mouse didn't work since 0.15. The
   helper is now compiled against Android's API, so this kind of error fails the build.
 - A release of the touch area without a press is ignored (it was measured from boot).
+- New actions for presentation gestures: long press (held past the system's touch & hold delay, opens
+  menus and details), right click and middle click, all at the pointer.
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
   Assistant webhook (`"gesture": "pen_attached"` / `"pen_detached"`) or a broadcast.
 - "Broadcast every gesture" is now "Send pen events to automation apps", with a description of both

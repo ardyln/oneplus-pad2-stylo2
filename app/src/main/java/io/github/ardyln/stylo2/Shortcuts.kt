@@ -21,7 +21,7 @@ data class Shortcut(
         APPLY_PRESET, // arg: preset id
 
         // Only for presentation gestures. SCROLL_* take the number of wheel steps as arg.
-        SCROLL_UP, SCROLL_DOWN, CLICK, NOTHING;
+        SCROLL_UP, SCROLL_DOWN, CLICK, LONG_CLICK, RIGHT_CLICK, MIDDLE_CLICK, NOTHING;
 
         val presentationOnly get() = this in PRESENTATION_ONLY
     }
@@ -29,7 +29,10 @@ data class Shortcut(
     fun toJson(): JSONObject = JSONObject().put("id", id).put("action", action.name).put("arg", arg)
 
     companion object {
-        private val PRESENTATION_ONLY = setOf(Action.SCROLL_UP, Action.SCROLL_DOWN, Action.CLICK, Action.NOTHING)
+        private val PRESENTATION_ONLY = setOf(
+            Action.SCROLL_UP, Action.SCROLL_DOWN, Action.CLICK, Action.LONG_CLICK, Action.RIGHT_CLICK,
+            Action.MIDDLE_CLICK, Action.NOTHING,
+        )
 
         fun fromJson(o: JSONObject) = Shortcut(
             id = o.getString("id"),
