@@ -4,8 +4,9 @@
 #   external stylus whose button Android merges into the pen's events. When the app closes
 #   the pipe, `uinput` exits and the device goes away, so a held button can't get stuck.
 # - publishes Saber's active tool (its "lastTool" pref) to the app's saber_tool file.
-# - forwards the pen's presentation keys (F19 while the touch surface near the tip is touched,
-#   F20) from its HID keyboard to the app's pen_keys.fifo, as lines like "KEY_F19 DOWN".
+# - forwards the pen's presentation input to the app's pen_keys.fifo: the keys from its HID keyboard
+#   (F19 while the touch area near the tip is touched, F20) as "KEY_F19 DOWN", and the scroll steps
+#   from its HID mouse (swipes on the touch area) as "REL_WHEEL UP" / "REL_WHEEL DOWN".
 
 PKG=io.github.ardyln.stylo2
 FILES=/data/data/$PKG/files
@@ -55,10 +56,11 @@ tool_loop() {
     done
 }
 
-# The pen's HID keyboard, e.g. /dev/input/event14; empty while the pen isn't connected.
-pen_keyboard() {
+# The pen's HID keyboard or mouse ("Keyboard" / "Mouse"), e.g. /dev/input/event14; empty while
+# the pen isn't connected.
+pen_device() {
     for d in /sys/class/input/event*; do
-        if [ "$(cat "$d/device/name" 2>/dev/null)" = "OnePlus Stylo 2 Keyboard" ]; then
+        if [ "$(cat "$d/device/name" 2>/dev/null)" = "OnePlus Stylo 2 $1" ]; then
             echo "/dev/input/${d##*/}"
             return
         fi
@@ -67,7 +69,7 @@ pen_keyboard() {
 
 keys_loop() {
     while true; do
-        dev=$(pen_keyboard)
+        dev=$(pen_device Keyboard)
         if [ -z "$dev" ] || [ ! -p "$FILES/pen_keys.fifo" ]; then
             sleep 5
             continue
@@ -82,7 +84,27 @@ keys_loop() {
     done
 }
 
+# The mouse also sends hundreds of movement events per second in presentation mode; grep keeps
+# only the scroll steps before the shell loop sees them.
+wheel_loop() {
+    while true; do
+        dev=$(pen_device Mouse)
+        if [ -z "$dev" ] || [ ! -p "$FILES/pen_keys.fifo" ]; then
+            sleep 5
+            continue
+        fi
+        getevent -l "$dev" 2>/dev/null | grep --line-buffered ' REL_WHEEL ' | while read -r _ _ value; do
+            case "$value" in
+                ffff*) echo "REL_WHEEL DOWN" ;;
+                *) echo "REL_WHEEL UP" ;;
+            esac
+        done > "$FILES/pen_keys.fifo"
+        sleep 1
+    done
+}
+
 log "stylus bridge started"
 button_loop &
 keys_loop &
+wheel_loop &
 tool_loop

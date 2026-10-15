@@ -21,8 +21,11 @@ import java.util.concurrent.Executors
 class StylusBridge(
     context: Context,
     private val onSaberTool: (Int?) -> Unit,
-    /** Called on a background thread for the pen's presentation keys: (key, pressed). */
-    private val onPenKey: (String, Boolean) -> Unit,
+    /**
+     * Called on a background thread for the pen's presentation input: ("KEY_F19", "DOWN"/"UP") or
+     * ("REL_WHEEL", "UP"/"DOWN").
+     */
+    private val onPenKey: (String, String) -> Unit,
 ) {
     private val fifo = File(context.filesDir, "stylus_button.fifo")
     private val keysFifo = File(context.filesDir, "pen_keys.fifo")
@@ -108,7 +111,7 @@ class StylusBridge(
                 keysFifo.bufferedReader().use { r ->
                     while (true) {
                         val parts = (r.readLine() ?: break).trim().split(Regex("\\s+"))
-                        if (parts.size == 2) onPenKey(parts[0], parts[1] == "DOWN")
+                        if (parts.size == 2) onPenKey(parts[0], parts[1])
                     }
                 }
             } catch (e: IOException) {

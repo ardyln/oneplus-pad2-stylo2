@@ -47,6 +47,7 @@ class PenService : Service() {
     private var onCharger = false
     private var tapCount = 0
     private var surfaceDownAt = 0L
+    private var lastFeedbackBuzz = 0L
     private val runner by lazy { ShortcutRunner(this, settings) { write(PenProtocol.buzz()) } }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
@@ -112,7 +113,7 @@ class PenService : Service() {
         bridge = StylusBridge(
             this,
             onSaberTool = { tool -> handler.post { onSaberTool(tool) } },
-            onPenKey = { key, down -> handler.post { onPenKey(key, down) } },
+            onPenKey = { key, value -> handler.post { onPenKey(key, value) } },
         )
         bridge.start()
         FocusService.listener = { handler.post { onForegroundChanged() } }
@@ -428,8 +429,14 @@ class PenService : Service() {
      * The pen's presentation keys (forwarded by the root helper): F19 is held while a finger is on
      * the touch surface near the tip. A short touch counts as a tap and clicks at the pointer.
      */
-    private fun onPenKey(key: String, down: Boolean) {
+    private fun onPenKey(key: String, value: String) {
         val now = SystemClock.uptimeMillis()
+        val down = value == "DOWN"
+        if (key == "REL_WHEEL") {
+            EventLog.add(EventLog.Source.PEN, "REL_WHEEL $value", "Swipe on the touch area: scroll ${value.lowercase()}")
+            if (settings.presentation && settings.vibrateScroll) feedbackBuzz(now)
+            return
+        }
         if (key == "KEY_F19") {
             if (down) {
                 surfaceDownAt = now
@@ -443,9 +450,17 @@ class PenService : Service() {
                 else "Surface near the tip held (air mouse)",
             )
             if (tap && settings.presentation && settings.clickSurfaceTap) bridge.click()
+            if (tap && settings.presentation && settings.vibrateTap) feedbackBuzz(now)
         } else if (down) {
             EventLog.add(EventLog.Source.PEN, key, "Presentation key (meaning unknown)")
         }
+    }
+
+    /** A short vibration for presentation gestures, at most one per [FEEDBACK_GAP_MS]. */
+    private fun feedbackBuzz(now: Long) {
+        if (now - lastFeedbackBuzz < FEEDBACK_GAP_MS) return
+        lastFeedbackBuzz = now
+        write(PenProtocol.buzz())
     }
 
     private fun clicksOnDoubleTap() = settings.presentation && settings.clickDoubleTap && bridge.ready
@@ -498,6 +513,7 @@ class PenService : Service() {
         private const val OP_TIMEOUT_MS = 5000L
         private const val FOREGROUND_POLL_MS = 1000L
         private const val SURFACE_TAP_MS = 250L
+        private const val FEEDBACK_GAP_MS = 150L
 
         /** Called on the main thread with the running count after each double tap (for the UI). */
         @Volatile var tapListener: ((Int) -> Unit)? = null

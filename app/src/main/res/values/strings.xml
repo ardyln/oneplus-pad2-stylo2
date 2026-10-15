@@ -110,6 +110,11 @@
     <string name="pointer_touch_desc">The pointer only moves while a finger is on the touch area, so it stays put when you put the pen down or gesture with it.</string>
     <string name="pointer_always_desc">The pointer follows every movement of the pen, like a laser pointer. Handy for presenting, but it also moves while you hold the pen otherwise.</string>
     <string name="presentation_click">Click</string>
+    <string name="presentation_vibration">Vibration</string>
+    <string name="vibrate_scroll_title">Vibrate when scrolling</string>
+    <string name="vibrate_scroll_summary">A short vibration for each swipe along the touch area</string>
+    <string name="vibrate_tap_title">Vibrate on a tap</string>
+    <string name="vibrate_tap_summary">A short vibration when you briefly tap the touch area</string>
     <string name="click_double_tap_title">Click with a double tap</string>
     <string name="click_double_tap_summary">A double tap on the touch area clicks where the pointer is. Two or more double taps in a row still run your shortcuts, e.g. one that turns presentation mode off</string>
     <string name="click_surface_title">Click with a single tap</string>

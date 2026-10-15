@@ -23,6 +23,8 @@ class PresentationActivity : AppCompatActivity() {
     private lateinit var pointerDescription: TextView
     private lateinit var clickDoubleTap: View
     private lateinit var clickSurfaceTap: View
+    private lateinit var vibrateScroll: View
+    private lateinit var vibrateTap: View
 
     // The service turns presentation mode off when the pen is attached.
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> refresh() }
@@ -60,6 +62,12 @@ class PresentationActivity : AppCompatActivity() {
             R.string.click_double_tap_summary) { settings.clickDoubleTap }
         bindSwitchRow(clickSurfaceTap, Settings.KEY_CLICK_SURFACE_TAP, R.string.click_surface_title,
             R.string.click_surface_summary) { settings.clickSurfaceTap }
+        vibrateScroll = findViewById(R.id.vibrate_scroll)
+        vibrateTap = findViewById(R.id.vibrate_tap)
+        bindSwitchRow(vibrateScroll, Settings.KEY_VIBRATE_SCROLL, R.string.vibrate_scroll_title,
+            R.string.vibrate_scroll_summary) { settings.vibrateScroll }
+        bindSwitchRow(vibrateTap, Settings.KEY_VIBRATE_TAP, R.string.vibrate_tap_title,
+            R.string.vibrate_tap_summary) { settings.vibrateTap }
     }
 
     override fun onResume() {
@@ -97,6 +105,8 @@ class PresentationActivity : AppCompatActivity() {
         pointerDescription.setText(if (always) R.string.pointer_always_desc else R.string.pointer_touch_desc)
         clickDoubleTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickDoubleTap
         clickSurfaceTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.clickSurfaceTap
+        vibrateScroll.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateScroll
+        vibrateTap.findViewById<MaterialSwitch>(R.id.toggle).isChecked = settings.vibrateTap
 
         gestures.removeAllViews()
         gesture(R.drawable.ic_gesture_swipe, R.string.gesture_swipe, R.string.gesture_swipe_does)
