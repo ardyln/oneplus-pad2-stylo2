@@ -64,7 +64,9 @@ At boot the module:
   exclusively while presentation mode is on, so swipes can be remapped; pointer movement is passed on
   unchanged through a fourth virtual device.
 
-Removing the module undoes all of this. KernelSU (and presumably Magisk) shows new versions from this repo's
+Removing the module undoes all of this (tested with KernelSU: removing it, rebooting, then
+installing the release zip and rebooting again leaves the system as before and sets everything up
+again; the app's settings are removed with the app). KernelSU (and presumably Magisk) shows new versions from this repo's
 releases as module updates.
 
 ## Saber
