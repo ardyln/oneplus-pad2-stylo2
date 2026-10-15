@@ -159,6 +159,8 @@
     <string name="stylus_apps_feel_card">Texture in these apps</string>
     <string name="stylus_apps_empty">No apps yet. Add one with the button below.</string>
     <string name="stylus_apps_add">Add app</string>
+    <string name="app_search_hint">Search apps</string>
+    <string name="app_search_none">No app matches</string>
     <string name="stylus_apps_remove">Remove</string>
     <string name="stylus_button_apps_none">No apps chosen</string>
     <string name="saber_texture_title">Texture follows Saber\'s tool</string>

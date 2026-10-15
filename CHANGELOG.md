@@ -7,6 +7,8 @@
   broadcasts, their extras and how to use them.
 - The charger actions can be set back to "Nothing", and double-tap shortcuts can be "Nothing" too, to
   skip a count (e.g. an action only on four double taps).
+- App lists (shortcut "Open an app", "Add app" on the Other apps page) have a search field and show
+  app icons.
 
 ## 0.21
 - Strength 0 is described correctly: the pen accepts it, but it can't be felt.

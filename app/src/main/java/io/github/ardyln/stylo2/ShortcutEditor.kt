@@ -2,7 +2,6 @@ package io.github.ardyln.stylo2
 
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.text.InputType
 import android.widget.EditText
@@ -211,15 +210,5 @@ class ShortcutEditor(private val context: Context) {
         }
     }
 
-    private fun pickApp(onPicked: (String) -> Unit) {
-        val pm = context.packageManager
-        val apps = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-            .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
-            .distinctBy { it.first }
-            .sortedBy { it.second.lowercase() }
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.choose_app)
-            .setItems(apps.map { it.second }.toTypedArray()) { _, which -> onPicked(apps[which].first) }
-            .show()
-    }
+    private fun pickApp(onPicked: (String) -> Unit) = AppPicker.show(context, R.string.choose_app, onPicked = onPicked)
 }

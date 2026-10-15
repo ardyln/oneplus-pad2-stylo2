@@ -1,6 +1,5 @@
 package io.github.ardyln.stylo2
 
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 /** Apps other than Saber where a double tap holds or releases Android's primary stylus button. */
@@ -129,20 +127,11 @@ class StylusAppsActivity : AppCompatActivity() {
     }
 
     private fun pickApp() {
-        val pm = packageManager
-        val chosen = settings.otherStylusApps
-        val candidates = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
-            .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
-            .distinctBy { it.first }
-            .filter { it.first !in chosen && it.first != packageName && it.first != Saber.PACKAGE }
-            .sortedBy { it.second.lowercase() }
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.stylus_apps_add)
-            .setItems(candidates.map { it.second }.toTypedArray()) { _, which ->
-                settings.setOtherStylusApps(settings.otherStylusApps + candidates[which].first)
-                show()
-            }
-            .show()
+        val exclude = settings.otherStylusApps + packageName + Saber.PACKAGE
+        AppPicker.show(this, R.string.stylus_apps_add, exclude) { pkg ->
+            settings.setOtherStylusApps(settings.otherStylusApps + pkg)
+            show()
+        }
     }
 
     private fun label(pkg: String): String = try {
