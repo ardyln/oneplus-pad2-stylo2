@@ -22,9 +22,15 @@ import java.util.concurrent.LinkedBlockingQueue;
  * the scroll steps (swipes on the touch area) go to the app as "REL_WHEEL UP" / "REL_WHEEL DOWN" on
  * pen_keys.fifo, so it can run the action the user chose. If this process dies, the kernel ends the
  * grab and the pen's mouse works directly again.
+ *
+ * It also forwards the touch area's keys from the pen's HID keyboard (not grabbed) as "KEY_F19 DOWN"
+ * and so on. Both devices are looked up again whenever a read fails, so a reconnected pen (new
+ * device nodes) is picked up; getevent, used for this before, kept reading the removed node.
  */
 public final class PenPointer {
     private static final String PEN_MOUSE = "OnePlus Stylo 2 Mouse";
+    private static final String PEN_KEYBOARD = "OnePlus Stylo 2 Keyboard";
+    private static final int KEY_F19 = 189, KEY_F20 = 190;
     private static final int EVIOCGRAB = 0x40044590;
     private static final int EV_SYN = 0, EV_KEY = 1, EV_REL = 2;
     private static final int REL_X = 0, REL_Y = 1, REL_WHEEL = 8, REL_WHEEL_HI_RES = 11;
@@ -50,8 +56,11 @@ public final class PenPointer {
 
     private void run() throws Exception {
         startKeyWriter();
+        startThread("pen-keys-reader", new Runnable() {
+            @Override public void run() { readKeysForever(); }
+        });
         while (true) {
-            String dev = findPenMouse();
+            String dev = findDevice(PEN_MOUSE);
             if (dev == null || !wantGrab()) {
                 Thread.sleep(500);
                 continue;
@@ -69,7 +78,54 @@ public final class PenPointer {
         }
     }
 
-    private static String findPenMouse() {
+    private static void startThread(String name, Runnable r) {
+        Thread t = new Thread(r, name);
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** Forwards F19/F20 from the pen's keyboard; reopens it after the pen reconnects. */
+    private void readKeysForever() {
+        byte[] raw = new byte[EVENT_SIZE];
+        ByteBuffer ev = ByteBuffer.wrap(raw).order(ByteOrder.LITTLE_ENDIAN);
+        while (true) {
+            String dev = findDevice(PEN_KEYBOARD);
+            if (dev == null) {
+                sleepQuietly(1000);
+                continue;
+            }
+            log("reading keys from " + dev);
+            try (FileInputStream in = new FileInputStream(dev)) {
+                while (true) {
+                    int n = 0;
+                    while (n < EVENT_SIZE) {
+                        int r = in.read(raw, n, EVENT_SIZE - n);
+                        if (r < 0) throw new IOException("end of " + dev);
+                        n += r;
+                    }
+                    int type = ev.getShort(16) & 0xffff;
+                    int code = ev.getShort(18) & 0xffff;
+                    int value = ev.getInt(20);
+                    // value 2 is key repeat, which a held touch area doesn't need
+                    if (type != EV_KEY || (code != KEY_F19 && code != KEY_F20) || value > 1) continue;
+                    keyLines.offer((code == KEY_F19 ? "KEY_F19 " : "KEY_F20 ") + (value == 1 ? "DOWN" : "UP"));
+                }
+            } catch (IOException e) {
+                // The pen disconnected (the node went away) or the device couldn't be read
+                log("keys: " + e.getMessage());
+            }
+            sleepQuietly(1000);
+        }
+    }
+
+    private static void sleepQuietly(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    private static String findDevice(String wanted) {
         File[] devices = new File("/sys/class/input").listFiles();
         if (devices == null) return null;
         for (File d : devices) {
@@ -77,7 +133,7 @@ public final class PenPointer {
             try {
                 String name = new String(java.nio.file.Files.readAllBytes(new File(d, "device/name").toPath()),
                         StandardCharsets.UTF_8).trim();
-                if (name.equals(PEN_MOUSE)) return "/dev/input/" + d.getName();
+                if (name.equals(wanted)) return "/dev/input/" + d.getName();
             } catch (IOException ignored) {
             }
         }

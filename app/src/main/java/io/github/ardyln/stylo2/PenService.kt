@@ -512,7 +512,7 @@ class PenService : Service() {
             // In presentation mode a single double tap runs its gesture action; chained ones run shortcuts.
             val a = doubleTapAction()!!
             EventLog.add(EventLog.Source.APP, "presentation double tap", "Double tap → ${a.action.name.lowercase().replace('_', ' ')}")
-            runner.run(a, 1, battery)
+            runner.run(a, 1, battery, PresentationGesture.DOUBLE_TAP.key)
             return@Runnable
         }
         val shortcut = settings.shortcuts.load().getOrNull(taps - 1)
@@ -541,7 +541,7 @@ class PenService : Service() {
                 "Swipe ${if (value == "UP") "toward the tip" else "away from the tip"} → ${a.action.name.lowercase().replace('_', ' ')}",
             )
             if (presentationActive()) {
-                runner.run(a, 1, battery)
+                runner.run(a, 1, battery, gesture.key)
                 if (settings.vibrateScroll) feedbackBuzz(now)
             }
             return
@@ -583,7 +583,7 @@ class PenService : Service() {
         if (!presentationActive()) return@Runnable
         val a = PresentationGesture.TAP.action(settings)
         EventLog.add(EventLog.Source.APP, "presentation tap", "Single tap → ${a.action.name.lowercase().replace('_', ' ')}")
-        runner.run(a, 1, battery)
+        runner.run(a, 1, battery, PresentationGesture.TAP.key)
         if (settings.vibrateTap) feedbackBuzz(SystemClock.uptimeMillis())
     }
 

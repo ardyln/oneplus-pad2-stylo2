@@ -4,7 +4,7 @@
 #   external stylus whose button Android merges into the pen's events. When the app closes
 #   the pipe, `uinput` exits and the device goes away, so a held button can't get stuck.
 # - publishes Saber's active tool (its "lastTool" pref) to the app's saber_tool file.
-# - forwards the pen's presentation keys from its HID keyboard (F19 while the touch area near the
+# - through penpointer.jar, forwards the pen's presentation keys from its HID keyboard (F19 while the touch area near the
 #   tip is touched, F20) to the app's pen_keys.fifo as "KEY_F19 DOWN";
 # - runs the pointer helper, which takes over the pen's HID mouse in presentation mode.
 
@@ -57,36 +57,9 @@ tool_loop() {
     done
 }
 
-# The pen's HID keyboard or mouse ("Keyboard" / "Mouse"), e.g. /dev/input/event14; empty while
-# the pen isn't connected.
-pen_device() {
-    for d in /sys/class/input/event*; do
-        if [ "$(cat "$d/device/name" 2>/dev/null)" = "OnePlus Stylo 2 $1" ]; then
-            echo "/dev/input/${d##*/}"
-            return
-        fi
-    done
-}
-
-keys_loop() {
-    while true; do
-        dev=$(pen_device Keyboard)
-        if [ -z "$dev" ] || [ ! -p "$FILES/pen_keys.fifo" ]; then
-            sleep 5
-            continue
-        fi
-        # Ends when the pen disconnects (the device goes away) or the app closes the pipe.
-        getevent -l "$dev" 2>/dev/null | while read -r type key value; do
-            case "$key" in
-                KEY_F19|KEY_F20) [ "$type" = EV_KEY ] && echo "$key $value" ;;
-            esac
-        done > "$FILES/pen_keys.fifo"
-        sleep 1
-    done
-}
-
 # Presentation mode: takes the pen's HID mouse exclusively while the app asks for it, passes the
-# movement on and sends the swipes (scroll steps) to the app (helper/src/.../PenPointer.java).
+# movement on and sends the swipes (scroll steps) and the touch area's keys (F19/F20) to the app
+# (helper/src/.../PenPointer.java).
 pointer_loop() {
     while true; do
         if [ -f "$MODDIR/penpointer.jar" ] && [ -d "$FILES" ]; then
@@ -99,6 +72,5 @@ pointer_loop() {
 
 log "stylus bridge started"
 button_loop &
-keys_loop &
 pointer_loop &
 tool_loop

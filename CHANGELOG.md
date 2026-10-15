@@ -5,6 +5,11 @@
   Android doesn't have) and restarted every few seconds, so the air mouse didn't work since 0.15. The
   helper is now compiled against Android's API, so this kind of error fails the build.
 - A release of the touch area without a press is ignored (it was measured from boot).
+- **Fix:** after the pen reconnected (e.g. Bluetooth off and on), taps and double taps on the touch
+  area no longer reached the app: the helper's `getevent` kept reading the removed device. The Java
+  helper now forwards F19/F20 itself and reopens the pen's keyboard after a reconnect.
+- Webhooks and broadcasts from presentation gestures carry the gesture's name (e.g.
+  `presentation_tap`) instead of `double_tap`.
 - New actions for presentation gestures: long press (held past the system's touch & hold delay, opens
   menus and details), right click and middle click, all at the pointer.
 - Actions for attaching the pen to the charger and taking it off (Shortcuts page), e.g. a Home
