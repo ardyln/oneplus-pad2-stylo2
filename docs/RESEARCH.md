@@ -233,10 +233,16 @@ KernelSU without a mounting metamodule doesn't overlay `system/`, so `service.sh
   (`system_server` may not use those file descriptors). The same applies to `settings`, which goes
   through the same path.
 
-So `pm` reads from `/dev/null` and writes to a file in `/data/local/tmp`, with a 2-minute limit, and
-the app is only recorded as installed when the output says `Success`; otherwise the next boot tries
-again. Tested by removing and reinstalling both Pad 2 modules and rebooting: both apps installed at
-boot.
+- **One prompt at a time:** Android may ask the user to allow installing the app, and it shows only
+  one such prompt at a time. With both Pad 2 modules installing at boot, the second install waited
+  for a prompt that never came.
+- `/system/bin/pm` is only `cmd package "$@"`, so a time limit on `pm` stops the wrapper but not the
+  install.
+
+So the modules take turns through a shared lock (`/dev/pad2-install.lock`), call `cmd package
+install` directly with stdin from `/dev/null`, output to a file in `/data/local/tmp` and a 5-minute
+limit, and decide whether the app is installed by comparing the installed APK with the module's
+(Android keeps the file byte for byte), so an install allowed late counts at the next boot.
 
 ## Tools
 

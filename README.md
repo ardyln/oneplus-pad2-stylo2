@@ -60,7 +60,8 @@ No OnePlus code or apps are used.
 1. Pair the pen with the tablet as usual.
 2. Download the module zip from [Releases](https://github.com/ardyln/oneplus-pad2-stylo2/releases),
    install it with KernelSU and reboot. Magisk should work the same way, but it has never been
-   tested.
+   tested. After unlocking, Android may ask you to allow installing the module's app: allow it
+   (with the keyboard module installed too, a second prompt follows for its app).
 3. Open the **Stylo 2** app to choose the texture, strength, shortcuts and notes-app options.
 
 At boot the module:
