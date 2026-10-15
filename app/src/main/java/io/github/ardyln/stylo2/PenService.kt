@@ -99,6 +99,9 @@ class PenService : Service() {
         if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE ||
             key == Settings.KEY_FEEDBACK || key == Settings.KEY_TEXTURE
         ) SettingTile.requestUpdate(this)
+        if ((key == Settings.KEY_SABER_ERASER || key == Settings.KEY_STYLUS_BUTTON_APPS) &&
+            bridge.pressed && activeApp !in settings.stylusButtonApps
+        ) bridge.setPressed(false)
         if (key in Settings.FEEDBACK_KEYS || key?.startsWith("saber_") == true || key?.startsWith("stylus_") == true) {
             sendFeedbackSetting()
         }
@@ -359,8 +362,8 @@ class PenService : Service() {
             on = t != Saber.TEXTURE_OFF
             if (on) texture = t
             tool.level(settings.prefs).let { if (it != Saber.LEVEL_MAIN) level = it }
-        } else if (settings.stylusAppsFeel && activeApp != null && activeApp in settings.stylusButtonApps) {
-            // Other note apps don't tell us their tool: one texture for all of them
+        } else if (settings.stylusAppsFeel && activeApp != null && activeApp in settings.otherStylusApps) {
+            // No per-tool integration for the other apps: one texture for all their tools
             val t = settings.stylusAppsTexture
             on = t != Saber.TEXTURE_OFF
             if (on) texture = t
@@ -395,8 +398,8 @@ class PenService : Service() {
             EventLog.Source.FOCUS, activeApp ?: "?",
             "Focused app" + when {
                 activeApp == Saber.PACKAGE -> ": Saber. Its tool settings apply"
-                activeApp in settings.stylusButtonApps -> ": double tap acts as the stylus button" +
-                    if (settings.stylusAppsFeel) ", the stylus apps texture applies" else ""
+                activeApp in settings.stylusButtonApps -> ": double tap holds the primary stylus button" +
+                    if (settings.stylusAppsFeel) ", the other apps texture applies" else ""
                 else -> ": shortcuts and the main texture apply"
             } + if (FocusService.running) "" else " (usage stats fallback)",
         )

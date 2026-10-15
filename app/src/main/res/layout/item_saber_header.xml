@@ -42,6 +42,10 @@
             android:focusable="false" />
     </LinearLayout>
 
+    <include
+        android:id="@+id/eraser_row"
+        layout="@layout/item_switch_row" />
+
     <TextView
         style="@style/Stylo2.SectionHeader"
         android:text="@string/saber_tools_header" />

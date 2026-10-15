@@ -16,7 +16,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
-/** The apps where a double tap holds or releases the virtual stylus button (Saber: eraser). */
+/** Apps other than Saber where a double tap holds or releases Android's primary stylus button. */
 class StylusAppsActivity : AppCompatActivity() {
     private lateinit var settings: Settings
     private lateinit var apps: LinearLayout
@@ -112,7 +112,7 @@ class StylusAppsActivity : AppCompatActivity() {
     private fun show() {
         val pm = packageManager
         apps.removeAllViews()
-        val chosen = settings.stylusButtonApps.sortedBy { label(it).lowercase() }
+        val chosen = settings.otherStylusApps.sortedBy { label(it).lowercase() }
         for (pkg in chosen) {
             val row = LayoutInflater.from(this).inflate(R.layout.item_app, apps, false)
             row.findViewById<TextView>(android.R.id.title).text = label(pkg)
@@ -120,7 +120,7 @@ class StylusAppsActivity : AppCompatActivity() {
                 try { pm.getApplicationIcon(pkg) } catch (e: PackageManager.NameNotFoundException) { null }
             )
             row.findViewById<View>(R.id.remove).setOnClickListener {
-                settings.setStylusButtonApps(settings.stylusButtonApps - pkg)
+                settings.setOtherStylusApps(settings.otherStylusApps - pkg)
                 show()
             }
             apps.addView(row)
@@ -130,16 +130,16 @@ class StylusAppsActivity : AppCompatActivity() {
 
     private fun pickApp() {
         val pm = packageManager
-        val chosen = settings.stylusButtonApps
+        val chosen = settings.otherStylusApps
         val candidates = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
             .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
             .distinctBy { it.first }
-            .filter { it.first !in chosen && it.first != packageName }
+            .filter { it.first !in chosen && it.first != packageName && it.first != Saber.PACKAGE }
             .sortedBy { it.second.lowercase() }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.stylus_apps_add)
             .setItems(candidates.map { it.second }.toTypedArray()) { _, which ->
-                settings.setStylusButtonApps(settings.stylusButtonApps + candidates[which].first)
+                settings.setOtherStylusApps(settings.otherStylusApps + candidates[which].first)
                 show()
             }
             .show()

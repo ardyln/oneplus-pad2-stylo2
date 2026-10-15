@@ -144,6 +144,15 @@ class SaberToolsActivity : AppCompatActivity() {
                         settings.prefs.edit().putBoolean(Settings.KEY_SABER_TEXTURE, !settings.saberTexture).apply()
                         notifyDataSetChanged()
                     }
+                    val eraser = h.itemView.findViewById<View>(R.id.eraser_row)
+                    eraser.findViewById<TextView>(android.R.id.title).setText(R.string.saber_eraser_title)
+                    eraser.findViewById<TextView>(android.R.id.summary).setText(R.string.saber_eraser_summary)
+                    eraser.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.toggle)
+                        .isChecked = settings.saberEraser
+                    eraser.setOnClickListener {
+                        settings.prefs.edit().putBoolean(Settings.KEY_SABER_ERASER, !settings.saberEraser).apply()
+                        notifyItemChanged(0)
+                    }
                     return
                 }
             }

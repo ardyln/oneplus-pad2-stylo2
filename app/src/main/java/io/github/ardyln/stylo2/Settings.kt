@@ -14,11 +14,17 @@ class Settings(context: Context) {
     val buttonBuzz get() = prefs.getBoolean(KEY_BUTTON_BUZZ, false)
     val tapWindowMs get() = prefs.getInt(KEY_TAP_WINDOW, 1000).toLong()
     val broadcastAll get() = prefs.getBoolean(KEY_BROADCAST_ALL, false)
-    /** A texture of its own while one of the stylus button apps is in front (other than Saber's tools). */
+    /** A texture of its own while one of the other apps (not Saber) is in front. */
     val stylusAppsFeel get() = prefs.getBoolean(KEY_STYLUS_APPS_FEEL, false)
     val stylusAppsTexture get() = prefs.getString(KEY_STYLUS_APPS_TEXTURE, PenProtocol.TEXTURE_PENCIL.toString())!!.toInt()
     val stylusAppsLevel get() = prefs.getString(KEY_STYLUS_APPS_LEVEL, null)?.toIntOrNull() ?: level
-    val stylusButtonApps: Set<String> get() = prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: setOf(Saber.PACKAGE)
+    /** Apps other than Saber where a double tap holds Android's primary stylus button. */
+    val otherStylusApps: Set<String> get() =
+        (prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: emptySet()) - Saber.PACKAGE
+    /** Whether a double tap toggles Saber's eraser (the primary stylus button). */
+    val saberEraser get() = prefs.getBoolean(KEY_SABER_ERASER, true)
+    /** Every app where a double tap holds the stylus button: Saber (if on) and the other apps. */
+    val stylusButtonApps: Set<String> get() = otherStylusApps + if (saberEraser) setOf(Saber.PACKAGE) else emptySet()
     val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
     val presentation get() = prefs.getBoolean(KEY_PRESENTATION, false)
     val presentationMode get() = prefs.getString(KEY_PRESENTATION_MODE, "0")!!.toInt()
@@ -35,10 +41,18 @@ class Settings(context: Context) {
 
     fun setPresentation(on: Boolean) = prefs.edit().putBoolean(KEY_PRESENTATION, on).apply()
 
-    fun setStylusButtonApps(apps: Set<String>) = prefs.edit().putStringSet(KEY_STYLUS_BUTTON_APPS, apps).apply()
+    fun setOtherStylusApps(apps: Set<String>) =
+        prefs.edit().putStringSet(KEY_STYLUS_BUTTON_APPS, apps - Saber.PACKAGE).apply()
     val shortcuts = ShortcutStore(prefs)
 
     init {
+        // Up to v0.19 Saber was on the stylus button app list; it has its own switch now.
+        val oldList = prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null)
+        if (oldList != null && Saber.PACKAGE in oldList) {
+            prefs.edit().putBoolean(KEY_SABER_ERASER, true).putStringSet(KEY_STYLUS_BUTTON_APPS, oldList - Saber.PACKAGE).apply()
+        } else if (oldList != null && !prefs.contains(KEY_SABER_ERASER)) {
+            prefs.edit().putBoolean(KEY_SABER_ERASER, false).apply()
+        }
         // v0.2 had a single "open an app" action; turn it into a shortcut once.
         val oldApp = prefs.getString(OLD_KEY_BUTTON_APP, null)
         if (prefs.getString(OLD_KEY_BUTTON_ACTION, null) == "open_app" && oldApp != null) {
@@ -61,6 +75,7 @@ class Settings(context: Context) {
         const val KEY_TEST_BUZZ = "test_buzz"
         const val KEY_STYLUS_BUTTON_APPS = "stylus_button_apps"
         const val KEY_STYLUS_APPS_FEEL = "stylus_apps_feel"
+        const val KEY_SABER_ERASER = "saber_double_tap_eraser"
         const val KEY_STYLUS_APPS_TEXTURE = "stylus_apps_texture"
         const val KEY_STYLUS_APPS_LEVEL = "stylus_apps_level"
         const val KEY_SABER_TEXTURE = "saber_texture"

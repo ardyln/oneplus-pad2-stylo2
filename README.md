@@ -11,8 +11,9 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
 - **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture.
 - **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
   eraser, and the texture follows the active tool, with a texture and strength per tool.
-  Other apps that use the stylus button (e.g. Notewise or Xodo) can be added to the list of stylus
-  button apps, and optionally get one texture of their own, since they don't say which tool is active.
+- **Other apps**: in apps you add to this list, a double tap holds or releases Android's primary
+  stylus button (`BUTTON_STYLUS_PRIMARY`); what that does is up to the app. Optionally, one texture
+  applies to all of them.
 
 - **Presets**: save all settings under a name and switch between setups from the app or with a
   shortcut ("Apply preset").

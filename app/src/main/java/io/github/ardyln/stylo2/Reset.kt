@@ -9,7 +9,7 @@ enum class ResetScope(val title: Int, val message: Int, val matches: (String) ->
         key == ShortcutStore.KEY || key == Settings.KEY_TAP_WINDOW || key == Settings.KEY_BROADCAST_ALL
     }),
     SABER(R.string.reset_saber_title, R.string.reset_saber_message, { key ->
-        key == Settings.KEY_SABER_TEXTURE || (key.startsWith("saber_") && (key.endsWith("_texture") || key.endsWith("_level")))
+        key == Settings.KEY_SABER_TEXTURE || key == Settings.KEY_SABER_ERASER || (key.startsWith("saber_") && (key.endsWith("_texture") || key.endsWith("_level")))
     }),
     STYLUS_APPS(R.string.reset_stylus_apps_title, R.string.reset_stylus_apps_message, { key ->
         key == Settings.KEY_STYLUS_BUTTON_APPS || key.startsWith("stylus_apps_")

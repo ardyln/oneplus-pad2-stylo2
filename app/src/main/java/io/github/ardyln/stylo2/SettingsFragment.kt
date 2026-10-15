@@ -122,11 +122,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("saber_screen")?.summary = getString(
             when {
                 !isInstalled(Saber.PACKAGE) -> R.string.saber_not_installed
-                settings.saberTexture -> R.string.saber_summary_on
-                else -> R.string.saber_summary_off
+                settings.saberTexture && settings.saberEraser -> R.string.saber_summary_on
+                settings.saberTexture -> R.string.saber_summary_on_no_eraser
+                settings.saberEraser -> R.string.saber_summary_off
+                else -> R.string.saber_summary_off_no_eraser
             }
         )
-        val apps = settings.stylusButtonApps.map { appLabel(it) }.sortedBy { it.lowercase() }
+        val apps = settings.otherStylusApps.map { appLabel(it) }.sortedBy { it.lowercase() }
         findPreference<Preference>("stylus_apps_screen")?.summary =
             if (apps.isEmpty()) getString(R.string.stylus_button_apps_none) else apps.joinToString(", ")
         val presets = PresetStore(requireContext()).load()
