@@ -62,6 +62,43 @@
         <service android:name=".PenService" android:exported="false" />
 
         <service
+            android:name=".PresentationTile"
+            android:exported="true"
+            android:icon="@drawable/ic_presentation"
+            android:label="@string/tile_presentation"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+
+        <service
+            android:name=".FeedbackTile"
+            android:exported="true"
+            android:icon="@drawable/ic_action_texture"
+            android:label="@string/tile_feedback"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+
+        <service
+            android:name=".TextureTile"
+            android:exported="true"
+            android:icon="@drawable/ic_texture_pencil"
+            android:label="@string/tile_texture"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+        </service>
+
+
+        <service
             android:name=".FocusService"
             android:exported="true"
             android:label="@string/focus_service_label"

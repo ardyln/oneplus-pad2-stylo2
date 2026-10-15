@@ -44,6 +44,8 @@ class ShortcutEditor(private val context: Context) {
                 Shortcut.Action.TOGGLE_POINTER -> R.drawable.ic_action_pointer
                 Shortcut.Action.TOGGLE_FEEDBACK -> R.drawable.ic_action_texture
                 Shortcut.Action.NEXT_TEXTURE -> R.drawable.ic_texture_pencil
+                Shortcut.Action.NEXT_PAGE -> R.drawable.ic_action_page_next
+                Shortcut.Action.PREVIOUS_PAGE -> R.drawable.ic_action_page_previous
             }
         )
     }
@@ -72,6 +74,8 @@ class ShortcutEditor(private val context: Context) {
             Shortcut.Action.TOGGLE_POINTER -> R.string.action_toggle_pointer
             Shortcut.Action.TOGGLE_FEEDBACK -> R.string.action_toggle_feedback
             Shortcut.Action.NEXT_TEXTURE -> R.string.action_next_texture
+            Shortcut.Action.NEXT_PAGE -> R.string.action_next_page
+            Shortcut.Action.PREVIOUS_PAGE -> R.string.action_previous_page
         }
     )
 

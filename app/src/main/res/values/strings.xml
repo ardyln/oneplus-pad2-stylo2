@@ -73,6 +73,13 @@
     <string name="action_toggle_pointer">Presentation pointer: while touching / always</string>
     <string name="action_toggle_feedback">Vibrate while writing on/off</string>
     <string name="action_next_texture">Next writing texture</string>
+    <string name="tile_presentation">Presentation</string>
+    <string name="tile_feedback">Writing feel</string>
+    <string name="tile_texture">Pen texture</string>
+    <string name="tile_on">On</string>
+    <string name="tile_off">Off</string>
+    <string name="action_next_page">Next page (Page Down)</string>
+    <string name="action_previous_page">Previous page (Page Up)</string>
     <string name="choose_app">Choose app</string>
     <string name="broadcast_action_title">Intent action</string>
     <string name="broadcast_action_hint">e.g. net.dinglisch.android.tasker.STYLO</string>

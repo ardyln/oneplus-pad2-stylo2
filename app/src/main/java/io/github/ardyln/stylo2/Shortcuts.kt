@@ -17,7 +17,7 @@ data class Shortcut(
 ) {
     enum class Action {
         OPEN_APP, MEDIA_PLAY_PAUSE, MEDIA_NEXT, MEDIA_PREVIOUS, BROADCAST, WEBHOOK, BUZZ,
-        TOGGLE_PRESENTATION, TOGGLE_POINTER, TOGGLE_FEEDBACK, NEXT_TEXTURE,
+        TOGGLE_PRESENTATION, TOGGLE_POINTER, TOGGLE_FEEDBACK, NEXT_TEXTURE, NEXT_PAGE, PREVIOUS_PAGE,
     }
 
     fun toJson(): JSONObject = JSONObject().put("id", id).put("action", action.name).put("arg", arg)

@@ -16,6 +16,8 @@ class ShortcutRunner(
     private val context: Context,
     private val settings: Settings,
     private val buzz: () -> Unit,
+    /** Presses a key through the root helper's virtual keyboard. */
+    private val key: (Int) -> Unit,
 ) {
 
     fun run(s: Shortcut, taps: Int, battery: Int) {
@@ -38,6 +40,8 @@ class ShortcutRunner(
                 .putBoolean(Settings.KEY_FEEDBACK, !settings.feedbackOn).apply()
             Shortcut.Action.NEXT_TEXTURE -> settings.prefs.edit()
                 .putString(Settings.KEY_TEXTURE, ((settings.texture + 1) % 4).toString()).apply()
+            Shortcut.Action.NEXT_PAGE -> key(StylusBridge.KEY_PAGEDOWN)
+            Shortcut.Action.PREVIOUS_PAGE -> key(StylusBridge.KEY_PAGEUP)
         }
     }
 

@@ -7,7 +7,8 @@ on AOSP-based ROMs (tested on PixelOS 17 for `caihong`):
   the texture (pencil, eraser, ballpoint pen, pen) and the strength.
 - **Thumb-button shortcuts**: the pen reports double taps; chain them (double tap, double tap ×2, …)
   and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
-  or a Home Assistant webhook.
+  or a Home Assistant webhook, next/previous page, and switching the app's own settings.
+- **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture.
 - **Notes apps (Saber)**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the
   eraser, and the texture follows the active tool, with a texture and strength per tool.
 
@@ -37,7 +38,8 @@ At boot the module:
 - enables the app's accessibility service "Stylo 2: active app", which only reads the package name of
   the focused window (to know when Saber is in use, also in desktop windowing mode);
 - starts a root helper (`stylus-bridge.sh`) that creates two virtual input devices with Android's
-  `uinput` tool (a stylus button for Saber, and a mouse button for presentation clicks), reads Saber's
+  `uinput` tool (a stylus button for Saber, a mouse button for presentation clicks, and Page Up/Down keys for the
+  page shortcuts), reads Saber's
   settings file to see its active tool, and forwards the pen's presentation keys to the app.
 
 Removing the module undoes all of this.

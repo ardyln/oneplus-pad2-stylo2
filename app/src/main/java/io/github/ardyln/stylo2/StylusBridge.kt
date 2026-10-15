@@ -101,6 +101,16 @@ class StylusBridge(
         }
     }
 
+    /** A key press (down and up) through the virtual "Stylo 2 keys" keyboard, e.g. [KEY_PAGEDOWN]. */
+    fun key(code: Int) {
+        if (!ready) return
+        io.execute {
+            send("""{"id":3,"command":"inject","events":[1,$code,1,0,0,0]}""")
+            send("""{"id":3,"command":"delay","duration":$CLICK_MS}""")
+            send("""{"id":3,"command":"inject","events":[1,$code,0,0,0,0]}""")
+        }
+    }
+
     /**
      * Reads the pen's presentation keys, which the root helper forwards from the pen's HID keyboard
      * as lines like "KEY_F19 DOWN". Blocks until the helper opens the pipe; reopens when it closes.
@@ -145,6 +155,7 @@ class StylusBridge(
             }
             send(REGISTER)
             send(REGISTER_CLICK)
+            send(REGISTER_KEYS)
             ready = out != null
             Log.i(PenService.TAG, "virtual stylus button ready")
             EventLog.add(
@@ -173,6 +184,8 @@ class StylusBridge(
     }
 
     companion object {
+        const val KEY_PAGEUP = 104
+        const val KEY_PAGEDOWN = 109
         private const val BTN_LEFT = 272
         private const val BTN_RIGHT = 273
         private const val CLICK_MS = 40
@@ -187,5 +200,10 @@ class StylusBridge(
             """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
             """{"type":"UI_SET_EVBIT","data":[1,2]},{"type":"UI_SET_KEYBIT","data":[$BTN_LEFT,$BTN_RIGHT]},""" +
             """{"type":"UI_SET_RELBIT","data":[0,1]}]}"""
+
+        /** A keyboard with only the page keys, for the next/previous page shortcuts. */
+        private const val REGISTER_KEYS = """{"id":3,"command":"register","name":"Stylo 2 keys",""" +
+            """"vid":8921,"pid":14442,"bus":"bluetooth","configuration":[""" +
+            """{"type":"UI_SET_EVBIT","data":[1]},{"type":"UI_SET_KEYBIT","data":[$KEY_PAGEUP,$KEY_PAGEDOWN]}]}"""
     }
 }

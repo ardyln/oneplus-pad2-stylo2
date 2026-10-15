@@ -51,7 +51,9 @@ class PenService : Service() {
     /** What the pen was last told about presentation mode; null after a reconnect. */
     private var sentPresentation: Boolean? = null
     private var sentPresentationMode = -1
-    private val runner by lazy { ShortcutRunner(this, settings) { write(PenProtocol.buzz()) } }
+    private val runner by lazy {
+        ShortcutRunner(this, settings, buzz = { write(PenProtocol.buzz()) }, key = { bridge.key(it) })
+    }
     private lateinit var bridge: StylusBridge
     private lateinit var foreground: ForegroundApp
     private var saberTool: Int? = null
@@ -80,6 +82,9 @@ class PenService : Service() {
     }
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE ||
+            key == Settings.KEY_FEEDBACK || key == Settings.KEY_TEXTURE
+        ) SettingTile.requestUpdate(this)
         if (key in Settings.FEEDBACK_KEYS || key?.startsWith("saber_") == true) sendFeedbackSetting()
         if (key == Settings.KEY_PRESENTATION || key == Settings.KEY_PRESENTATION_MODE) sendPresentation()
     }
