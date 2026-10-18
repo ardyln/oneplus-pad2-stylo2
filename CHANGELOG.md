@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.25
+- **New:** the pen vibrates when a double tap toggles Saber's eraser, so you feel the switch
+  between the eraser and your tool. The same goes for the stylus button in the other apps. Both are
+  on by default; turn them off with **Vibrate when the eraser toggles** on the Saber page and
+  **Vibrate when the stylus button toggles** on the Other apps page. "Vibrate on each double tap"
+  still covers every app as before, and the pen never vibrates twice for one double tap.
+
 ## 0.24
 - **Fix:** with both Pad 2 modules installed at once, only one app got installed. Android may ask
   you to allow each app's install but shows one such prompt at a time, so the second install waited

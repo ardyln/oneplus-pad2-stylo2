@@ -153,6 +153,18 @@ class SaberToolsActivity : AppCompatActivity() {
                         settings.prefs.edit().putBoolean(Settings.KEY_SABER_ERASER, !settings.saberEraser).apply()
                         notifyItemChanged(0)
                     }
+                    // The vibration only applies while the double tap toggles the eraser
+                    val buzz = h.itemView.findViewById<View>(R.id.eraser_buzz_row)
+                    buzz.findViewById<TextView>(android.R.id.title).setText(R.string.saber_eraser_buzz_title)
+                    buzz.findViewById<TextView>(android.R.id.summary).setText(R.string.saber_eraser_buzz_summary)
+                    buzz.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.toggle)
+                        .isChecked = settings.saberEraserBuzz
+                    buzz.isEnabled = settings.saberEraser
+                    buzz.alpha = if (settings.saberEraser) 1f else 0.5f
+                    buzz.setOnClickListener {
+                        settings.prefs.edit().putBoolean(Settings.KEY_SABER_ERASER_BUZZ, !settings.saberEraserBuzz).apply()
+                        notifyItemChanged(0)
+                    }
                     return
                 }
             }

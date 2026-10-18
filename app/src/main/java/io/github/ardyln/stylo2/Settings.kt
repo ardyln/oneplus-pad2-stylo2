@@ -18,6 +18,8 @@ class Settings(context: Context) {
     val stylusAppsFeel get() = prefs.getBoolean(KEY_STYLUS_APPS_FEEL, false)
     val stylusAppsTexture get() = prefs.getString(KEY_STYLUS_APPS_TEXTURE, PenProtocol.TEXTURE_PENCIL.toString())!!.toInt()
     val stylusAppsLevel get() = prefs.getString(KEY_STYLUS_APPS_LEVEL, null)?.toIntOrNull() ?: 4
+    /** Whether the pen vibrates when a double tap presses or releases the stylus button in the other apps. */
+    val stylusAppsBuzz get() = prefs.getBoolean(KEY_STYLUS_APPS_BUZZ, true)
     /** Apps other than Saber where a double tap holds Android's primary stylus button. */
     val otherStylusApps: Set<String> get() =
         (prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null) ?: emptySet()) - Saber.PACKAGE
@@ -27,6 +29,8 @@ class Settings(context: Context) {
         // Settings from before v0.20 (e.g. an old preset): Saber was on or off the app list
         prefs.getStringSet(KEY_STYLUS_BUTTON_APPS, null)?.contains(Saber.PACKAGE) ?: true,
     )
+    /** Whether the pen vibrates when a double tap toggles Saber's eraser. */
+    val saberEraserBuzz get() = prefs.getBoolean(KEY_SABER_ERASER_BUZZ, true)
     /** Every app where a double tap holds the stylus button: Saber (if on) and the other apps. */
     val stylusButtonApps: Set<String> get() = otherStylusApps + if (saberEraser) setOf(Saber.PACKAGE) else emptySet()
     val saberTexture get() = prefs.getBoolean(KEY_SABER_TEXTURE, true)
@@ -83,8 +87,10 @@ class Settings(context: Context) {
         const val KEY_STYLUS_BUTTON_APPS = "stylus_button_apps"
         const val KEY_STYLUS_APPS_FEEL = "stylus_apps_feel"
         const val KEY_SABER_ERASER = "saber_double_tap_eraser"
+        const val KEY_SABER_ERASER_BUZZ = "saber_eraser_vibrate"
         const val KEY_STYLUS_APPS_TEXTURE = "stylus_apps_texture"
         const val KEY_STYLUS_APPS_LEVEL = "stylus_apps_level"
+        const val KEY_STYLUS_APPS_BUZZ = "stylus_apps_vibrate"
         const val KEY_SABER_TEXTURE = "saber_texture"
         const val KEY_BRIDGE_STATUS = "bridge_status"
         const val KEY_PRESENTATION = "presentation"

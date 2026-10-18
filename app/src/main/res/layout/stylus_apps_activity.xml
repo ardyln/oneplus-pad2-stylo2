@@ -59,6 +59,10 @@
                 android:id="@+id/feel_card"
                 layout="@layout/item_saber_tool" />
 
+            <include
+                android:id="@+id/buzz_switch"
+                layout="@layout/item_switch_row" />
+
             <TextView
                 style="@style/Stylo2.SectionHeader"
                 android:text="@string/stylus_apps_header" />

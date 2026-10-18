@@ -17,11 +17,12 @@ Features:
   apps.
 - **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture. Long-press a
   tile to open its page.
-- **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser, and the
-  texture follows the active tool, with a texture and strength per tool. Both can be turned off.
+- **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser (with a
+  short vibration to confirm it), and the texture follows the active tool, with a texture and strength
+  per tool. Each can be turned off.
 - **Other apps**: in apps you add to this list, a double tap holds or releases Android's primary
-  stylus button (`BUTTON_STYLUS_PRIMARY`); what that does is up to the app. Optionally, one texture
-  applies to all of them.
+  stylus button (`BUTTON_STYLUS_PRIMARY`); what that does is up to the app. The pen vibrates briefly
+  on each switch (can be turned off), and optionally one texture applies to all of them.
 - **Presentation mode**: the touch area near the tip becomes a remote: touch and move the pen to move
   the pointer (air mouse), and give each gesture (swipe toward or away from the tip, single tap, double
   tap) an action: scroll with a chosen strength, click, right click (opens menus, like a long press),

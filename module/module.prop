@@ -1,7 +1,7 @@
 id=pad2_stylo2
 name=OnePlus Pad 2 Stylo 2 (haptics, thumb button, presentation mode)
-version=0.24
-versionCode=24
+version=0.25
+versionCode=25
 author=ardy
 description=Writing haptics, thumb-button shortcuts, presentation mode and Saber integration for the OnePlus Stylo 2 on AOSP ROMs
 updateJson=https://raw.githubusercontent.com/ardyln/oneplus-pad2-stylo2/main/update.json

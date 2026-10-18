@@ -39,7 +39,22 @@ class StylusAppsActivity : AppCompatActivity() {
             add.requestLayout()
         }
         bindFeel()
+        bindBuzz()
         show()
+    }
+
+    /** Whether the pen vibrates when a double tap presses or releases the stylus button here. */
+    private fun bindBuzz() {
+        val row = findViewById<View>(R.id.buzz_switch)
+        val toggle = row.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.toggle)
+        row.findViewById<TextView>(android.R.id.title).setText(R.string.stylus_apps_buzz_title)
+        row.findViewById<TextView>(android.R.id.summary).setText(R.string.stylus_apps_buzz_summary)
+        toggle.isChecked = settings.stylusAppsBuzz
+        row.setOnClickListener {
+            val on = !settings.stylusAppsBuzz
+            settings.prefs.edit().putBoolean(Settings.KEY_STYLUS_APPS_BUZZ, on).apply()
+            toggle.isChecked = on
+        }
     }
 
     /** The optional writing feel for these apps: a switch, then texture and strength. */

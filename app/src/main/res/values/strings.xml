@@ -63,6 +63,8 @@
     <string name="saber_eraser_title">Double tap toggles the eraser</string>
     <string name="saber_eraser_summary">A double tap presses Android\'s primary stylus button (BUTTON_STYLUS_PRIMARY) and keeps it held, which Saber uses as its eraser; the next double tap releases it. Shortcuts and presentation mode pause in Saber while this is on.</string>
     <string name="saber_summary_off">Double tap toggles the eraser · texture per tool is off</string>
+    <string name="saber_eraser_buzz_title">Vibrate when the eraser toggles</string>
+    <string name="saber_eraser_buzz_summary">A short vibration in the pen confirms each switch between the eraser and your tool</string>
     <string name="focus_status_title">Active app detection</string>
     <string name="focus_on">On. Knows which app you\'re using, also with windows side by side</string>
     <string name="focus_off">Off. Saber and other apps may not be recognised. Tap to turn on</string>
@@ -156,6 +158,8 @@
     <string name="stylus_apps_intro">Apps other than Saber where the thumb button acts as a stylus button. A double tap presses Android\'s primary stylus button (BUTTON_STYLUS_PRIMARY, the side button on most styluses) and keeps it held; the next double tap releases it. What that does is up to the app: many note apps erase while it\'s held, others select or ignore it. Shortcuts and presentation mode pause in these apps. Saber has its own page.</string>
     <string name="stylus_apps_header">Apps</string>
     <string name="stylus_apps_feel_header">Writing feel in these apps</string>
+    <string name="stylus_apps_buzz_title">Vibrate when the stylus button toggles</string>
+    <string name="stylus_apps_buzz_summary">A short vibration in the pen confirms each double tap that presses or releases the stylus button in these apps</string>
     <string name="stylus_apps_feel_title">Own texture in these apps</string>
     <string name="stylus_apps_feel_summary">While one of these apps is open, the pen uses the texture below instead of the main one. There\'s no per-tool integration for these apps, so the same texture applies to all their tools.</string>
     <string name="stylus_apps_feel_card">Texture in these apps</string>

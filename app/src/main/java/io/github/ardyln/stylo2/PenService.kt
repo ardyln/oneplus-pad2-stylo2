@@ -485,7 +485,8 @@ class PenService : Service() {
                 if (bridge.pressed) "Virtual stylus button held: Android adds it to the pen's input; Saber erases"
                 else "Virtual stylus button released: Saber goes back to the previous tool",
             )
-            if (settings.buttonBuzz) write(PenProtocol.buzz())
+            val buzz = settings.buttonBuzz || if (activeApp == Saber.PACKAGE) settings.saberEraserBuzz else settings.stylusAppsBuzz
+            if (buzz) write(PenProtocol.buzz())
             return
         }
         tapCount++
