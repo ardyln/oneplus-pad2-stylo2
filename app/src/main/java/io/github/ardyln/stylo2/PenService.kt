@@ -333,6 +333,11 @@ class PenService : Service() {
         chargerState = attached
         val sinceReady = SystemClock.uptimeMillis() - readyAt
         Log.i(TAG, "charger: ${if (attached) "attached" else "detached"} (was $previous, ${sinceReady} ms after connecting)")
+        if (previous == true && !attached) {
+            // The pen can lose the writing feedback while on the magnet without disconnecting
+            lastFeedback = null
+            sendFeedbackSetting()
+        }
         if (previous == attached) return
         if (previous == null && sinceReady < CHARGER_INITIAL_MS) return
         val trigger = ChargerTrigger.of(attached)

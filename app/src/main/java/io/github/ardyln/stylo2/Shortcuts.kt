@@ -16,7 +16,9 @@ data class Shortcut(
     val arg: String? = null,
 ) {
     enum class Action {
-        OPEN_APP, MEDIA_PLAY_PAUSE, MEDIA_NEXT, MEDIA_PREVIOUS, BROADCAST, WEBHOOK, BUZZ,
+        OPEN_APP,
+        GO_BACK, // back to the app that was focused before the last OPEN_APP
+        MEDIA_PLAY_PAUSE, MEDIA_NEXT, MEDIA_PREVIOUS, BROADCAST, WEBHOOK, BUZZ,
         TOGGLE_PRESENTATION, TOGGLE_POINTER, TOGGLE_FEEDBACK, NEXT_TEXTURE, NEXT_PAGE, PREVIOUS_PAGE,
         APPLY_PRESET, // arg: preset id
 

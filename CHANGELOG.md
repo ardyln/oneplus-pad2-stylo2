@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.26
+- **New:** a **Go back to the previous app** shortcut action. It returns to the app (or home screen)
+  you were using before the last **Open an app** shortcut, as long as the opened app is still in
+  front. Together with the charger actions this makes a quick-notes workflow: set **Removed from the
+  charger** to open Saber and **Attached to the charger** to go back, then raising the pen opens
+  your notes and putting it back returns you to what you were doing. Saber keeps running in the
+  background, like after pressing Home.
+- **Fix:** writing feedback could stop after the pen had been on the magnetic charger, until you
+  turned the main switch off and on. The pen can drop the setting while it's on the magnet without
+  disconnecting, and the app only sent it again when it changed. The app now sends it again every
+  time the pen comes off the magnet.
+
 ## 0.25
 - **New:** the pen vibrates when a double tap toggles Saber's eraser, so you feel the switch
   between the eraser and your tool. The same goes for the stylus button in the other apps. Both are

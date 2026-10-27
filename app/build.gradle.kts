@@ -13,8 +13,8 @@ android {
         minSdk = 31
         // 28: legacy Bluetooth permissions, no runtime BLUETOOTH_CONNECT prompt
         targetSdk = 28
-        versionCode = 25
-        versionName = "0.25"
+        versionCode = 26
+        versionName = "0.26"
     }
 
     signingConfigs {

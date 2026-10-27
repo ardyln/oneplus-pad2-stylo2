@@ -30,6 +30,7 @@ class ShortcutRunner(
         Log.i(PenService.TAG, "shortcut: $gesture ${s.action} $arg")
         when (s.action) {
             Shortcut.Action.OPEN_APP -> openApp(s.arg)
+            Shortcut.Action.GO_BACK -> goBack()
             Shortcut.Action.MEDIA_PLAY_PAUSE -> mediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
             Shortcut.Action.MEDIA_NEXT -> mediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
             Shortcut.Action.MEDIA_PREVIOUS -> mediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
@@ -65,10 +66,45 @@ class ShortcutRunner(
             return
         }
         launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // Remember where we came from for "Go back"; nothing to return to if the app was already focused.
+        val from = FocusService.focused
+        returnTo = if (from != pkg) from else null
+        opened = if (from != pkg) pkg else null
         try {
             context.startActivity(launch)
         } catch (e: RuntimeException) {
             Log.e(PenService.TAG, "could not open $pkg", e)
+        }
+    }
+
+    /**
+     * Brings back the app that was focused before the last "Open an app", the way a launcher
+     * resumes it. Only while the opened app is still focused, so it never pulls you out of
+     * something else you switched to.
+     */
+    private fun goBack() {
+        val from = returnTo
+        val app = opened
+        val focused = FocusService.focused
+        if (from == null || app == null || focused != app) {
+            EventLog.add(EventLog.Source.APP, "go_back", "Go back: nothing to do (focused: ${focused ?: "?"})")
+            return
+        }
+        returnTo = null
+        opened = null
+        val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val homePkg = context.packageManager.resolveActivity(home, 0)?.activityInfo?.packageName
+        val intent = if (from == homePkg) home else context.packageManager.getLaunchIntentForPackage(from)
+        if (intent == null) {
+            Log.w(PenService.TAG, "go back: no way to open $from")
+            return
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        EventLog.add(EventLog.Source.APP, "go_back", "Go back: $app → $from")
+        try {
+            context.startActivity(intent)
+        } catch (e: RuntimeException) {
+            Log.e(PenService.TAG, "could not go back to $from", e)
         }
     }
 
@@ -103,6 +139,10 @@ class ShortcutRunner(
     }
 
     companion object {
+        /** The app focused before the last "Open an app", and the app it opened. */
+        @Volatile private var returnTo: String? = null
+        @Volatile private var opened: String? = null
+
         const val MAX_SCROLL = 5
         private const val CLICK_MS = 40L
 

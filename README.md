@@ -13,8 +13,9 @@ Features:
   and give each its own action: open an app, media keys, a broadcast intent (Tasker and similar apps)
   or a Home Assistant webhook, next/previous page, applying a preset, and switching the app's own
   settings ("Nothing" skips a count, e.g. to use only four double taps). Attaching the pen to the
-  charger and taking it off can run actions too, and every pen event can be broadcast to automation
-  apps.
+  charger and taking it off can run actions too (e.g. open Saber when you take the pen off and go
+  back to the previous app when you put it back), and every pen event can be broadcast to
+  automation apps.
 - **Quick Settings tiles**: presentation mode, writing feel on/off, and the pen texture. Long-press a
   tile to open its page.
 - **Saber**: in [Saber](https://github.com/saber-notes/saber), a double tap toggles the eraser (with a

@@ -33,6 +33,7 @@ class ShortcutEditor(private val context: Context) {
         view.setImageResource(
             when (s.action) {
                 Shortcut.Action.OPEN_APP -> R.drawable.ic_action_apps
+                Shortcut.Action.GO_BACK -> R.drawable.ic_action_go_back
                 Shortcut.Action.MEDIA_PLAY_PAUSE -> R.drawable.ic_action_play_pause
                 Shortcut.Action.MEDIA_NEXT -> R.drawable.ic_action_next
                 Shortcut.Action.MEDIA_PREVIOUS -> R.drawable.ic_action_previous
@@ -73,6 +74,7 @@ class ShortcutEditor(private val context: Context) {
     private fun actionName(a: Shortcut.Action): String = context.getString(
         when (a) {
             Shortcut.Action.OPEN_APP -> R.string.action_open_app
+            Shortcut.Action.GO_BACK -> R.string.action_go_back
             Shortcut.Action.MEDIA_PLAY_PAUSE -> R.string.action_media_play_pause
             Shortcut.Action.MEDIA_NEXT -> R.string.action_media_next
             Shortcut.Action.MEDIA_PREVIOUS -> R.string.action_media_previous

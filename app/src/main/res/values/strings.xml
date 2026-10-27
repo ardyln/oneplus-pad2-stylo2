@@ -99,6 +99,7 @@
     <string name="shortcut_delete">Delete</string>
     <string name="action_open_app">Open an app</string>
     <string name="action_open_app_named">Open %1$s</string>
+    <string name="action_go_back">Go back to the previous app</string>
     <string name="action_media_play_pause">Media: play / pause</string>
     <string name="action_media_next">Media: next track</string>
     <string name="action_media_previous">Media: previous track</string>
